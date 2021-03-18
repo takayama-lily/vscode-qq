@@ -3,11 +3,11 @@ import * as vscode from 'vscode';
 import * as oicq from 'oicq';
 import { ctx, client, setClient } from "./global";
 import { genConfig, writeAccount, writePassword, openConfigFile } from "./config";
-import { FriendListTreeDataProvider, GroupListTreeDataProvider } from "./explorer";
+import { initLists } from "./explorer";
 
-var logining = false;
-var selected_status: 11 | 31 | 41 | 50 | 60 | 70 = 11;
-var status_map: {[k: number]: string} = {
+let logining = false;
+let selected_status: number = 11;
+const status_map: {[k: number]: string} = {
     11: "我在线上",
     60: "Q我吧",
     31: "离开",
@@ -15,8 +15,8 @@ var status_map: {[k: number]: string} = {
     70: "请勿打扰",
     41: "隐身",
     0: "离线",
-    98: "切换账号",
-    99: "设置",
+    98: "@切换账号",
+    99: "@设置",
 };
 
 /**
@@ -60,8 +60,7 @@ function createClient(uin: number) {
         writeAccount(this.uin);
         writePassword(this.password_md5.toString("hex"));
         vscode.window.showInformationMessage(`QQ: ${client.nickname}(${client.uin}) 已上线`);
-        vscode.window.registerTreeDataProvider("chat-friends", new FriendListTreeDataProvider);
-        vscode.window.registerTreeDataProvider("chat-groups", new GroupListTreeDataProvider);
+        initLists();
     });
 
     inputPassword();
@@ -124,7 +123,7 @@ function inputTicket() {
         });
 }
 
-export function startup() {
+export function invoke() {
     const tmp = { ...status_map };
     if (!client || !client.isOnline()) {
         tmp[0] += " (当前)";
@@ -134,23 +133,23 @@ export function startup() {
     const arr = Object.values(tmp);
     vscode.window.showQuickPick(arr)
         .then((value) => {
-            if (value === "设置") {
+            if (value === "@设置") {
                 return openConfigFile();
             }
             if (logining) {
                 vscode.window.showInformationMessage("正在登录中，请稍后...");
                 return;
             }
-            if (value?.includes("离线")) {
-                client?.logout();
-            } else if (value?.includes("切换账号")) {
+            if (value === "@切换账号") {
                 client?.logout();
                 writeAccount(0);
                 writePassword("");
-                inputAccount();
+                return inputAccount();
+            }
+            if (value?.includes("离线")) {
+                client?.logout();
             } else if (value) {
                 const i = arr.indexOf(value);
-                // @ts-ignore
                 selected_status = Number(Object.keys(status_map)[i]);
                 if (client && client.password_md5) {
                     if (!client.isOnline())

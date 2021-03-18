@@ -27,11 +27,15 @@
 			"qq-explorer": [
 				{
 					"id": "chat-friends",
-					"name": "Friends"
+					"name": "好友列表"
 				},
 				{
 					"id": "chat-groups",
-					"name": "Groups"
+					"name": "群列表"
+				},
+				{
+					"id": "chat-strangers",
+					"name": "陌生人列表"
 				}
 			]
 		}
@@ -58,6 +62,8 @@
 		"vscode-test": "^1.5.1"
 	},
 	"dependencies": {
-		"oicq": "^1.14.0"
+		"@types/ws": "^7.4.0",
+		"oicq": "^1.14.1",
+		"ws": "^7.4.4"
 	}
 }
