@@ -102,12 +102,12 @@ export function initLists() {
     vscode.window.registerTreeDataProvider("chat-strangers", strangerListTreeDataProvider);
 
     client.on("notice.friend.increase", function (data) {
-        vscode.window.showInformationMessage(`新增了好友：${data.nickname} (${data.user_id})`)
+        vscode.window.showInformationMessage(`新增了好友：${data.nickname} (${data.user_id})`);
         friendListTreeDataProvider.refresh();
     });
 
     client.on("notice.friend.decrease", function (data) {
-        vscode.window.showInformationMessage(`删除了好友：${data.nickname} (${data.user_id})`)
+        vscode.window.showInformationMessage(`删除了好友：${data.nickname} (${data.user_id})`);
         friendListTreeDataProvider.refresh();
     });
 
@@ -137,5 +137,42 @@ export function initLists() {
     client.on("notice.group.setting", function (data) {
         if (data.group_name)
             groupListTreeDataProvider.refresh(data.group_id);
+    });
+
+    client.on("request.friend.add", function (data) {
+        vscode.window.showInformationMessage(`${data.nickname}(${data.user_id}) 请求添加你为好友，来自 ${data.source}。附加信息：${data.comment}`, "同意", "拒绝")
+            .then((value) => {
+                if (value === "同意") {
+                    this.setFriendAddRequest(data.flag);
+                } else if (value = "拒绝") {
+                    this.setFriendAddRequest(data.flag, false);
+                }
+            });
+    });
+
+    client.on("request.group.invite", function (data) {
+        vscode.window.showInformationMessage(`${data.nickname}(${data.user_id}) 邀请你加入群 ${data.group_name}(${data.group_id})。`, "同意", "拒绝")
+            .then((value) => {
+                if (value === "同意") {
+                    this.setGroupAddRequest(data.flag);
+                } else if (value = "拒绝") {
+                    this.setGroupAddRequest(data.flag, false);
+                }
+            });
+    });
+
+    client.on("request.group.add", function (data) {
+        // @ts-ignore
+        if (!this.config.receive_group_request) {
+            return;
+        }
+        vscode.window.showInformationMessage(`${data.nickname}(${data.user_id}) 申请加入群 ${data.group_name}(${data.group_id})。附加信息：${data.comment}`, "同意", "拒绝")
+            .then((value) => {
+                if (value === "同意") {
+                    this.setGroupAddRequest(data.flag);
+                } else if (value = "拒绝") {
+                    this.setGroupAddRequest(data.flag, false);
+                }
+            });
     });
 }
