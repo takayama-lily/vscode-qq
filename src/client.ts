@@ -6,8 +6,8 @@ import { genConfig, writeAccount, writePassword, openConfigFile } from "./config
 import { initLists } from "./explorer";
 
 let logining = false;
-let selected_status: number = 11;
-const status_map: {[k: number]: string} = {
+let selectedStatus: number = 11;
+const statusMap: {[k: number]: string} = {
     11: "我在线上",
     60: "Q我吧",
     31: "离开",
@@ -55,8 +55,8 @@ function createClient(uin: number) {
     });
     client.on("system.online", function () {
         logining = false;
-        if (selected_status !== 11)
-            this.setOnlineStatus(selected_status);
+        if (selectedStatus !== 11)
+            this.setOnlineStatus(selectedStatus);
         writeAccount(this.uin);
         writePassword(this.password_md5.toString("hex"));
         vscode.window.showInformationMessage(`QQ: ${client.nickname}(${client.uin}) 已上线`);
@@ -124,7 +124,7 @@ function inputTicket() {
 }
 
 export function invoke() {
-    const tmp = { ...status_map };
+    const tmp = { ...statusMap };
     if (!client || !client.isOnline()) {
         tmp[0] += " (当前)";
     } else {
@@ -150,12 +150,12 @@ export function invoke() {
                 client?.logout();
             } else if (value) {
                 const i = arr.indexOf(value);
-                selected_status = Number(Object.keys(status_map)[i]);
+                selectedStatus = Number(Object.keys(statusMap)[i]);
                 if (client && client.password_md5) {
                     if (!client.isOnline())
                         client.login();
                     else
-                        client.setOnlineStatus(selected_status);
+                        client.setOnlineStatus(selectedStatus);
                 } else {
                     inputAccount();
                 }

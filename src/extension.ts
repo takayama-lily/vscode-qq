@@ -4,7 +4,6 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as global from "./global";
 import * as client from "./client";
-import { ChatDocumentContentProvider } from "./message";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -15,9 +14,6 @@ export function activate(context: vscode.ExtensionContext) {
     if (!fs.existsSync(context.globalStoragePath)) {
         fs.mkdirSync(context.globalStoragePath);
     }
-
-    // register
-    vscode.workspace.registerTextDocumentContentProvider("oicq", new ChatDocumentContentProvider);
 
     // creat status bar item
     const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" type="text/css" href="https://lab.morfans.cn/LiteWebChat_Frame/litewebchat.min.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<style>
+html,body{
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+.lite-chatbox .cmsg {
+    margin: 10px 7px;
+}
+</style>
+<script>
+const vscode = acquireVsCodeApi();
+window.onfocus = () => {
+    vscode.postMessage({
+        command: "focused"
+    });
+};
+window.addEventListener("message", function (event) {
+    if (event.data[Symbol.iterator] === "function") {
+        let html = "";
+        for (let data of event.data) {
+            html += genUserMessage(data);
+        }
+        $(".lite-chatbox").prepend(html);
+    }
+    else if (event.data.post_type === "message") {
+        $(".lite-chatbox").append(genUserMessage(event.data));
+    }
+});
+function genUserMessage(data) {
+    return `<div class="${data.user_id === data.self_id ? "cright" : "cleft"} cmsg" id="${data.message_id}">
+    <img class="headIcon radius" ondragstart="return false;" oncontextmenu="return false;" src="${genAvaterUrl(data.user_id)}" />
+    <span class="name" title="${data.sender.nickname} (${data.user_id}) / ${new Date(data.time * 1000)}">${data.sender.card ? data.sender.card : data.sender.nickname}</span>
+    <span class="content">${parseMessage(data.message)}</span>
+</div>`;
+}
+function filterStringMsg(str) {
+    str = str.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    str = str.replace(/\r\n/g, "<br>").replace(/\r/g, "<br>").replace(/\n/g, "<br>");
+    return str;
+}
+function genAvaterUrl(user_id) {
+    return `http://q1.qlogo.cn/g?b=qq&s=640&nk=` + user_id;
+}
+function parseMessage(message) {
+    let msg = "";
+    for (let v of message) {
+        switch (v.type) {
+            case "text":
+            case "at":
+                msg += filterStringMsg(v.data.text);
+                break;
+            case "face":
+            case "sface":
+            case "bface":
+                if (v.data.text) {
+                    msg += filterStringMsg(v.data.text);
+                } else {
+                    msg += "[表情]";
+                }
+                break;
+            case "image":
+                msg += `<a href="${v.data.url}" target="_blank">[图片]</a>`
+                break;
+            case "flash":
+                // let width = v.data.file.split("-")[1];
+                // width = parseInt(10000 / (width / 2));
+                // if (width > 100) {
+                //     width = 100;
+                // }
+                // msg += `<div style="width: ${width}%"><a href="${v.data.url}" target="_blank"><img src="${v.data.url}"></a></div>`;
+                msg += `<a href="${v.data.url}" target="_blank">[闪照]</a>`
+                break;
+            case "record":
+                msg += "[语音]";
+                break;
+            case "video":
+                msg += "[视频]";
+                break;
+            case "xml":
+                msg += "[xml消息]";
+                break;
+            case "json":
+                msg += "[json消息]";
+                break;
+            case "file":
+                msg += "[文件]";
+                break;
+            case "reply":
+                msg += "[回复]";
+                break;
+            case "rps":
+                msg += "[猜拳]";
+                break;
+            case "dice":
+                msg += "[骰子]";
+                break;
+        }
+    }
+    return msg;
+}
+function send() {
+    const content = $("#content").val();
+    if (!content)
+        return;
+    vscode.postMessage({
+        command: "send",
+        data: content,
+    });
+    $("#content").val("");
+}
+</script>
+<body>
+    <div class="lite-chatbox">
+        <div class="tips">
+            <span>上拉获得历史消息</span>
+        </div>
+    </div>
+    <hr>
+    <textarea id="content" cols="40" rows="8"></textarea>
+    <button id="send" onclick="send()">发送</button>
+</body>
+</html>

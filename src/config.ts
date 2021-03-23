@@ -7,14 +7,14 @@ import { ctx } from "./global";
 interface Config extends oicq.ConfBot {
     account: number;
     password: string;
-    receive_group_request: boolean,
+    show_me_add_group_request: boolean,
 }
 
 const optimized: Config = {
     account: 0,
     password: "",
     platform: 5,
-    receive_group_request: false,
+    show_me_add_group_request: false,
     remote_ip: "",
     remote_port: 0,
 };

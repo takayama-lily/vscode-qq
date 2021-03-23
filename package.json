@@ -32,10 +32,6 @@
 				{
 					"id": "chat-groups",
 					"name": "群列表"
-				},
-				{
-					"id": "chat-strangers",
-					"name": "陌生人列表"
 				}
 			]
 		}
