@@ -63,7 +63,17 @@ class ContactListTreeDataProvider implements vscode.TreeDataProvider<number> {
 
 class FriendListTreeDataProvider extends ContactListTreeDataProvider {
     getChildren() {
-        return [...client?.fl.keys()];
+        return [...client?.fl.keys()].sort((a, b) => {
+            const ida = genContactId("u", a);
+            const idb = genContactId("u", b);
+            if (itemMap.get(ida)?.new) {
+                return -1;
+            }
+            if (itemMap.get(idb)?.new) {
+                return 1;
+            }
+            return 0;
+        });
     }
     getTreeItem(uin: number) {
         const obj = client.fl.get(uin);
@@ -78,7 +88,17 @@ class FriendListTreeDataProvider extends ContactListTreeDataProvider {
 
 class GroupListTreeDataProvider extends ContactListTreeDataProvider {
     getChildren() {
-        return [...client?.gl.keys()];
+        return [...client?.gl.keys()].sort((a, b) => {
+            const ida = genContactId("g", a);
+            const idb = genContactId("g", b);
+            if (itemMap.get(ida)?.new) {
+                return -1;
+            }
+            if (itemMap.get(idb)?.new) {
+                return 1;
+            }
+            return 0;
+        });
     }
     getTreeItem(uin: number) {
         const obj = client.gl.get(uin);
@@ -176,23 +196,27 @@ export function initLists() {
         });
 
         client.on("message.group", function (data) {
-            const id = this.uin + "g" + data.group_id;
+            const id = genContactId("g", data.group_id);
             if (webviewMap.get(id)?.active) {
                 return;
             }
-            groupListTreeDataProvider.getTreeItem(data.group_id).new = true;
-            groupListTreeDataProvider.refresh(data.group_id);
+            if (itemMap.has(id)) {
+                //@ts-ignore
+                itemMap.get(id)?.new = true;
+            }
+            groupListTreeDataProvider.refresh();
         });
 
         client.on("message.private", function (data) {
-            const id = this.uin + "u" + data.user_id;
+            const id = genContactId("u", data.user_id);
             if (webviewMap.get(id)?.active) {
                 return;
             }
-            if (this.fl.has(data.user_id)) {
-                friendListTreeDataProvider.getTreeItem(data.user_id).new = true;
-                friendListTreeDataProvider.refresh(data.user_id);
+            if (itemMap.has(id)) {
+                //@ts-ignore
+                itemMap.get(id)?.new = true;
             }
+            friendListTreeDataProvider.refresh();
         });
 
         client.on("message.group", onGroupMessage);
@@ -235,9 +259,9 @@ export function openChatView(id: string, label?: string | vscode.MarkdownString)
         const { type, uin } = parseContactId(id);
         if (data?.command === "focused") {
             if (type === "u") {
-                friendListTreeDataProvider.refresh(uin);
+                friendListTreeDataProvider.refresh();
             } else {
-                groupListTreeDataProvider.refresh(uin);
+                groupListTreeDataProvider.refresh();
             }
         } else if (data?.command === "send") {
             if (type === "u") {
