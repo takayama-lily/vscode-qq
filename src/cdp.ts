@@ -4,9 +4,14 @@ import * as http from "http";
 import * as os from "os";
 import * as WebSocket from "ws";
 import * as getPort from "get-port";
+import { ctx } from "./global";
 
 const params = [
-    "--remote-debugging-port="
+    "--disable-extensions",
+    "--enable-automation",
+    "--no-sandbox",
+    "--headeless",
+    "--disable-gpu",
 ];
 
 export const NO_CHROME_ERROR = Symbol("no chrome");
@@ -28,7 +33,9 @@ export class Cdp extends EventEmitter {
             cmd = "chrome";
         }
         cmd += ` "${url}" `;
-        cmd += params.join(" ") + this.port;
+        cmd += params.join(" ")
+            + " --user-data-dir=" + ctx.globalStoragePath
+            + " --remote-debugging-port=" + this.port;
         this.url = url;
         child_process.execSync(cmd);
     }
@@ -103,7 +110,7 @@ export class Cdp extends EventEmitter {
                 clearInterval(id);
                 this._getTicket();
             } else {
-                if (times >= 10) {
+                if (times >= 5) {
                     clearInterval(id);
                     this.emit("error", TIMEOUT_ERROR);
                 } else {
