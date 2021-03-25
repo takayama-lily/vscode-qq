@@ -1,27 +1,11 @@
-import * as fs from 'fs';
-import * as path from 'path';
 import * as vscode from 'vscode';
 import * as oicq from 'oicq';
-import { client, ctx, genContactId, parseContactId } from "./global";
+import { client, genContactId, parseContactId } from "./global";
+import * as chat from "./chat";
 
 let friendListTreeDataProvider: FriendListTreeDataProvider;
 let groupListTreeDataProvider: GroupListTreeDataProvider;
 let itemMap: Map<string, ContactTreeItem> = new Map;
-
-vscode.commands.registerCommand("oicq.user.open", (uin: number) => {
-    const id = genContactId("u", uin);
-    const item = itemMap.get(id);
-    if (item) {
-        openChatView(id, item.tooltip);
-    }
-});
-vscode.commands.registerCommand("oicq.group.open", (uin: number) => {
-    const id = genContactId("g", uin);
-    const item = itemMap.get(id);
-    if (item) {
-        openChatView(id, item.tooltip);
-    }
-});
 
 class ContactTreeItem extends vscode.TreeItem {
     new = false;
@@ -182,7 +166,7 @@ export function initLists() {
     
         client.on("request.group.add", function (data) {
             // @ts-ignore
-            if (!this.config.show_me_add_group_request2) {
+            if (!this.config.show_me_add_group_request) {
                 return;
             }
             vscode.window.showInformationMessage(`${data.nickname}(${data.user_id}) 申请加入群 ${data.group_name}(${data.group_id})。附加信息：${data.comment}`, "同意", "拒绝")
@@ -195,99 +179,19 @@ export function initLists() {
                 });
         });
 
-        client.on("message.group", function (data) {
-            const id = genContactId("g", data.group_id);
-            if (webviewMap.get(id)?.active) {
-                return;
-            }
-            if (itemMap.has(id)) {
-                //@ts-ignore
-                itemMap.get(id)?.new = true;
-            }
-            groupListTreeDataProvider.refresh();
-        });
-
-        client.on("message.private", function (data) {
-            const id = genContactId("u", data.user_id);
-            if (webviewMap.get(id)?.active) {
-                return;
-            }
-            if (itemMap.has(id)) {
-                //@ts-ignore
-                itemMap.get(id)?.new = true;
-            }
-            friendListTreeDataProvider.refresh();
-        });
-
-        client.on("message.group", onGroupMessage);
-        client.on("message.private", onC2CMessage);
+        chat.bind();
     }
 }
 
-export const webviewMap: Map<string, vscode.WebviewPanel> = new Map;
-const lastMsgMap: Map<string, oicq.PrivateMessageEventData | oicq.GroupMessageEventData> = new Map;
-let html = "";
-
-export function openChatView(id: string, label?: string | vscode.MarkdownString) {
-    if (webviewMap.has(id)) {
-        return webviewMap.get(id)?.reveal();
+export function refreshContacts(id: string, flag: boolean) {
+    if (itemMap.has(id)) {
+        //@ts-ignore
+        itemMap.get(id)?.new = flag;
     }
-    if (!html) {
-        html = fs.readFileSync(path.join(ctx.extensionPath, "chat.html"), { encoding: "utf-8" });
-    }
-    const webview = vscode.window.createWebviewPanel("chat", String(label), -1, {
-        enableScripts: true,
-        enableCommandUris: true,
-        retainContextWhenHidden: true
-    });
-    webviewMap.set(id, webview);
-    webview.webview.html = html;
-    webview.reveal();
-    if (lastMsgMap.has(id)) {
-        webview.webview.postMessage(lastMsgMap.get(id));
-    }
-    lastMsgMap.delete(id);
-    webview.onDidDispose(() => {
-        webviewMap.delete(id);
-    });
-    webview.webview.onDidReceiveMessage((data) => {
-        const item = itemMap.get(id);
-        if (!item) {
-            return;
-        }
-        item.new = false;
-        const { type, uin } = parseContactId(id);
-        if (data?.command === "focused") {
-            if (type === "u") {
-                friendListTreeDataProvider.refresh();
-            } else {
-                groupListTreeDataProvider.refresh();
-            }
-        } else if (data?.command === "send") {
-            if (type === "u") {
-                client.sendPrivateMsg(uin, data?.data);
-            } else {
-                client.sendGroupMsg(uin, data?.data);
-            }
-        }
-    });
-}
-
-function onMessage(id: string, data: oicq.PrivateMessageEventData | oicq.GroupMessageEventData) {
-    const webview = webviewMap.get(id);
-    if (webview) {
-        webview.webview.postMessage(data);
+    const { type } = parseContactId(id);
+    if (type === "u") {
+        friendListTreeDataProvider.refresh();
     } else {
-        lastMsgMap.set(id, data);
+        groupListTreeDataProvider.refresh();
     }
-}
-
-export function onC2CMessage(this: oicq.Client, data: oicq.PrivateMessageEventData) {
-    const id = genContactId("u", data.user_id);
-    onMessage(id, data);
-}
-
-export function onGroupMessage(this: oicq.Client, data: oicq.GroupMessageEventData) {
-    const id = genContactId("g", data.group_id);
-    onMessage(id, data);
 }

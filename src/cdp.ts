@@ -10,6 +10,9 @@ const params = [
     "--remote-debugging-port="
 ];
 
+export const NO_CHROME_ERROR = Symbol("no chrome");
+export const TIMEOUT_ERROR = Symbol("failed too many time");
+
 export class Cdp extends EventEmitter {
     private port = 0;
     private webSocketDebuggerUrl = "";
@@ -24,7 +27,7 @@ export class Cdp extends EventEmitter {
         }
         cmd += ` ${url} `;
         cmd += params.join(" ") + this.port;
-        child_process.exec(cmd, () => { });
+        child_process.execSync(cmd);
     }
 
     private getWebSocketDebuggerUrl() {
@@ -54,8 +57,13 @@ export class Cdp extends EventEmitter {
         });
     }
 
-    public getTicket(url: string) {
-        this.openChrome(url);
+    public async getTicket(url: string) {
+        try {
+            await this.openChrome(url);
+        } catch {
+            this.emit("error", NO_CHROME_ERROR);
+            return;
+        }
         this.getWebSocketDebuggerUrl();
         let times = 1;
         const id = setInterval(() => {
@@ -65,7 +73,7 @@ export class Cdp extends EventEmitter {
                 this._getTicket();
             } else {
                 if (times >= 10) {
-                    this.emit("error", new Error("failed too many time"));
+                    this.emit("error", TIMEOUT_ERROR);
                 } else {
                     this.getWebSocketDebuggerUrl();
                 }

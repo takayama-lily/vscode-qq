@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" type="text/css" href="{litewebchat.min.css}" />
+    <script src="{jquery.min.js}"></script>
+    <script src="{moment.min.js}"></script>
+    <script src="{app.js}"></script>
+</head>
+<style>
+html,body{
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+.lite-chatbox .cmsg {
+    margin: 10px 7px;
+}
+#img-preview {
+    position: absolute;
+    display: none;
+    width: 200px;
+    border: black 1px solid;
+}
+#content {
+    width: 100%;
+    resize: none;
+    position: fixed;
+    bottom: 40px;
+    left: 0;
+}
+button#send {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    margin: 10px;
+}
+#to-bottom {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    margin: 10px;
+    cursor: pointer;
+    color: #fff;
+}
+#footer {
+    position: fixed;
+    width: 100%;
+    height: 40px;
+    bottom: 0;
+    background-color:rgb(39, 40, 34);
+}
+</style>
+
+<body>
+    <div class="lite-chatbox">
+        <div class="tips">
+            <span ondblclick='getChatHistory($(".msgid").first().attr("id") ?? "", 10);'>双击加载历史消息</span>
+        </div>
+    </div>
+    <div class="lite-chatbox" id="lite-chatbox"></div>
+    <div style="height: 300px; width: 100%;"></div>
+    <img id="img-preview" style="z-index: 999;">
+
+    <textarea id="content" rows="15" placeholder="在此输入消息..."></textarea>
+    <div id="footer" class="vscode-dark"></div>
+    <button id="send" onclick="sendMsg()">发送</button>
+    <span id="to-bottom" onclick="window.scrollTo(0, document.documentElement.clientHeight);">↓底部</span>
+</body>
+
+</html>

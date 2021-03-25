@@ -1,7 +1,7 @@
 import * as crypto from 'crypto';
 import * as vscode from 'vscode';
 import * as oicq from 'oicq';
-import { ctx, client, setClient } from "./global";
+import { client, setClient } from "./global";
 import { genConfig, writeAccount, writePassword, openConfigFile } from "./config";
 import { initLists } from "./explorer";
 
@@ -55,8 +55,9 @@ function createClient(uin: number) {
     });
     client.on("system.online", function () {
         logining = false;
-        if (selectedStatus !== 11)
+        if (selectedStatus !== 11) {
             this.setOnlineStatus(selectedStatus);
+        }
         writeAccount(this.uin);
         writePassword(this.password_md5.toString("hex"));
         vscode.window.showInformationMessage(`QQ: ${client.nickname}(${client.uin}) 已上线`);
@@ -152,10 +153,11 @@ export function invoke() {
                 const i = arr.indexOf(value);
                 selectedStatus = Number(Object.keys(statusMap)[i]);
                 if (client && client.password_md5) {
-                    if (!client.isOnline())
+                    if (!client.isOnline()) {
                         client.login();
-                    else
+                    } else {
                         client.setOnlineStatus(selectedStatus);
+                    }
                 } else {
                     inputAccount();
                 }
