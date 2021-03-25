@@ -4,6 +4,7 @@ import * as oicq from 'oicq';
 import { client, setClient } from "./global";
 import { genConfig, writeAccount, writePassword, openConfigFile } from "./config";
 import { initLists } from "./explorer";
+import { Cdp } from "./cdp";
 
 let logining = false;
 let selectedStatus: number = 11;
@@ -28,15 +29,24 @@ function createClient(uin: number) {
 
     client.on("system.login.error", function (data) {
         logining = false;
-        vscode.window.showErrorMessage(data.message);
         if (data.message.includes("密码错误")) {
             writeAccount(0);
             writePassword("");
+            data.message += "(请选择：@切换账号)";
         }
+        vscode.window.showErrorMessage(data.message);
+        
     }); 
     client.on("system.login.slider", function (data) {
-        vscode.window.showInformationMessage(`[点我](${data.url}) 完成滑动验证码并获取ticket (按F12查看网络请求以获取)`);
-        inputTicket();
+        const cdp = new Cdp;
+        cdp.on("ticket", (ticket: string) => {
+            client.sliderLogin(ticket);
+        });
+        cdp.on("error", (err: Symbol) => {
+            vscode.window.showInformationMessage(`打开chrome失败，请 [点我](${data.url}) 完成滑动验证码并获取ticket (按F12查看网络请求以获取)`);
+            inputTicket();
+        });
+        cdp.getTicket(data.url);
     });
     client.on("system.login.device", function (data) {
         const webview = vscode.window.createWebviewPanel("device", "[QQ]需要验证设备安全性 (完成后请关闭)", -1, {

@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as oicq from 'oicq';
 import { client, genContactId, parseContactId } from "./global";
 import * as chat from "./chat";
 
