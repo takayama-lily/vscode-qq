@@ -331,4 +331,10 @@ $(document).ready(function () {
     $("body").on("mouseleave", ".chat-img", function() {
         $("#img-preview").hide();
     });
+
+    $(window).keydown(function (event) {
+        if (event.ctrlKey && event.keyCode === 13) {
+           sendMsg();
+        }
+   });
 });
