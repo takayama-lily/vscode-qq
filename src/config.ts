@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as oicq from 'oicq';
 import * as vscode from 'vscode';
-import { ctx } from "./global";
+import { ctx, client } from "./global";
 
 interface Config extends oicq.ConfBot {
     account: number;
@@ -59,4 +59,24 @@ export function openConfigFile() {
     readConfig();
     const uri = vscode.Uri.file(getConfigFilePath());
     vscode.window.showTextDocument(uri);
+}
+
+export function deleteToken() {
+    if (client) {
+        fs.unlink(path.join(client.dir, "token"), () => { });
+        fs.unlink(path.join(client.dir, "t106"), () => { });
+    }
+}
+
+export function writePinned(pinned: string[]) {
+    fs.writeFile(path.join(client.dir, "pinned"), pinned.join("\n"), () => { });
+}
+
+export async function readPinned() {
+    try {
+        const pinned = await fs.promises.readFile(path.join(client.dir, "pinned"), { encoding: "utf-8" });
+        return String(pinned).split("\n");
+    } catch {
+        return [];
+    }
 }

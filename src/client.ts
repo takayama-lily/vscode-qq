@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 import * as vscode from 'vscode';
 import * as oicq from 'oicq';
 import { client, setClient } from "./global";
-import { genConfig, writeAccount, writePassword, openConfigFile } from "./config";
+import { genConfig, writeAccount, writePassword, openConfigFile, deleteToken } from "./config";
 import { initLists } from "./explorer";
 import { Cdp } from "./cdp";
 
@@ -33,6 +33,8 @@ function createClient(uin: number) {
             writeAccount(0);
             writePassword("");
             data.message += "(请选择：@切换账号)";
+        } else if (data.message.includes("未收到")) {
+            data.message = "服务器繁忙，请再试一次。";
         }
         vscode.window.showErrorMessage(data.message);
         
@@ -43,7 +45,7 @@ function createClient(uin: number) {
             client.sliderLogin(ticket);
         });
         cdp.on("error", (err: Symbol) => {
-            vscode.window.showInformationMessage(`打开chrome失败，请 [点我](${data.url}) 完成滑动验证码并获取ticket (按F12查看网络请求以获取)`);
+            vscode.window.showInformationMessage(`打开chrome失败，请 [点我](${data.url}) 完成滑动验证码并获取ticket (按F12查看网络请求以获取) [教程](https://github.com/takayama-lily/oicq/wiki/01.%E6%BB%91%E5%8A%A8%E9%AA%8C%E8%AF%81%E7%A0%81%E5%92%8C%E8%AE%BE%E5%A4%87%E9%94%81)`);
             inputTicket();
         });
         cdp.getTicket(data.url);
@@ -108,7 +110,7 @@ function inputPassword() {
         return client.login(password);
     }
     vscode.window.showInputBox({
-        prompt: `输入QQ号 ${client.uin} 的密码`,
+        prompt: `输入账号 ${client.uin} 的密码`,
         password: true
     }).then((pass)=>{
         if (!pass) {
@@ -153,6 +155,7 @@ export function invoke() {
             }
             if (value === "@切换账号") {
                 client?.logout();
+                deleteToken();
                 writeAccount(0);
                 writePassword("");
                 return inputAccount();

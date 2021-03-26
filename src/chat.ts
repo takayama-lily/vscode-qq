@@ -11,14 +11,8 @@ interface WebViewPostData {
     echo?: string,
 }
 
-vscode.commands.registerCommand("oicq.user.open", (uin: number) => {
-    const id = genContactId("u", uin);
-    openChatView(id, client.fl.get(uin)?.nickname);
-});
-vscode.commands.registerCommand("oicq.group.open", (uin: number) => {
-    const id = genContactId("g", uin);
-    openChatView(id, client.gl.get(uin)?.group_name);
-});
+vscode.commands.registerCommand("oicq.c2c.open", openChatView);
+vscode.commands.registerCommand("oicq.group.open", openChatView);
 
 const webviewMap: Map<string, vscode.WebviewPanel> = new Map;
 let html = "";
@@ -38,11 +32,20 @@ function getHtml(webview: vscode.Webview) {
         .replace("{app.js}", app.toString());
 }
 
-function openChatView(id: string, label?: string | vscode.MarkdownString) {
+function openChatView(id: string) {
+
+    const { type, uin } = parseContactId(id);
+    let label: string;
+    if (type === "u") {
+        label = String(client.fl.get(uin)?.nickname);
+    } else {
+        label = String(client.gl.get(uin)?.group_name);
+    }
+
     if (webviewMap.has(id)) {
         return webviewMap.get(id)?.reveal();
     }
-    const webview = vscode.window.createWebviewPanel("chat", String(label), -1, {
+    const webview = vscode.window.createWebviewPanel("chat", label, -1, {
         enableScripts: true,
         enableCommandUris: true,
         retainContextWhenHidden: true
@@ -59,7 +62,6 @@ function openChatView(id: string, label?: string | vscode.MarkdownString) {
             refreshContacts(id, false);
         } else {
             if (data.command === "getChatHistory" && data.params?.[0] === "") {
-                const { type, uin } = parseContactId(id);
                 let buf: Buffer;
                 if (type === "g") {
                     buf = Buffer.alloc(21);

@@ -3,7 +3,7 @@ import * as EventEmitter from "events";
 import * as http from "http";
 import * as os from "os";
 import * as WebSocket from "ws";
-import * as getPort from "get-port";
+import * as getAnUnusedPort from "get-port";
 import { ctx } from "./global";
 
 const params = [
@@ -25,7 +25,7 @@ export class Cdp extends EventEmitter {
     private ticket = "";
 
     private async openChrome(url: string) {
-        this.port = await getPort();
+        this.port = await getAnUnusedPort();
         let cmd = "";
         if (os.platform().includes("win")) {
             cmd = "cmd /c start chrome.exe";

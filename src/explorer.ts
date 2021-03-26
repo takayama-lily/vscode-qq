@@ -1,41 +1,16 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
+import { readPinned, writePinned } from "./config";
 import { client, genContactId, parseContactId } from "./global";
 import * as chat from "./chat";
 
 let friendListTreeDataProvider: FriendListTreeDataProvider;
 let groupListTreeDataProvider: GroupListTreeDataProvider;
+let pinnedTreeDataProvider: PinnedTreeDataProvider;
 let itemMap: Map<string, ContactTreeItem> = new Map;
-
-vscode.commands.registerCommand("oicq.friend.copy", (uin: number) => {
-    vscode.env.clipboard.writeText(`${client.fl.get(uin)?.nickname}(${uin})`);
-});
-vscode.commands.registerCommand("oicq.group.copy", (uin: number) => {
-    vscode.env.clipboard.writeText(`${client.gl.get(uin)?.group_name}(${uin})`);
-});
-
-vscode.commands.registerCommand("oicq.friend.delete", (uin: number) => {
-    vscode.window.showInformationMessage(`确定要删除好友 ${client.fl.get(uin)?.nickname}(${uin}) ？`, "仅删除", "删除并拉黑")
-        .then((value) => {
-            if (value === "仅删除") {
-                client.deleteFriend(uin, false);
-            } else if (value === "删除并拉黑") {
-                client.deleteFriend(uin, true);
-            }
-        });
-});
-
-vscode.commands.registerCommand("oicq.group.delete", (uin: number) => {
-    vscode.window.showInformationMessage(`确定要退出群 ${client.gl.get(uin)?.group_name}(${uin}) ？`, "是")
-        .then((value) => {
-            if (value === "是") {
-                client.setGroupLeave(uin);
-            }
-        });
-});
 
 class ContactTreeItem extends vscode.TreeItem {
     new = false;
+    pinned = false;
     id: string;
     constructor(id: string) {
         super(id);
@@ -47,107 +22,180 @@ class ContactTreeItem extends vscode.TreeItem {
     }
 }
 
+const EMOJI_PERSON = String.fromCodePoint(0x1f464);
+const EMOJI_GROUP = String.fromCodePoint(0x1f465);
+
 /**
  * @abstract
  */
-class ContactListTreeDataProvider implements vscode.TreeDataProvider<number> {
-    _onDidChangeTreeData = new vscode.EventEmitter<number | undefined | null | void>();
+class ContactListTreeDataProvider implements vscode.TreeDataProvider<string> {
+    _onDidChangeTreeData = new vscode.EventEmitter<string | undefined | null | void>();
     onDidChangeTreeData = this._onDidChangeTreeData.event;
-    getChildren() {
-        return [0];
+    getChildren(): string[] | Promise<string[]> {
+        return [];
     }
-    getTreeItem(uin: number) {
-        return new vscode.TreeItem("dummy");;
-    }
-    createItemIfNotExists(id: string) {
+    getTreeItem(id: string) {
+        const { type, uin } = parseContactId(id);
         let item = itemMap.get(id);
-        if (item === undefined) {
+        if (!item) {
             item = new ContactTreeItem(id);
+            if (type === "u") {
+                item.command = {
+                    title: "打开私聊", command: "oicq.c2c.open", arguments: [id]
+                };
+            } else {
+                item.command = {
+                    title: "打开群聊", command: "oicq.group.open", arguments: [id]
+                };
+            }
             itemMap.set(id, item);
+        }
+        if (type === "u") {
+            item.updateLabel(EMOJI_PERSON + client.fl.get(uin)?.nickname);
+        } else {
+            item.updateLabel(EMOJI_GROUP + client.gl.get(uin)?.group_name);
         }
         return item;
     }
-    refresh(uin?: number) {
-        this._onDidChangeTreeData.fire(uin);
+    refresh(id?: string) {
+        this._onDidChangeTreeData.fire(id);
     }
 }
 
 class FriendListTreeDataProvider extends ContactListTreeDataProvider {
     getChildren() {
-        return [...client?.fl.keys()].sort((a, b) => {
-            const ida = genContactId("u", a);
-            const idb = genContactId("u", b);
-            if (itemMap.get(ida)?.new) {
-                return -1;
+        const children: string[] = [];
+        for (const uin of client?.fl.keys()) {
+            const id = genContactId("u", uin);
+            if (itemMap.get(id)?.new) {
+                children.unshift(id);
+            } else {
+                children.push(id);
             }
-            if (itemMap.get(idb)?.new) {
-                return 1;
-            }
-            return 0;
-        });
-    }
-    getTreeItem(uin: number) {
-        const obj = client.fl.get(uin);
-        const item = this.createItemIfNotExists(genContactId("u", uin));
-        item.updateLabel(obj?.nickname);
-        item.command = {
-            title: "oicq.user.open", command: "oicq.user.open", arguments: [uin]
-        };
-        return item;
+        }
+        return children;
     }
 }
 
 class GroupListTreeDataProvider extends ContactListTreeDataProvider {
     getChildren() {
-        return [...client?.gl.keys()].sort((a, b) => {
-            const ida = genContactId("g", a);
-            const idb = genContactId("g", b);
-            if (itemMap.get(ida)?.new) {
-                return -1;
+        const children: string[] = [];
+        for (const uin of client?.gl.keys()) {
+            const id = genContactId("g", uin);
+            if (itemMap.get(id)?.new) {
+                children.unshift(id);
+            } else {
+                children.push(id);
             }
-            if (itemMap.get(idb)?.new) {
-                return 1;
-            }
-            return 0;
-        });
-    }
-    getTreeItem(uin: number) {
-        const obj = client.gl.get(uin);
-        const item = this.createItemIfNotExists(genContactId("g", uin));
-        item.updateLabel(obj?.group_name);
-        item.command = {
-            title: "oicq.group.open", command: "oicq.group.open", arguments: [uin]
-        };
-        return item;
+        }
+        return children;
     }
 }
 
-export function initLists() {
+class PinnedTreeDataProvider extends ContactListTreeDataProvider {
+    inited = false;
+    async getChildren() {
+        const children: string[] = [];
+        if (this.inited) {
+            for (const item of itemMap.values()) {
+                if (item.pinned) {
+                    children.push(item.id);
+                }
+            }
+        } else {
+            const pinned = await readPinned();
+            for (const item of itemMap.values()) {
+                if (pinned.includes(item.id)) {
+                    item.pinned = true;
+                    children.push(item.id);
+                }
+            }
+            this.inited = true;
+        }
+        return children;
+    }
+}
+
+vscode.commands.registerCommand("oicq.contact.pin", (id: string) => {
+    const item = itemMap.get(id);
+    if (item) {
+        item.pinned = true;
+    }
+    pinnedTreeDataProvider.refresh();
+    pinnedTreeDataProvider.getChildren().then(writePinned);
+});
+
+vscode.commands.registerCommand("oicq.contact.unpin", (id: string) => {
+    const item = itemMap.get(id);
+    if (item) {
+        item.pinned = false;
+    }
+    pinnedTreeDataProvider.refresh();
+    pinnedTreeDataProvider.getChildren().then(writePinned);
+});
+
+vscode.commands.registerCommand("oicq.tooltip.copy", (id: string) => {
+    const tooltip = itemMap.get(id)?.tooltip;
+    if (tooltip) {
+        vscode.env.clipboard.writeText(String(tooltip));
+    }
+});
+
+vscode.commands.registerCommand("oicq.friend.delete", (id: string) => {
+    vscode.window.showInformationMessage(`确定要删除好友 ${itemMap.get(id)?.tooltip} ？`, "仅删除", "删除并拉黑")
+        .then((value) => {
+            const { uin } = parseContactId(id);
+            if (value === "仅删除") {
+                client.deleteFriend(uin, false);
+            } else if (value === "删除并拉黑") {
+                client.deleteFriend(uin, true);
+            }
+        });
+});
+
+vscode.commands.registerCommand("oicq.group.delete", (id: string) => {
+    vscode.window.showInformationMessage(`确定要退出群 ${itemMap.get(id)?.tooltip} ？`, "是")
+        .then((value) => {
+            const { uin } = parseContactId(id);
+            if (value === "是") {
+                client.setGroupLeave(uin);
+            }
+        });
+});
+
+export async function initLists() {
     itemMap = new Map;
     friendListTreeDataProvider = new FriendListTreeDataProvider;
     vscode.window.registerTreeDataProvider("chat-friends", friendListTreeDataProvider);
     groupListTreeDataProvider = new GroupListTreeDataProvider;
     vscode.window.registerTreeDataProvider("chat-groups", groupListTreeDataProvider);
+    pinnedTreeDataProvider = new PinnedTreeDataProvider;
+    vscode.window.registerTreeDataProvider("chat-pinned", pinnedTreeDataProvider);
 
     if (!client.listenerCount("notice.friend.increase")) {
         client.on("notice.friend.increase", function (data) {
             vscode.window.showInformationMessage(`新增了好友：${data.nickname} (${data.user_id})`);
             friendListTreeDataProvider.refresh();
+            pinnedTreeDataProvider.refresh();
         });
-    
+
         client.on("notice.friend.decrease", function (data) {
             vscode.window.showInformationMessage(`删除了好友：${data.nickname} (${data.user_id})`);
             friendListTreeDataProvider.refresh();
+            pinnedTreeDataProvider.refresh();
         });
-    
+
         client.on("notice.friend.profile", function (data) {
-            friendListTreeDataProvider.refresh(data.user_id);
+            const id = genContactId("u", data.user_id);
+            friendListTreeDataProvider.refresh(id);
+            pinnedTreeDataProvider.refresh(id);
         });
-    
+
         client.on("notice.group.increase", function (data) {
             if (data.user_id === this.uin) {
                 vscode.window.showInformationMessage(`你已加入群：${this.gl.get(data.group_id)?.group_name} (${data.group_id})`);
                 groupListTreeDataProvider.refresh();
+                pinnedTreeDataProvider.refresh();
             }
         });
         client.on("notice.group.decrease", function (data) {
@@ -160,15 +208,18 @@ export function initLists() {
                 }
                 vscode.window.showInformationMessage(msg);
                 groupListTreeDataProvider.refresh();
+                pinnedTreeDataProvider.refresh();
             }
         });
-    
+
         client.on("notice.group.setting", function (data) {
             if (data.group_name) {
-                groupListTreeDataProvider.refresh(data.group_id);
+                const id = genContactId("g", data.group_id);
+                groupListTreeDataProvider.refresh(id);
+                pinnedTreeDataProvider.refresh(id);
             }
         });
-    
+
         client.on("request.friend.add", function (data) {
             vscode.window.showInformationMessage(`${data.nickname}(${data.user_id}) 请求添加你为好友，来自 ${data.source}。附加信息：${data.comment}`, "同意", "拒绝", "拒绝并拉黑")
                 .then((value) => {
@@ -181,7 +232,7 @@ export function initLists() {
                     }
                 });
         });
-    
+
         client.on("request.group.invite", function (data) {
             vscode.window.showInformationMessage(`${data.nickname}(${data.user_id}) 邀请你加入群 ${data.group_name}(${data.group_id})。`, "同意", "拒绝", "拒绝并拉黑")
                 .then((value) => {
@@ -194,7 +245,7 @@ export function initLists() {
                     }
                 });
         });
-    
+
         client.on("request.group.add", function (data) {
             // @ts-ignore
             if (!this.config.show_me_add_group_request) {
@@ -217,9 +268,12 @@ export function initLists() {
 }
 
 export function refreshContacts(id: string, flag: boolean) {
-    if (itemMap.has(id)) {
-        //@ts-ignore
-        itemMap.get(id)?.new = flag;
+    const item = itemMap.get(id);
+    if (item) {
+        if (item.new === flag) {
+            return;
+        }
+        item.new = flag;
     }
     const { type } = parseContactId(id);
     if (type === "u") {
@@ -227,4 +281,5 @@ export function refreshContacts(id: string, flag: boolean) {
     } else {
         groupListTreeDataProvider.refresh();
     }
+    pinnedTreeDataProvider.refresh();
 }
