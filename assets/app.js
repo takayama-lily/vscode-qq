@@ -288,7 +288,7 @@ function parseMessage(message) {
                 //     width = 100;
                 // }
                 // msg += `<div style="width: ${width}%"><a href="${v.data.url}" target="_blank"><img src="${v.data.url}"></a></div>`;
-                msg += `<a href="${v.data.url}" target="_blank">[闪照]</a>`;
+                msg += `<a href="${v.data.url}" target="_blank" class="chat-img">[闪照]</a>`;
                 break;
             case "record":
                 msg += "[语音]";
