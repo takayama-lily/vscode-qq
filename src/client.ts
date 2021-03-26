@@ -33,8 +33,6 @@ function createClient(uin: number) {
             writeAccount(0);
             writePassword("");
             data.message += "(请选择：@切换账号)";
-        } else if (data.message.includes("未收到")) {
-            data.message = "服务器繁忙，请再试一次。";
         }
         vscode.window.showErrorMessage(data.message);
         
@@ -63,6 +61,9 @@ function createClient(uin: number) {
     });
     client.on("system.offline", (data)=>{
         logining = false;
+        if (data.message.includes("未收到")) {
+            data.message = "服务器繁忙，请再试一次。";
+        }
         vscode.window.showErrorMessage(data.message);
     });
     client.on("system.online", function () {

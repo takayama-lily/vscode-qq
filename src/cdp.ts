@@ -2,6 +2,7 @@ import * as child_process from "child_process";
 import * as EventEmitter from "events";
 import * as http from "http";
 import * as os from "os";
+import * as path from "path";
 import * as WebSocket from "ws";
 import * as getAnUnusedPort from "get-port";
 import { ctx } from "./global";
@@ -34,7 +35,7 @@ export class Cdp extends EventEmitter {
         }
         cmd += ` "${url}" `;
         cmd += params.join(" ")
-            + " --user-data-dir=" + ctx.globalStoragePath
+            + " --user-data-dir=" + path.join(ctx.globalStoragePath, "tmp")
             + " --remote-debugging-port=" + this.port;
         this.url = url;
         child_process.execSync(cmd);

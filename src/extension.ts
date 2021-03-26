@@ -2,6 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as fs from 'fs';
+import * as path from 'path';
 import * as global from "./global";
 import * as client from "./client";
 
@@ -13,6 +14,9 @@ export function activate(context: vscode.ExtensionContext) {
     global.setContext(context);
     if (!fs.existsSync(context.globalStoragePath)) {
         fs.mkdirSync(context.globalStoragePath);
+    }
+    if (!fs.existsSync(path.join(context.globalStoragePath, "tmp"))) {
+        fs.mkdirSync(path.join(context.globalStoragePath, "tmp"));
     }
 
     // creat status bar item
