@@ -137,7 +137,7 @@ function genSystemMessage(data) {
                 appendRecalledText(data.message_id);
                 break;
             case "increase":
-                msg = `${data.nickname}(${data.user_id}) 加入了群聊`;
+                msg = `${filterXss(data.nickname)}(${data.user_id}) 加入了群聊`;
                 break;
             case "decrease":
                 if (data.dismiss) {
@@ -181,7 +181,7 @@ function genLabel(user_id) {
     if (!member) {
         return user_id;
     }
-    return `${member.card ? member.card : member.nickname}(${user_id})`;
+    return `${filterXss(member.card ? member.card : member.nickname)}(${user_id})`;
 }
 
 /**
@@ -223,17 +223,28 @@ function genUserMessage(data) {
     }
     return `<a class="msgid" id="${data.message_id}"></a><div class="${data.user_id === data.self_id ? "cright" : "cleft"} cmsg">
     <img class="headIcon radius" ondragstart="return false;" oncontextmenu="return false;" src="${genAvaterUrl(data.user_id)}" />
-    <span msgid="${data.message_id}" class="name" title="${data.sender.nickname}(${data.user_id}) ${moment(data.time * 1000).format('YYYY/MM/DD k:mm:ss')}">${title}${data.sender.card ? data.sender.card : data.sender.nickname} ${moment(data.time * 1000).format('k:mm:ss')}</span>
+    <span msgid="${data.message_id}" class="name" title="${filterXss(data.sender.nickname)}(${data.user_id}) ${moment(data.time * 1000).format('YYYY/MM/DD k:mm:ss')}">${title}${filterXss(data.sender.card ? data.sender.card : data.sender.nickname)} ${moment(data.time * 1000).format('k:mm:ss')}</span>
     <span class="content">${parseMessage(data.message)}</span>
 </div>`;
 }
+
+const xssMap = {
+    "&": "&amp;",
+    "\"": "&quot;",
+    "<": "&lt;",
+    ">": "&gt;",
+    " ": "&nbsp;",
+    "\t": "&emsp;",
+};
 
 /**
  * xss过滤
  * @param {string} str 
  */
 function filterXss(str) {
-    str = str.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/[ ]/g, "&nbsp;").replace(/\t/g, "&nbsp;&nbsp;");
+    str = str.replace(/[&"<>\t ]/g, (s) => {
+        return xssMap[s];
+    });
     str = str.replace(/\r\n/g, "<br>").replace(/\r/g, "<br>").replace(/\n/g, "<br>");
     return str;
 }
