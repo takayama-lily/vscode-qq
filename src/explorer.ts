@@ -1,10 +1,38 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 import { client, genContactId, parseContactId } from "./global";
 import * as chat from "./chat";
 
 let friendListTreeDataProvider: FriendListTreeDataProvider;
 let groupListTreeDataProvider: GroupListTreeDataProvider;
 let itemMap: Map<string, ContactTreeItem> = new Map;
+
+vscode.commands.registerCommand("oicq.friend.copy", (uin: number) => {
+    vscode.env.clipboard.writeText(`${client.fl.get(uin)?.nickname}(${uin})`);
+});
+vscode.commands.registerCommand("oicq.group.copy", (uin: number) => {
+    vscode.env.clipboard.writeText(`${client.gl.get(uin)?.group_name}(${uin})`);
+});
+
+vscode.commands.registerCommand("oicq.friend.delete", (uin: number) => {
+    vscode.window.showInformationMessage(`确定要删除好友 ${client.fl.get(uin)?.nickname}(${uin}) ？`, "仅删除", "删除并拉黑")
+        .then((value) => {
+            if (value === "仅删除") {
+                client.deleteFriend(uin, false);
+            } else if (value === "删除并拉黑") {
+                client.deleteFriend(uin, true);
+            }
+        });
+});
+
+vscode.commands.registerCommand("oicq.group.delete", (uin: number) => {
+    vscode.window.showInformationMessage(`确定要退出群 ${client.gl.get(uin)?.group_name}(${uin}) ？`, "是")
+        .then((value) => {
+            if (value === "是") {
+                client.setGroupLeave(uin);
+            }
+        });
+});
 
 class ContactTreeItem extends vscode.TreeItem {
     new = false;
@@ -142,23 +170,27 @@ export function initLists() {
         });
     
         client.on("request.friend.add", function (data) {
-            vscode.window.showInformationMessage(`${data.nickname}(${data.user_id}) 请求添加你为好友，来自 ${data.source}。附加信息：${data.comment}`, "同意", "拒绝")
+            vscode.window.showInformationMessage(`${data.nickname}(${data.user_id}) 请求添加你为好友，来自 ${data.source}。附加信息：${data.comment}`, "同意", "拒绝", "拒绝并拉黑")
                 .then((value) => {
                     if (value === "同意") {
                         this.setFriendAddRequest(data.flag);
                     } else if (value = "拒绝") {
                         this.setFriendAddRequest(data.flag, false);
+                    } else if (value = "拒绝并拉黑") {
+                        this.setFriendAddRequest(data.flag, false, "", true);
                     }
                 });
         });
     
         client.on("request.group.invite", function (data) {
-            vscode.window.showInformationMessage(`${data.nickname}(${data.user_id}) 邀请你加入群 ${data.group_name}(${data.group_id})。`, "同意", "拒绝")
+            vscode.window.showInformationMessage(`${data.nickname}(${data.user_id}) 邀请你加入群 ${data.group_name}(${data.group_id})。`, "同意", "拒绝", "拒绝并拉黑")
                 .then((value) => {
                     if (value === "同意") {
                         this.setGroupAddRequest(data.flag);
                     } else if (value = "拒绝") {
                         this.setGroupAddRequest(data.flag, false);
+                    } else if (value = "拒绝并拉黑") {
+                        this.setGroupAddRequest(data.flag, false, "", true);
                     }
                 });
         });
@@ -168,12 +200,14 @@ export function initLists() {
             if (!this.config.show_me_add_group_request) {
                 return;
             }
-            vscode.window.showInformationMessage(`${data.nickname}(${data.user_id}) 申请加入群 ${data.group_name}(${data.group_id})。附加信息：${data.comment}`, "同意", "拒绝")
+            vscode.window.showInformationMessage(`${data.nickname}(${data.user_id}) 申请加入群 ${data.group_name}(${data.group_id})。附加信息：${data.comment}`, "同意", "拒绝", "拒绝并拉黑")
                 .then((value) => {
                     if (value === "同意") {
                         this.setGroupAddRequest(data.flag);
                     } else if (value = "拒绝") {
                         this.setGroupAddRequest(data.flag, false);
+                    } else if (value = "拒绝并拉黑") {
+                        this.setGroupAddRequest(data.flag, false, "", true);
                     }
                 });
         });

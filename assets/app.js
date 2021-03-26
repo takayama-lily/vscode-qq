@@ -243,7 +243,7 @@ function filterXss(str) {
  * @param {number} user_id 
  */
 function genAvaterUrl(user_id) {
-    return `http://q1.qlogo.cn/g?b=qq&s=640&nk=` + user_id;
+    return `http://q1.qlogo.cn/g?b=qq&s=100&nk=` + user_id;
 }
 
 /**
