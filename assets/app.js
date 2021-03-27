@@ -86,7 +86,7 @@ async function updateMemberList() {
     }
 }
 
-function getChatHistory(message_id = "", count = 5) {
+function getChatHistory(message_id = "", count = 20) {
     callApi("getChatHistory", [message_id, count]).then((data) => {
         let html = "";
         for (let msg of data.data) {
@@ -95,6 +95,11 @@ function getChatHistory(message_id = "", count = 5) {
             }
         }
         $("#lite-chatbox").prepend(html);
+        if (message_id) {
+            window.location.hash = "#" + message_id;
+        } else {
+            $(document).scrollTop($(document).height());
+        }
     });
 }
 
@@ -273,7 +278,7 @@ function parseMessage(message) {
             case "sface":
             case "bface":
                 if (v.data.text) {
-                    msg += filterXss(v.data.text);
+                    msg += "[" + filterXss(v.data.text) + "]";
                 } else {
                     msg += "[表情]";
                 }
@@ -337,4 +342,10 @@ $(document).ready(function () {
            sendMsg();
         }
    });
+
+   window.onscroll = function () {
+        if ($(window).scrollTop() === 0) {
+            getChatHistory($(".msgid").first().attr("id") ?? "", 10);
+        }
+   };
 });
