@@ -11,6 +11,7 @@
 > 私聊消息只支持获取24小时以内的历史消息。  
 > 发送文字以外的消息暂时只能手写 [CQ码](https://github.com/takayama-lily/oicq/wiki/90.%E5%A6%82%E4%BD%95%E5%8F%91%E9%80%81%E5%A4%9A%E5%AA%92%E4%BD%93%E5%86%85%E5%AE%B9(CQ%E7%A0%81))  
 > 暂不支持临时会话，UI还有待改进，功能有待增强。  
+> 本程序不在本地保存任何消息记录和图片。  
 
 ![预览图](https://user-images.githubusercontent.com/12014361/112642602-cfeb5380-8e86-11eb-88fd-930657040e39.png)
 
