@@ -24,6 +24,9 @@ let members = new Map;
  */
 let ginfo;
 
+// 表情文件夹路径
+let facePath = "";
+
 // 监听来自vscode的消息
 window.addEventListener("message", async function (event) {
 
@@ -301,6 +304,12 @@ function parseMessage(message) {
                 msg += filterXss(v.data.text);
                 break;
             case "face":
+                if (v.data.id > 310) {
+                    msg += "[表情]";
+                } else {
+                    msg += `<img src="${facePath + v.data.id}.png">`;
+                }
+                break;
             case "sface":
             case "bface":
                 if (v.data.text) {
@@ -376,4 +385,10 @@ $(document).ready(function () {
             getChatHistory($(".msgid").first().attr("id") ?? "", 10);
         }
    };
+
+   //得到本地表情图片路径
+   const a = $("link").attr("href");
+   const b = a.split("/");
+   b.pop();
+   facePath = b.join("/") + "/faces/";
 });
