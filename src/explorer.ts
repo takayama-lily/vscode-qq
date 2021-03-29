@@ -141,6 +141,34 @@ vscode.commands.registerCommand("oicq.tooltip.copy", (id: string) => {
     }
 });
 
+vscode.commands.registerCommand("oicq.contact.profile", async (id: string) => {
+    const { uin, type } = parseContactId(id);
+    const arr: string[] = [];
+    if (type === "u") {
+        const data = (await client.getStrangerInfo(uin, true)).data;
+        if (data) {
+            arr.push("账号：" + data.user_id);
+            arr.push("昵称：" + data.nickname);
+            arr.push("性别：" + data.sex);
+            arr.push("年龄：" + data.age);
+            arr.push("地区：" + data.area);
+        }
+    } else {
+        const data = (await client.getGroupInfo(uin, true)).data;
+        if (data) {
+            arr.push("群号：" + data.group_id);
+            arr.push("群名：" + data.group_name);
+            arr.push(`人数：${data.member_count}/${data.max_member_count}`);
+            arr.push("等级：" + data.grade);
+            arr.push("活跃人数：" + data.active_member_count);
+            arr.push("创建时间：" + new Date(data.create_time * 1000));
+            arr.push("最后入群时间：" + new Date(data.last_join_time * 1000));
+            arr.push("最后发言时间：" + new Date(data.last_sent_time * 1000));
+        }
+    }
+    vscode.window.showQuickPick(arr);
+});
+
 vscode.commands.registerCommand("oicq.friend.delete", (id: string) => {
     vscode.window.showInformationMessage(`确定要删除好友 ${itemMap.get(id)?.tooltip} ？`, "仅删除", "删除并拉黑")
         .then((value) => {

@@ -17,15 +17,19 @@
 		"commands": [
 			{
 				"command": "oicq.contact.pin",
-				"title": "置顶"
+				"title": "固定"
 			},
 			{
 				"command": "oicq.contact.unpin",
-				"title": "取消置顶"
+				"title": "取消固定"
+			},
+			{
+				"command": "oicq.contact.profile",
+				"title": "查看资料"
 			},
 			{
 				"command": "oicq.tooltip.copy",
-				"title": "复制标签"
+				"title": "拷贝标签"
 			},
 			{
 				"command": "oicq.friend.delete",
@@ -35,7 +39,6 @@
 				"command": "oicq.group.delete",
 				"title": "退群"
 			}
-			
 		],
 		"viewsContainers": {
 			"activitybar": [
@@ -50,7 +53,7 @@
 			"qq-explorer": [
 				{
 					"id": "chat-pinned",
-					"name": "置顶"
+					"name": "固定"
 				},
 				{
 					"id": "chat-friends",
@@ -71,6 +74,10 @@
 				{
 					"command": "oicq.contact.unpin",
 					"when": "view == chat-pinned"
+				},
+				{
+					"command": "oicq.contact.profile",
+					"when": "view == chat-friends || view == chat-groups"
 				},
 				{
 					"command": "oicq.tooltip.copy",
