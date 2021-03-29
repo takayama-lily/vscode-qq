@@ -8,7 +8,7 @@ import { Cdp } from "./cdp";
 
 let logining = false;
 let selectedStatus: number = 11;
-const statusMap: {[k: number]: string} = {
+const statusMap: { [k: number]: string } = {
     11: "我在线上",
     60: "Q我吧",
     31: "离开",
@@ -16,6 +16,7 @@ const statusMap: {[k: number]: string} = {
     70: "请勿打扰",
     41: "隐身",
     0: "离线",
+    97: "@个人资料",
     98: "@切换账号",
     99: "@设置",
 };
@@ -35,8 +36,8 @@ function createClient(uin: number) {
             data.message += "(请选择：@切换账号)";
         }
         vscode.window.showErrorMessage(data.message);
-        
-    }); 
+
+    });
     client.on("system.login.slider", function (data) {
         const cdp = new Cdp;
         cdp.on("ticket", (ticket: string) => {
@@ -55,11 +56,11 @@ function createClient(uin: number) {
         });
         webview.webview.html = `<script>location.href="${data.url}";</script>`;
         webview.reveal();
-        webview.onDidDispose(()=>{
+        webview.onDidDispose(() => {
             client.login();
         });
     });
-    client.on("system.offline", (data)=>{
+    client.on("system.offline", (data) => {
         logining = false;
         if (data.message.includes("未收到")) {
             data.message = "服务器繁忙，请再试一次。";
@@ -90,7 +91,7 @@ function inputAccount() {
     }
     vscode.window.showInputBox({
         prompt: "请输入你的QQ账号",
-    }).then((uin)=>{
+    }).then((uin) => {
         if (!uin) {
             return;
         }
@@ -113,7 +114,7 @@ function inputPassword() {
     vscode.window.showInputBox({
         prompt: `输入账号 ${client.uin} 的密码`,
         password: true
-    }).then((pass)=>{
+    }).then((pass) => {
         if (!pass) {
             return;
         }
@@ -127,14 +128,64 @@ function inputPassword() {
  * input ticket from slider catpcha
  */
 function inputTicket() {
-    vscode.window.showInputBox({prompt: "输入验证码ticket"})
-        .then((ticket)=>{
+    vscode.window.showInputBox({ prompt: "输入验证码ticket" })
+        .then((ticket) => {
             if (!ticket) {
                 inputTicket();
             } else {
                 client.sliderLogin(ticket);
             }
         });
+}
+
+function showProfile() {
+    const arr = [
+        "账号：" + client.uin + " (点击复制)",
+        "昵称：" + client.nickname + " (点击设置)",
+        "性别：" + client.sex + " (点击设置)",
+        "年龄：" + client.age + " (点击设置)",
+        "个性签名 (点击设置)"
+    ];
+    vscode.window.showQuickPick(arr).then((value) => {
+        switch (value) {
+            case arr[0]:
+                vscode.env.clipboard.writeText(String(client.uin));
+                break;
+            case arr[1]:
+                vscode.window.showInputBox({ prompt: "输入新的昵称；当前为：" + client.nickname})
+                    .then((value) => {
+                        if (value) {
+                            client.setNickname(value);
+                        }
+                    });
+                break;
+            case arr[2]:
+                vscode.window.showInputBox({ prompt: "输入性别数字，0: unknown; 1: male; 2: female"})
+                    .then((value) => {
+                        if (value) {
+                            //@ts-ignore
+                            client.setGender(Number(value));
+                        }
+                    });
+                break;
+            case arr[3]:
+                vscode.window.showInputBox({ prompt: "输入生日(20020202的形式)"})
+                    .then((value) => {
+                        if (value) {
+                            client.setBirthday(value);
+                        }
+                    });
+                break;
+            case arr[4]:
+                vscode.window.showInputBox({ prompt: "输入个性签名"})
+                    .then((value) => {
+                        if (value) {
+                            client.setSignature(value);
+                        }
+                    });
+                break;
+        }
+    });
 }
 
 export function invoke() {
@@ -160,6 +211,12 @@ export function invoke() {
                 writeAccount(0);
                 writePassword("");
                 return inputAccount();
+            }
+            if (value === "@个人资料") {
+                if (client) {
+                    showProfile();
+                }
+                return;
             }
             if (value?.includes("离线")) {
                 client?.logout();
