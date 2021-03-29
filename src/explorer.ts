@@ -9,7 +9,7 @@ let pinnedTreeDataProvider: PinnedTreeDataProvider;
 let itemMap: Map<string, ContactTreeItem> = new Map;
 
 class ContactTreeItem extends vscode.TreeItem {
-    new = false;
+    new = 0;
     pinned = false;
     id: string;
     constructor(id: string) {
@@ -17,7 +17,7 @@ class ContactTreeItem extends vscode.TreeItem {
         this.id = id;
     };
     updateLabel(name?: string) {
-        this.label = name + (this.new ? " (有新消息)" : "");
+        this.label = name + (this.new > 0 ? ` (+${this.new})` : "");
         this.tooltip = name + ` (${parseContactId(this.id).uin})`;
     }
 }
@@ -270,10 +270,11 @@ export async function initLists() {
 export function refreshContacts(id: string, flag: boolean) {
     const item = itemMap.get(id);
     if (item) {
-        if (item.new === flag) {
-            return;
+        if (flag) {
+            ++item.new;
+        } else {
+            item.new = 0;
         }
-        item.new = flag;
     }
     const { type } = parseContactId(id);
     if (type === "u") {
