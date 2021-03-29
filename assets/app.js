@@ -19,6 +19,11 @@ window.onfocus = () => {
  */
 let members = new Map;
 
+/**
+ * @type {import("oicq").GroupInfo}
+ */
+let ginfo;
+
 // 监听来自vscode的消息
 window.addEventListener("message", async function (event) {
 
@@ -38,7 +43,13 @@ window.addEventListener("message", async function (event) {
     if (!event.data.echo) {
         // event
         if (event.data.post_type === "message") {
+            if ($(window).scrollTop() + $(window).height() >= $(document).height()) {
+                var flag = 1;
+            }
             $("#lite-chatbox").append(genUserMessage(event.data));
+            if (flag) {
+                $(document).scrollTop($(document).height());
+            }
         } else if (event.data.post_type === "notice") {
             $("#lite-chatbox").append(genSystemMessage(event.data));
         }
@@ -79,6 +90,7 @@ function callApi(command, params) {
 }
 
 async function updateMemberList() {
+    ginfo = (await callApi("getGroupInfo", [uin])).data;
     const arr = (await callApi("getGroupMemberList", [uin])).data;
     members = new Map;
     for (let v of arr) {
@@ -93,6 +105,9 @@ function getChatHistory(message_id = "", count = 20) {
             if (msg.message_id !== message_id) {
                 html += genUserMessage(msg);
             }
+        }
+        if (!html) {
+            return;
         }
         $("#lite-chatbox").prepend(html);
         if (message_id) {
@@ -109,6 +124,12 @@ function sendMsg() {
         return;
     }
     callApi(c2c ? "sendPrivateMsg" : "sendGroupMsg", [uin, message]).then((data) => {
+        if (data.retcode > 1) {
+            $("#lite-chatbox").append(`<div class="tips">
+    <span class="tips-danger">Error: ${data.error?.message}</span>
+</div>`);
+            return;
+        }
         if (c2c && data.data.message_id) {
             const html = `<a class="msgid" id="${data.data.message_id}"></a><div class="cright cmsg">
     <img class="headIcon radius" ondragstart="return false;" oncontextmenu="return false;" src="${genAvaterUrl(me)}" />
@@ -117,8 +138,10 @@ function sendMsg() {
 </div>`;
             $("#lite-chatbox").append(html);
         }
+        $("#content").val("");
+    }).then(() => {
+        $(document).scrollTop($(document).height());
     });
-    $("#content").val("");
 }
 
 /**
@@ -162,7 +185,10 @@ function genSystemMessage(data) {
                 msg = `${genLabel(data.operator_id)} 将群主转让给了 ${genLabel(data.user_id)}`;
                 break;
             case "ban":
-                msg = `${genLabel(data.operator_id)} 禁言 ${data.user_id === 80000000 ? "匿名用户("+data.nickname+")" : genLabel(data.user_id)} ${data.duration}秒`;
+                if (data.user_id > 0)
+                    msg = `${genLabel(data.operator_id)} 禁言 ${data.user_id === 80000000 ? "匿名用户("+data.nickname+")" : genLabel(data.user_id)} ${data.duration}秒`;
+                else
+                    msg = `${genLabel(data.operator_id)} ${data.duration > 0 ? "开启" : "关闭"}了全员禁言`;
                 break;
             case "poke":
                 msg = `${genLabel(data.operator_id)} ${data.action} ${genLabel(data.user_id)} ${data.suffix}`;
@@ -186,7 +212,7 @@ function genLabel(user_id) {
     if (!member) {
         return user_id;
     }
-    return `${filterXss(member.card ? member.card : member.nickname)}(${user_id})`;
+    return `<b title="${filterXss(member.nickname)} (${user_id})">${filterXss(member.card ? member.card : member.nickname)}</b>`;
 }
 
 /**
@@ -324,8 +350,8 @@ function parseMessage(message) {
     return msg;
 }
 
-// 图片预览
 $(document).ready(function () {
+    // 图片预览
     $("body").on("mouseenter", ".chat-img", function() {
         const url = $(this).attr("href");
         $("#img-preview").attr("src", url);
@@ -337,12 +363,14 @@ $(document).ready(function () {
         $("#img-preview").hide();
     });
 
+    // Ctrl+Enter
     $(window).keydown(function (event) {
         if (event.ctrlKey && event.keyCode === 13) {
            sendMsg();
         }
    });
 
+   //滚动到顶部加载消息
    window.onscroll = function () {
         if ($(window).scrollTop() === 0) {
             getChatHistory($(".msgid").first().attr("id") ?? "", 10);
