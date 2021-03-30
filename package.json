@@ -2,7 +2,7 @@
 	"name": "vscode-qq",
 	"displayName": "QQ",
 	"description": "lite qq",
-	"version": "0.1.1",
+	"version": "0.2.0",
 	"engines": {
 		"vscode": "^1.53.0"
 	},
@@ -77,11 +77,11 @@
 				},
 				{
 					"command": "oicq.contact.profile",
-					"when": "view == chat-friends || view == chat-groups"
+					"when": "view == chat-friends || view == chat-groups || view == chat-pinned"
 				},
 				{
 					"command": "oicq.tooltip.copy",
-					"when": "view == chat-friends || view == chat-groups"
+					"when": "view == chat-friends || view == chat-groups || view == chat-pinned"
 				},
 				{
 					"command": "oicq.friend.delete",

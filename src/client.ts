@@ -149,7 +149,7 @@ function showProfile() {
     vscode.window.showQuickPick(arr).then((value) => {
         switch (value) {
             case arr[0]:
-                vscode.env.clipboard.writeText(String(client.uin));
+                vscode.env.clipboard.writeText(`${client.nickname} (${client.uin})`);
                 break;
             case arr[1]:
                 vscode.window.showInputBox({ prompt: "输入新的昵称；当前为：" + client.nickname})
