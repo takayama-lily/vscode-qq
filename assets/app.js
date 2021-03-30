@@ -89,7 +89,7 @@ function callApi(command, params) {
             resolve(data);
         });
     });
-    
+
 }
 
 async function updateMemberList() {
@@ -128,8 +128,18 @@ function sendMsg() {
     }
     callApi(c2c ? "sendPrivateMsg" : "sendGroupMsg", [uin, message]).then((data) => {
         if (data.retcode > 1) {
+            let msg = data.error?.message;
+            if (msg?.includes("禁言")) {
+                if (ginfo.shutup_time_me * 1000 > Date.now()) {
+                    msg += " (至" + moment(ginfo.shutup_time_me * 1000).format('YYYY/MM/DD k:mm:ss') + ")";
+                } else if (ginfo.shutup_time_whole) {
+                    msg += " (全员禁言)";
+                }
+            } else if (msg === "bot not online") {
+                msg = "断线了，发送失败";
+            }
             $("#lite-chatbox").append(`<div class="tips">
-    <span class="tips-danger">Error: ${data.error?.message}</span>
+    <span class="tips-danger">Error: ${msg}</span>
 </div>`);
             return;
         }
@@ -142,6 +152,7 @@ function sendMsg() {
             $("#lite-chatbox").append(html);
         }
         $("#content").val("");
+        currentTextareaContent = "";
     }).then(() => {
         $(document).scrollTop($(document).height());
     });
@@ -189,7 +200,7 @@ function genSystemMessage(data) {
                 break;
             case "ban":
                 if (data.user_id > 0)
-                    msg = `${genLabel(data.operator_id)} 禁言 ${data.user_id === 80000000 ? "匿名用户("+data.nickname+")" : genLabel(data.user_id)} ${data.duration}秒`;
+                    msg = `${genLabel(data.operator_id)} 禁言 ${data.user_id === 80000000 ? "匿名用户(" + data.nickname + ")" : genLabel(data.user_id)} ${data.duration}秒`;
                 else
                     msg = `${genLabel(data.operator_id)} ${data.duration > 0 ? "开启" : "关闭"}了全员禁言`;
                 break;
@@ -230,9 +241,9 @@ function filterMsgIdSelector(message_id) {
  * @param {string} message_id 
  */
 function appendRecalledText(message_id) {
-    let html = $("span[msgid="+filterMsgIdSelector(message_id)+"]").html();
+    let html = $("span[msgid=" + filterMsgIdSelector(message_id) + "]").html();
     if (html) {
-        $("span[msgid="+filterMsgIdSelector(message_id)+"]").html(html + " (已撤回)");
+        $("span[msgid=" + filterMsgIdSelector(message_id) + "]").html(html + " (已撤回)");
     }
 }
 
@@ -245,7 +256,7 @@ function genUserMessage(data) {
         return "";
     }
     let title = "";
-    
+
     if (data.anonymous) {
         data.sender.card = data.anonymous.name;
         title = `<span class="htitle member">匿名</span>`;
@@ -257,7 +268,9 @@ function genUserMessage(data) {
     }
     return `<a class="msgid" id="${data.message_id}"></a><div class="${data.user_id === data.self_id ? "cright" : "cleft"} cmsg">
     <img class="headIcon radius" ondragstart="return false;" oncontextmenu="return false;" src="${genAvaterUrl(data.user_id)}" />
-    <span msgid="${data.message_id}" class="name" title="${filterXss(data.sender.nickname)}(${data.user_id}) ${moment(data.time * 1000).format('YYYY/MM/DD k:mm:ss')}">${title}${filterXss(data.sender.card ? data.sender.card : data.sender.nickname)} ${moment(data.time * 1000).format('k:mm:ss')}</span>
+    <span msgid="${data.message_id}" ondblclick="addAt(${data.user_id})" class="name" title="${filterXss(data.sender.nickname)}(${data.user_id}) ${moment(data.time * 1000).format('YYYY/MM/DD k:mm:ss')}">
+        ${title}${filterXss(data.sender.card ? data.sender.card : data.sender.nickname)} ${moment(data.time * 1000).format('k:mm:ss')}
+    </span>
     <span class="content">${parseMessage(data.message)}</span>
 </div>`;
 }
@@ -300,8 +313,10 @@ function parseMessage(message) {
     for (let v of message) {
         switch (v.type) {
             case "text":
-            case "at":
                 msg += filterXss(v.data.text);
+                break;
+            case "at":
+                msg += `<a href="javascript:void(0);" onclick="addAt('${v.data.qq}');">${filterXss(v.data.text)}</a>`;
                 break;
             case "face":
                 if (v.data.id > 310 || v.data.id === 275) {
@@ -319,10 +334,10 @@ function parseMessage(message) {
                 }
                 break;
             case "image":
-                msg += `<a href="${v.data.url}" target="_blank" class="chat-img">[图片]</a>`;
+                msg += `<a href="${v.data.url}&file=${v.data.file}&vscodeDragFlag=1" target="_blank" class="chat-img">[图片]</a>`;
                 break;
             case "flash":
-                msg += `<a href="${v.data.url}" target="_blank" class="chat-img">[闪照]</a>`;
+                msg += `<a href="${v.data.url}&file=${v.data.file}&vscodeDragFlag=1" target="_blank" class="chat-img">[闪照]</a>`;
                 break;
             case "record":
                 msg += `<a href="${v.data.url}" target="_blank">[语音]</a>`;
@@ -341,9 +356,12 @@ function parseMessage(message) {
                 msg += "[json卡片]";
                 break;
             case "file":
-                msg += `<a href="${v.data.url}" target="_blank">[文件:${filterXss(v.data.name)}(${v.data.size/1e6}MB)]</a>`;
+                msg += `<a href="${v.data.url}" target="_blank">[文件:${filterXss(v.data.name)}(${v.data.size / 1e6}MB)]</a>`;
                 break;
             case "reply":
+                if (message[1]?.type === "at" && message[3]?.type === "at" && message[1]?.data.qq === message[3]?.data.qq) {
+                    message.splice(1, 2);
+                }
                 msg += `<a href="#${v.data.id}">[回复]</a>`;
                 break;
             case "rps":
@@ -363,36 +381,70 @@ function parseMessage(message) {
     return msg;
 }
 
+/**
+ * 双击加入at元素到输入框
+ * @param {number|"all"} uid 
+ */
+function addAt(uid) {
+    if (c2c) {
+        return;
+    }
+    const cqcode = `[CQ:at,qq=${uid}] `;
+    currentTextareaContent += cqcode;
+    $("#content").val(currentTextareaContent);
+}
+
+let currentTextareaContent = "";
+
 $(document).ready(function () {
     // 图片预览
-    $("body").on("mouseenter", ".chat-img", function() {
+    $("body").on("mouseenter", ".chat-img", function () {
         const url = $(this).attr("href");
         $("#img-preview").attr("src", url);
         $("#img-preview").css("left", $(this).offset().left + 20 + "px");
         $("#img-preview").css("top", $(this).offset().top - 5 + "px");
         $("#img-preview").show();
     });
-    $("body").on("mouseleave", ".chat-img", function() {
+    $("body").on("mouseleave", ".chat-img", function () {
         $("#img-preview").hide();
     });
 
     // Ctrl+Enter
     $(window).keydown(function (event) {
         if (event.ctrlKey && event.keyCode === 13) {
-           sendMsg();
+            sendMsg();
         }
-   });
+    });
 
-   //滚动到顶部加载消息
-   window.onscroll = function () {
+    //滚动到顶部加载消息
+    window.onscroll = function () {
         if ($(window).scrollTop() === 0) {
             getChatHistory($(".msgid").first().attr("id") ?? "", 10);
         }
-   };
+    };
 
-   //得到本地表情图片路径
-   const a = $("link").attr("href");
-   const b = a.split("/");
-   b.pop();
-   facePath = b.join("/") + "/faces/";
+    //得到本地表情图片路径
+    const a = $("link").attr("href");
+    const b = a.split("/");
+    b.pop();
+    facePath = b.join("/") + "/faces/";
+
+    //表情、图片拖动
+    $("#content").on("input", function () {
+        const content = $(this).val();
+        const diff = content.substr(currentTextareaContent.length);
+        if (diff.startsWith(facePath)) {
+            const faceId = diff.substr(facePath.length).split(".")[0];
+            const cqcode = `[CQ:face,id=${faceId}]`;
+            currentTextareaContent += cqcode;
+            $(this).val(currentTextareaContent);
+        } else if (diff.endsWith("&vscodeDragFlag=1")) {
+            const file = new URL(diff).searchParams.get("file");
+            const cqcode = `[CQ:image,file=${file}]`;
+            currentTextareaContent += cqcode;
+            $(this).val(currentTextareaContent);
+        } else {
+            currentTextareaContent = content;
+        }
+    });
 });

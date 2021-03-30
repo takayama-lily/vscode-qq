@@ -18,9 +18,13 @@ html,body{
 .lite-chatbox .content img {
     width: auto;
 }
+.lite-chatbox .content a {
+    text-decoration: none;
+}
 .lite-chatbox .cmsg {
     margin: 10px 7px;
 }
+
 #img-preview {
     position: absolute;
     display: none;
@@ -67,7 +71,7 @@ button#send {
     <textarea id="content" rows="10" placeholder="在此输入消息..."></textarea>
     <div id="footer" class="vscode-dark">
         <button id="send" onclick="sendMsg()">发送</button>Ctrl+Enter　
-        (发文字以外内容暂时只能手写<a href="https://github.com/takayama-lily/oicq/wiki/90.%E5%A6%82%E4%BD%95%E5%8F%91%E9%80%81%E5%A4%9A%E5%AA%92%E4%BD%93%E5%86%85%E5%AE%B9(CQ%E7%A0%81)" target="_blank">CQ码</a>)
+        (发文字以外内容暂时只能使用<a href="https://github.com/takayama-lily/oicq/wiki/90.%E5%A6%82%E4%BD%95%E5%8F%91%E9%80%81%E5%A4%9A%E5%AA%92%E4%BD%93%E5%86%85%E5%AE%B9(CQ%E7%A0%81)" target="_blank">CQ码</a>)
     </div>
     <span id="to-bottom" onclick="$(document).scrollTop($(document).height());">↓底部</span>
 </body>
