@@ -304,8 +304,8 @@ function parseMessage(message) {
                 msg += filterXss(v.data.text);
                 break;
             case "face":
-                if (v.data.id > 310) {
-                    msg += "[表情]";
+                if (v.data.id > 310 || v.data.id === 275) {
+                    msg += "[未知表情]";
                 } else {
                     msg += `<img src="${facePath + v.data.id}.png">`;
                 }
@@ -322,28 +322,26 @@ function parseMessage(message) {
                 msg += `<a href="${v.data.url}" target="_blank" class="chat-img">[图片]</a>`;
                 break;
             case "flash":
-                // let width = v.data.file.split("-")[1];
-                // width = parseInt(10000 / (width / 2));
-                // if (width > 100) {
-                //     width = 100;
-                // }
-                // msg += `<div style="width: ${width}%"><a href="${v.data.url}" target="_blank"><img src="${v.data.url}"></a></div>`;
                 msg += `<a href="${v.data.url}" target="_blank" class="chat-img">[闪照]</a>`;
                 break;
             case "record":
-                msg += "[语音]";
+                msg += `<a href="${v.data.url}" target="_blank">[语音]</a>`;
                 break;
             case "video":
-                msg += "[视频]";
+                msg += `<a href="${v.data.url}" target="_blank">[视频]</a>`;
                 break;
             case "xml":
-                msg += "[xml消息]";
+                if (v.data.type === 35) {
+                    msg += "[合并转发(暂不支持查看)]";
+                } else {
+                    msg += "[xml卡片]";
+                }
                 break;
             case "json":
-                msg += "[json消息]";
+                msg += "[json卡片]";
                 break;
             case "file":
-                msg += "[文件]";
+                msg += `<a href="${v.data.url}" target="_blank">[文件:${filterXss(v.data.name)}(${v.data.size/1e6}MB)]</a>`;
                 break;
             case "reply":
                 msg += `<a href="#${v.data.id}">[回复]</a>`;
@@ -353,6 +351,12 @@ function parseMessage(message) {
                 break;
             case "dice":
                 msg += "[骰子]";
+                break;
+            case "shake":
+                msg += "[窗口抖动]";
+                break;
+            case "poke":
+                msg += "[戳一戳]";
                 break;
         }
     }
