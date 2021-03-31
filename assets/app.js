@@ -45,16 +45,16 @@ window.addEventListener("message", async function (event) {
 
     if (!event.data.echo) {
         // event
+        if ($(window).scrollTop() + $(window).height() >= $(document).height()) {
+            var flag = 1;
+        }
         if (event.data.post_type === "message") {
-            if ($(window).scrollTop() + $(window).height() >= $(document).height()) {
-                var flag = 1;
-            }
             $("#lite-chatbox").append(genUserMessage(event.data));
-            if (flag) {
-                $(document).scrollTop($(document).height());
-            }
         } else if (event.data.post_type === "notice") {
             $("#lite-chatbox").append(genSystemMessage(event.data));
+        }
+        if (flag) {
+            $(document).scrollTop($(document).height());
         }
     } else {
         // api ret
@@ -121,11 +121,14 @@ function getChatHistory(message_id = "", count = 20) {
     });
 }
 
+let sending = false;
 function sendMsg() {
     const message = $("#content").val();
-    if (!message) {
+    if (sending || !message) {
         return;
     }
+    sending = true;
+    $("#send").attr("disabled", true);
     callApi(c2c ? "sendPrivateMsg" : "sendGroupMsg", [uin, message]).then((data) => {
         if (data.retcode > 1) {
             let msg = data.error?.message;
@@ -153,7 +156,12 @@ function sendMsg() {
         }
         $("#content").val("");
         currentTextareaContent = "";
-    }).then(() => {
+    }).catch(() => {
+        $("#content").val("");
+        currentTextareaContent = "";
+    }).finally(() => {
+        sending = false;
+        $("#send").attr("disabled", false);
         $(document).scrollTop($(document).height());
     });
 }
@@ -175,7 +183,7 @@ function genSystemMessage(data) {
         updateMemberList();
         switch (data.sub_type) {
             case "recall":
-                msg = `${genLabel(data.operator_id)} 撤回了 ${data.user_id === data.operator_id ? "自己" : genLabel(data.user_id)} 的 <a href="#${data.message_id}">一条消息</>`;
+                msg = `${genLabel(data.operator_id)} 撤回了 ${data.user_id === data.operator_id ? "自己" : genLabel(data.user_id)} 的<a href="#${data.message_id}">一条消息</>`;
                 appendRecalledText(data.message_id);
                 break;
             case "increase":
@@ -334,10 +342,10 @@ function parseMessage(message) {
                 }
                 break;
             case "image":
-                msg += `<a href="${v.data.url}&file=${v.data.file}&vscodeDragFlag=1" target="_blank" class="chat-img">[图片]</a>`;
+                msg += `<a href="${v.data.url}&file=${v.data.file}&vscodeDragFlag=1" target="_blank" class="chat-img">图片</a>`;
                 break;
             case "flash":
-                msg += `<a href="${v.data.url}&file=${v.data.file}&vscodeDragFlag=1" target="_blank" class="chat-img">[闪照]</a>`;
+                msg += `<a href="${v.data.url}&file=${v.data.file}&vscodeDragFlag=1" target="_blank" class="chat-img">闪照</a>`;
                 break;
             case "record":
                 msg += `<a href="${v.data.url}" target="_blank">[语音]</a>`;

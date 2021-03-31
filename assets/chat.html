@@ -22,7 +22,12 @@ html,body{
     text-decoration: none;
 }
 .lite-chatbox .cmsg {
-    margin: 10px 7px;
+    margin: 10px 15px;
+}
+.lite-chatbox .cmsg .content {
+    border-radius: 0 10px 10px 10px;
+    font-size: 14px;
+    padding: 8px 15px;
 }
 
 #img-preview {
@@ -34,27 +39,23 @@ html,body{
 #content {
     width: 100%;
     resize: none;
-    position: fixed;
-    bottom: 40px;
-    left: 0;
+    box-sizing: border-box;
 }
 button#send {
     margin: 10px;
 }
 #to-bottom {
-    position: fixed;
+    position: absolute;
     bottom: 0;
     right: 0;
     margin: 10px;
     cursor: pointer;
-    color: #fff;
 }
 #footer {
-    position: fixed;
+    position: sticky;
     width: 100%;
-    height: 40px;
     bottom: 0;
-    background-color:rgb(39, 40, 34);
+    background-color: var(--vscode-editor-background);
 }
 </style>
 
@@ -65,15 +66,14 @@ button#send {
         </div>
     </div>
     <div class="lite-chatbox" id="lite-chatbox"></div>
-    <div style="height: 300px; width: 100%;"></div>
+    <div style="width: 100%; height: 30px;"></div>
     <img id="img-preview" style="z-index: 999;">
-
-    <textarea id="content" rows="10" placeholder="在此输入消息..."></textarea>
-    <div id="footer" class="vscode-dark">
+    <div id="footer">
+        <textarea id="content" rows="10" placeholder="在此输入消息..."></textarea>
         <button id="send" onclick="sendMsg()">发送</button>Ctrl+Enter　
         (发文字以外内容暂时只能使用<a href="https://github.com/takayama-lily/oicq/wiki/90.%E5%A6%82%E4%BD%95%E5%8F%91%E9%80%81%E5%A4%9A%E5%AA%92%E4%BD%93%E5%86%85%E5%AE%B9(CQ%E7%A0%81)" target="_blank">CQ码</a>)
+        <span id="to-bottom" onclick="$(document).scrollTop($(document).height());">↓底部</span>
     </div>
-    <span id="to-bottom" onclick="$(document).scrollTop($(document).height());">↓底部</span>
 </body>
 
 </html>

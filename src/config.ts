@@ -15,8 +15,6 @@ const optimized: Config = {
     password: "",
     platform: 5,
     show_me_add_group_request: false,
-    remote_ip: "",
-    remote_port: 0,
 };
 
 function getConfigFilePath() {
