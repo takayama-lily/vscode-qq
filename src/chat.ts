@@ -1,8 +1,7 @@
-import * as fs from 'fs';
-import * as path from 'path';
 import * as vscode from 'vscode';
 import * as oicq from 'oicq';
 import { refreshContacts } from "./explorer";
+import { getConfig } from "./config";
 import { client, ctx, genContactId, parseContactId } from "./global";
 
 interface WebViewPostData {
@@ -15,21 +14,45 @@ vscode.commands.registerCommand("oicq.c2c.open", openChatView);
 vscode.commands.registerCommand("oicq.group.open", openChatView);
 
 const webviewMap: Map<string, vscode.WebviewPanel> = new Map;
-let html = "";
+
+const html = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{themeCssUri}" />
+    <script src="{themeJsUri}"></script>
+</head>
+<body></body>
+</html>`;
+
+const availableThemes = [
+    "default"
+];
 
 function getHtml(webview: vscode.Webview) {
-    if (!html) {
-        html = fs.readFileSync(path.join(ctx.extensionPath, "assets", "chat.html"), { encoding: "utf-8" });
+    let css: string, js: string;
+    const config = getConfig();
+    if (config.theme_css && config.theme_js) {
+        if (config.theme_css.startsWith("http")) {
+            css = config.theme_css;
+        } else {
+            css = webview.asWebviewUri(vscode.Uri.file(config.theme_css)).toString();
+        }
+        if (config.theme_js.startsWith("http")) {
+            js = config.theme_js;
+        } else {
+            js = webview.asWebviewUri(vscode.Uri.file(config.theme_js)).toString();
+        }
+    } else {
+        let theme = "default";
+        if (availableThemes.includes(String(config.theme))) {
+            theme = String(config.theme);
+        }
+        css = webview.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, "assets", theme + "-theme", "style.css")).toString();
+        js = webview.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, "assets", theme + "-theme", "app.js")).toString();
     }
-    const litewebchat = webview.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, "assets", "litewebchat.min.css"));
-    const jquery = webview.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, "assets", "jquery.min.js"));
-    const moment = webview.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, "assets", "moment.min.js"));
-    const app = webview.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, "assets", "app.js"));
-    return html
-        .replace("{litewebchat.min.css}", litewebchat.toString())
-        .replace("{jquery.min.js}", jquery.toString())
-        .replace("{moment.min.js}", moment.toString())
-        .replace("{app.js}", app.toString());
+    return html.replace("{themeCssUri}", css).replace("{themeJsUri}", js);
 }
 
 function openChatView(id: string) {
