@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 import * as vscode from 'vscode';
 import * as oicq from 'oicq';
 import { client, setClient } from "./global";
-import { genConfig, writeAccount, openConfigFile, deleteToken } from "./config";
+import { openConfigFile, deleteToken, genClientConfig, getConfig, setConfig } from "./config";
 import { initLists } from "./explorer";
 import { Cdp } from "./cdp";
 
@@ -25,13 +25,16 @@ const statusMap: { [k: number]: string } = {
  * create the instance
  */
 function createClient(uin: number) {
-    const c = oicq.createClient(uin, genConfig());
+    const c = oicq.createClient(uin, genClientConfig());
     setClient(c);
 
     client.on("system.login.error", function (data) {
         logining = false;
         if (data.message.includes("密码错误")) {
-            writeAccount(0, "");
+            setConfig({
+                account: 0,
+                password: ""
+            });
             data.message += "(请选择：@切换账号)";
         }
         vscode.window.showErrorMessage(data.message);
@@ -58,6 +61,7 @@ function createClient(uin: number) {
         webview.onDidDispose(() => {
             client.login();
         });
+        vscode.window.showInformationMessage(`[设备锁验证地址](${data.url}) 若vscode中无法正常显示可在浏览器中打开`);
     });
     client.on("system.offline", (data) => {
         logining = false;
@@ -71,7 +75,10 @@ function createClient(uin: number) {
         if (selectedStatus !== 11) {
             this.setOnlineStatus(selectedStatus);
         }
-        writeAccount(this.uin, this.password_md5.toString("hex"));
+        setConfig({
+            account: this.uin,
+            password: this.password_md5.toString("hex")
+        });
         vscode.window.showInformationMessage(`${client.nickname}(${client.uin}) 已上线`);
         initLists();
     });
@@ -83,7 +90,7 @@ function createClient(uin: number) {
  * input account
  */
 function inputAccount() {
-    const uin = genConfig().account;
+    const uin = Number(getConfig().account);
     if (uin > 10000 && uin < 0xffffffff) {
         return createClient(uin);
     }
@@ -105,7 +112,7 @@ function inputAccount() {
  * input password of account
  */
 function inputPassword() {
-    const password = genConfig().password;
+    const password = String(getConfig().password);
     if (password) {
         return client.login(password);
     }
@@ -116,7 +123,7 @@ function inputPassword() {
         if (!pass) {
             return;
         }
-        const password = crypto.createHash("md5").update(pass).digest("hex");
+        const password = crypto.createHash("md5").update(pass).digest();
         logining = true;
         client.login(password);
     });
@@ -206,7 +213,10 @@ export function invoke() {
             if (value === "@切换账号") {
                 client?.logout();
                 deleteToken();
-                writeAccount(0, "");
+                setConfig({
+                    account: 0,
+                    password: ""
+                });
                 return inputAccount();
             }
             if (value === "@个人资料") {

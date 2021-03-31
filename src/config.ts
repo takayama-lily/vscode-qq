@@ -5,9 +5,12 @@ import * as vscode from 'vscode';
 import { ctx, client, NOOP } from "./global";
 
 interface Config extends oicq.ConfBot {
-    account: number;
-    password: string;
-    show_me_add_group_request: boolean,
+    account?: number,
+    password?: string,
+    show_me_add_group_request?: boolean,
+    theme?: string,
+    theme_css?: string,
+    theme_js?: string,
 }
 
 const optimized: Config = {
@@ -15,23 +18,37 @@ const optimized: Config = {
     password: "",
     platform: 5,
     show_me_add_group_request: false,
+    theme: "default",
+    theme_css: "",
+    theme_js: "",
 };
+
+let config: Config | undefined;
 
 function getConfigFilePath() {
     return path.join(ctx.globalStoragePath, "config.json");
 }
 
-function readConfig(): Config {
-    try {
-        return JSON.parse(fs.readFileSync(getConfigFilePath(), { encoding: "utf-8" }));
-    } catch {
-        fs.writeFileSync(getConfigFilePath(), JSON.stringify(optimized, null, 2));
-        return optimized;
+export function getConfig(): Config {
+    if (!config) {
+        try {
+            config = JSON.parse(fs.readFileSync(getConfigFilePath(), { encoding: "utf-8" }));
+        } catch {
+            fs.writeFile(getConfigFilePath(), JSON.stringify(optimized, null, 2), NOOP);
+            config = { ...optimized };
+        }
     }
+    //@ts-ignore
+    return config;
 }
 
-export function genConfig() {
-    const config: oicq.ConfBot = {
+export function setConfig(obj: Config) {
+    Object.assign(getConfig(), obj);
+    fs.writeFile(getConfigFilePath(), JSON.stringify(config, null, 2), NOOP);
+}
+
+export function genClientConfig() {
+    const clientConfig: oicq.ConfBot = {
         log_level: "off",
         kickoff: false,
         ignore_self: false,
@@ -39,20 +56,24 @@ export function genConfig() {
         reconn_interval: 0,
         data_dir: ctx.globalStoragePath,
     };
-    return Object.assign(readConfig(), config);
+    return Object.assign(clientConfig, getConfig());
 }
 
-export function writeAccount(account: number, password: string) {
-    const config = readConfig();
-    config.account = account;
-    config.password = password;
-    fs.writeFile(getConfigFilePath(), JSON.stringify(config, null, 2), NOOP);
-}
-
+let watcherCreatedFlag = false;
 export function openConfigFile() {
-    readConfig();
+    getConfig();
     const uri = vscode.Uri.file(getConfigFilePath());
     vscode.window.showTextDocument(uri);
+    if (!watcherCreatedFlag) {
+        watcherCreatedFlag = true;
+        vscode.workspace.createFileSystemWatcher(getConfigFilePath(), true, false, true).onDidChange(async () => {
+            try {
+                config = JSON.parse(await fs.promises.readFile(getConfigFilePath(), { encoding: "utf-8" }));
+            } catch {
+                vscode.window.showErrorMessage("配置文件中有错误，请检查。");
+            }
+        });
+    }
 }
 
 export function deleteToken() {
