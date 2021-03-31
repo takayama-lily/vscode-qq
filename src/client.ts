@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 import * as vscode from 'vscode';
 import * as oicq from 'oicq';
 import { client, setClient } from "./global";
-import { genConfig, writeAccount, writePassword, openConfigFile, deleteToken } from "./config";
+import { genConfig, writeAccount, openConfigFile, deleteToken } from "./config";
 import { initLists } from "./explorer";
 import { Cdp } from "./cdp";
 
@@ -31,8 +31,7 @@ function createClient(uin: number) {
     client.on("system.login.error", function (data) {
         logining = false;
         if (data.message.includes("密码错误")) {
-            writeAccount(0);
-            writePassword("");
+            writeAccount(0, "");
             data.message += "(请选择：@切换账号)";
         }
         vscode.window.showErrorMessage(data.message);
@@ -72,9 +71,8 @@ function createClient(uin: number) {
         if (selectedStatus !== 11) {
             this.setOnlineStatus(selectedStatus);
         }
-        writeAccount(this.uin);
-        writePassword(this.password_md5.toString("hex"));
-        vscode.window.showInformationMessage(`QQ: ${client.nickname}(${client.uin}) 已上线`);
+        writeAccount(this.uin, this.password_md5.toString("hex"));
+        vscode.window.showInformationMessage(`${client.nickname}(${client.uin}) 已上线`);
         initLists();
     });
 
@@ -208,8 +206,7 @@ export function invoke() {
             if (value === "@切换账号") {
                 client?.logout();
                 deleteToken();
-                writeAccount(0);
-                writePassword("");
+                writeAccount(0, "");
                 return inputAccount();
             }
             if (value === "@个人资料") {

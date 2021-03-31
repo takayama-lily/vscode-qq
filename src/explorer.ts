@@ -162,7 +162,6 @@ vscode.commands.registerCommand("oicq.contact.profile", async (id: string) => {
             arr.push("等级：" + data.grade);
             arr.push("活跃人数：" + data.active_member_count);
             arr.push("创建时间：" + new Date(data.create_time * 1000));
-            arr.push("最后入群时间：" + new Date(data.last_join_time * 1000));
         }
     }
     vscode.window.showQuickPick(arr);

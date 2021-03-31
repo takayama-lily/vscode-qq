@@ -316,13 +316,13 @@ function parseMessage(message) {
                 msg += filterXss(v.data.text);
                 break;
             case "at":
-                msg += `<a href="javascript:void(0);" onclick="addAt('${v.data.qq}');">${filterXss(v.data.text)}</a>`;
+                msg += `<a title="${v.data.qq}" href="javascript:void(0);" onclick="addAt('${v.data.qq}');">${filterXss(v.data.text)}</a>`;
                 break;
             case "face":
                 if (v.data.id > 310 || v.data.id === 275) {
                     msg += "[未知表情]";
                 } else {
-                    msg += `<img src="${facePath + v.data.id}.png">`;
+                    msg += `<img ondblclick="addFace(${v.data.id})" src="${facePath + v.data.id}.png">`;
                 }
                 break;
             case "sface":
@@ -390,6 +390,16 @@ function addAt(uid) {
         return;
     }
     const cqcode = `[CQ:at,qq=${uid}] `;
+    currentTextareaContent += cqcode;
+    $("#content").val(currentTextareaContent);
+}
+
+/**
+ * 双击加入表情到输入框
+ * @param {number} id 
+ */
+function addFace(id) {
+    const cqcode = `[CQ:face,qq=${id}] `;
     currentTextareaContent += cqcode;
     $("#content").val(currentTextareaContent);
 }

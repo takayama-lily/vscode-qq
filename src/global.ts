@@ -34,4 +34,6 @@ function setClient(c: oicq.Client) {
 let ctx: vscode.ExtensionContext;
 let client: oicq.Client;
 
-export { ctx, client, setContext, setClient };
+const NOOP = () => { };
+
+export { ctx, client, setContext, setClient, NOOP };

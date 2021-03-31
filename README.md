@@ -13,6 +13,8 @@
 > 暂不支持临时会话，UI还有待改进，功能有待增强。  
 > 本程序不在本地保存任何消息记录和图片。  
 
+[外网被限制无法登录的解决方法](https://github.com/takayama-lily/vscode-qq/wiki/%E6%88%91%E7%9A%84%E6%9C%BA%E5%99%A8%E6%B2%A1%E6%9C%89%E5%A4%96%E7%BD%91%E6%80%8E%E4%B9%88%E5%8A%9E)
+
 ![预览图](https://user-images.githubusercontent.com/12014361/112642602-cfeb5380-8e86-11eb-88fd-930657040e39.png)
 
 > 使用的UI库：[https://github.com/MorFansLab/LiteWebChat_Frame](https://github.com/MorFansLab/LiteWebChat_Frame)

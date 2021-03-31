@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as oicq from 'oicq';
 import * as vscode from 'vscode';
-import { ctx, client } from "./global";
+import { ctx, client, NOOP } from "./global";
 
 interface Config extends oicq.ConfBot {
     account: number;
@@ -44,15 +44,11 @@ export function genConfig() {
     return Object.assign(readConfig(), config);
 }
 
-export function writeAccount(account: number) {
+export function writeAccount(account: number, password: string) {
     const config = readConfig();
     config.account = account;
-    fs.writeFileSync(getConfigFilePath(), JSON.stringify(config, null, 2));
-}
-export function writePassword(password: string) {
-    const config = readConfig();
     config.password = password;
-    fs.writeFileSync(getConfigFilePath(), JSON.stringify(config, null, 2));
+    fs.writeFile(getConfigFilePath(), JSON.stringify(config, null, 2), NOOP);
 }
 
 export function openConfigFile() {
@@ -63,13 +59,13 @@ export function openConfigFile() {
 
 export function deleteToken() {
     if (client) {
-        fs.unlink(path.join(client.dir, "token"), () => { });
-        fs.unlink(path.join(client.dir, "t106"), () => { });
+        fs.unlink(path.join(client.dir, "token"), NOOP);
+        fs.unlink(path.join(client.dir, "t106"), NOOP);
     }
 }
 
 export function writePinned(pinned: string[]) {
-    fs.writeFile(path.join(client.dir, "pinned"), pinned.join("\n"), () => { });
+    fs.writeFile(path.join(client.dir, "pinned"), pinned.join("\n"), NOOP);
 }
 
 export async function readPinned() {
