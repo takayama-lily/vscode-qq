@@ -1,12 +1,9 @@
 # VS Code QQ Extension Change Log
 
-## Version 0.1.0: 2021/3/26
+## Version 0.3.0: 2021/4/2
 
-## Version 0.1.1
-
-* fix xss注入
-* fix 一些UI细节问题
-* add Ctrl+Enter发送
+* [Config] 增加 `theme` `theme_css` `theme_js` 配置项，以支持自定义UI界面
+* [default-theme] 优化UI，双击表情可以加入输入框
 
 ## Version 0.2.0: 2021/3/30
 
@@ -21,4 +18,10 @@
 * [Explorer] 支持查看好友资料和群资料
 * [Explorer] 优化menu排序，"置顶" 改为 "固定"
 
-> 0.3.0计划美化输入框，支持选择表情，并且增加撤回、禁言和踢群等功能
+## Version 0.1.1
+
+* fix xss注入
+* fix 一些UI细节问题
+* add Ctrl+Enter发送
+
+## Version 0.1.0: 2021/3/26
