@@ -15,8 +15,14 @@ html,body{
 .lite-chatbox .cmsg {
     margin: 10px 15px;
 }
-.lite-chatbox .cmsg .content {
+.lite-chatbox .cleft .content {
     border-radius: 0 10px 10px 10px;
+    font-size: 14px;
+    padding: 8px 15px;
+}
+
+.lite-chatbox .cright .content {
+    border-radius: 10px 0px 10px 10px;
     font-size: 14px;
     padding: 8px 15px;
 }

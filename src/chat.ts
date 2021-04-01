@@ -15,22 +15,11 @@ vscode.commands.registerCommand("oicq.group.open", openChatView);
 
 const webviewMap: Map<string, vscode.WebviewPanel> = new Map;
 
-const html = `<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="{themeCssUri}" />
-    <script src="{themeJsUri}"></script>
-</head>
-<body></body>
-</html>`;
-
 const availableThemes = [
     "default"
 ];
 
-function getHtml(webview: vscode.Webview) {
+function getHtml(id: string, webview: vscode.Webview) {
     let css: string, js: string;
     const config = getConfig();
     if (config.theme_css && config.theme_js) {
@@ -52,7 +41,20 @@ function getHtml(webview: vscode.Webview) {
         css = webview.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, "assets", theme + "-theme", "style.css")).toString();
         js = webview.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, "assets", theme + "-theme", "app.js")).toString();
     }
-    return html.replace("{themeCssUri}", css).replace("{themeJsUri}", js);
+    const { self, type, uin } = parseContactId(id);
+    const path = webview.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, "assets")).toString();
+    return `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="${css}" />
+</head>
+<body>
+    <env self_id="${self}" nickname="${client.nickname}" c2c="${type === "u" ? 1 : 0}" target_id="${uin}" temp="0" path="${path}">
+    <script src="${js}"></script>
+</body>
+</html>`;
 }
 
 function openChatView(id: string) {
@@ -74,9 +76,8 @@ function openChatView(id: string) {
         retainContextWhenHidden: true
     });
     webviewMap.set(id, webview);
-    webview.webview.html = getHtml(webview.webview);
+    webview.webview.html = getHtml(id, webview.webview);
     webview.reveal();
-    webview.webview.postMessage(id);
     webview.onDidDispose(() => {
         webviewMap.delete(id);
     });
@@ -97,7 +98,7 @@ function openChatView(id: string) {
             const fn = client[data.command];
             if (typeof fn === "function") {
                 //@ts-ignore
-                let ret: any = fn.apply(client, data.params);
+                let ret: any = fn.apply(client, Array.isArray(data.params) ? data.params : []);
                 if (ret instanceof Promise) {
                     ret = await ret;
                 }

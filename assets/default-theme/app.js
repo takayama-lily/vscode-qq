@@ -9,10 +9,13 @@
  */
 const vscode = acquireVsCodeApi();
 
-let me = 0;
-let c2c = false;
-let id = "";
-let uin = 0;
+let me = $("env").attr("self_id");
+let c2c = $("env").attr("c2c") == "1";
+let uin = $("env").attr("target_id");
+let nick = $("env").attr("nickname");
+
+// 表情文件夹路径
+let facePath = $("env").attr("path") + "/faces/";
 
 // 上报window focus事件
 window.onfocus = () => {
@@ -26,31 +29,15 @@ window.onfocus = () => {
 let members = new Map;
 
 /**
+ * 群资料
  * @type {import("oicq").GroupInfo}
  */
 let ginfo;
 
-// 表情文件夹路径
-let facePath = "";
-
 // 监听来自vscode的消息
 window.addEventListener("message", async function (event) {
-
-    // init
-    if (typeof event.data === "string") {
-        id = event.data;
-        me = parseInt(id);
-        c2c = id.includes("u") ? true : false;
-        uin = parseInt(id.replace(/^[0-9]+[a-z]{1}/, ""));
-        if (!c2c) {
-            await updateMemberList();
-        }
-        getChatHistory();
-        return;
-    }
-
     if (!event.data.echo) {
-        // event
+        // 消息和通知事件
         if ($(window).scrollTop() + $(window).height() >= $(document).height()) {
             var flag = 1;
         }
@@ -63,7 +50,7 @@ window.addEventListener("message", async function (event) {
             $(document).scrollTop($(document).height());
         }
     } else {
-        // api ret
+        // api返回值
         handlers.get(event.data?.echo)?.call(null, event.data);
         handlers.delete(event.data.echo);
     }
@@ -95,7 +82,6 @@ function callApi(command, params) {
             resolve(data);
         });
     });
-
 }
 
 async function updateMemberList() {
@@ -155,7 +141,7 @@ function sendMsg() {
         if (c2c && data.data.message_id) {
             const html = `<a class="msgid" id="${data.data.message_id}"></a><div class="cright cmsg">
     <img class="headIcon radius" ondragstart="return false;" oncontextmenu="return false;" src="${genAvaterUrl(me)}" />
-    <span msgid="${data.data.message_id}" class="name" title="我(${me}) ${moment().format('YYYY/MM/DD k:mm:ss')}">我 ${moment().format('k:mm:ss')}</span>
+    <span msgid="${data.data.message_id}" class="name" title="${nick}(${me}) ${moment().format('YYYY/MM/DD k:mm:ss')}">${nick} ${moment().format('k:mm:ss')}</span>
     <span class="content">${filterXss(message)}</span>
 </div>`;
             $("#lite-chatbox").append(html);
@@ -226,8 +212,8 @@ function genSystemMessage(data) {
     if (!msg) {
         return "";
     }
-    return `<div class="tips">
-    <span class="tips-info">${msg}</span>
+    return `<div class="tips" title="${moment(data.time * 1000).format("YYYY/MM/DD k:mm:ss")}">
+    <span>${msg}</span>
 </div>`;
 }
 
@@ -248,7 +234,7 @@ function genLabel(user_id) {
  * @param {string} message_id 
  */
 function filterMsgIdSelector(message_id) {
-    return message_id.replace(/\//g, "\\/").replace(/\=/g, "\\=");
+    return message_id.replace(/\//g, "\\/").replace(/\=/g, "\\=").replace(/\+/g, "\\+");
 }
 
 /**
@@ -463,12 +449,6 @@ $(document).ready(function () {
         }
     };
 
-    //得到本地表情图片路径
-    const a = $("link").attr("href");
-    const b = a.split("/");
-    b.pop();
-    facePath = b.join("/") + "/../faces/";
-
     //表情、图片拖动
     $("#content").on("input", function () {
         const content = $(this).val();
@@ -488,3 +468,13 @@ $(document).ready(function () {
         }
     });
 });
+
+//init
+(async()=>{
+    if (!c2c) {
+        //加载群资料、群员列表
+        await updateMemberList();
+    }
+    //加载历史消息
+    getChatHistory();
+})();
