@@ -137,7 +137,7 @@ function sendMsg() {
         }
         if (c2c && data.data.message_id) {
             const html = `<a class="msgid" id="${data.data.message_id}"></a><div class="cright cmsg">
-    <img class="headIcon radius" ondragstart="return false;" oncontextmenu="return false;" src="${genAvaterUrl(me)}" />
+    <img class="headIcon radius chat-img" src="${genAvaterUrl(me)}" />
     <span msgid="${data.data.message_id}" class="name" title="${nick}(${me}) ${moment().format('YYYY/MM/DD k:mm:ss')}">${nick} ${moment().format('k:mm:ss')}</span>
     <span class="content">${filterXss(message)}</span>
 </div>`;
@@ -264,7 +264,7 @@ function genUserMessage(data) {
         }
     }
     return `<a class="msgid" id="${data.message_id}"></a><div class="${data.user_id === data.self_id ? "cright" : "cleft"} cmsg">
-    <img class="headIcon radius" ondragstart="return false;" oncontextmenu="return false;" src="${genAvaterUrl(data.user_id)}" />
+    <img class="headIcon radius chat-img" src="${genAvaterUrl(data.user_id)}" />
     <span msgid="${data.message_id}" ondblclick="addAt(${data.user_id})" class="name" title="${filterXss(data.sender.nickname)}(${data.user_id}) ${moment(data.time * 1000).format('YYYY/MM/DD k:mm:ss')}">
         ${title}${filterXss(data.sender.card ? data.sender.card : data.sender.nickname)} ${moment(data.time * 1000).format('k:mm:ss')}
     </span>
@@ -331,10 +331,11 @@ function parseMessage(message) {
                 }
                 break;
             case "image":
-                msg += `<a href="${v.data.url}&file=${v.data.file}&vscodeDragFlag=1" target="_blank" class="chat-img">图片</a>`;
-                break;
             case "flash":
-                msg += `<a href="${v.data.url}&file=${v.data.file}&vscodeDragFlag=1" target="_blank" class="chat-img">闪照</a>`;
+                if (!c2c) {
+                    v.data.url = v.data.url.replace(/\/[0-9]+\//, "/0/").replace(/[0-9]+-/g, "0-");
+                }
+                msg += `<a href="${v.data.url}&file=${v.data.file}&vscodeDragFlag=1" target="_blank" class="chat-img">${v.type === "image" ? "图片" : "闪照"}</a>`;
                 break;
             case "record":
                 msg += `<a href="${v.data.url}" target="_blank">[语音]</a>`;
@@ -422,10 +423,15 @@ $(document).ready(function () {
 
     // 图片预览
     $("body").on("mouseenter", ".chat-img", function () {
-        const url = $(this).attr("href");
+        const url = $(this).attr("href") ?? $(this).attr("src").replace("100", "640");
+        let left = $(this).offset().left + 20;
+        if (left + 100 > $(window).width()) {
+            left -= 200;
+        }
+        let top = $(this).offset().top - 5;
         $("#img-preview").attr("src", url);
-        $("#img-preview").css("left", $(this).offset().left + 20 + "px");
-        $("#img-preview").css("top", $(this).offset().top - 5 + "px");
+        $("#img-preview").css("left", left + "px");
+        $("#img-preview").css("top", top + "px");
         $("#img-preview").show();
     });
     $("body").on("mouseleave", ".chat-img", function () {
