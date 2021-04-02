@@ -4,10 +4,10 @@ import { refreshContacts } from "./explorer";
 import { getConfig } from "./config";
 import { client, ctx, genContactId, parseContactId } from "./global";
 
-interface WebViewPostData {
-    command?: keyof oicq.Client,
-    params?: any[],
-    echo?: string,
+export interface WebViewPostData {
+    command: keyof oicq.Client,
+    params: any[],
+    echo: string,
 }
 
 vscode.commands.registerCommand("oicq.c2c.open", openChatView);
@@ -81,10 +81,13 @@ function openChatView(id: string) {
     webview.onDidDispose(() => {
         webviewMap.delete(id);
     });
-    webview.webview.onDidReceiveMessage(async (data: WebViewPostData) => {
-        if (!data.command) {
+    webview.onDidChangeViewState((event) => {
+        if (event.webviewPanel.visible) {
             refreshContacts(id, false);
-        } else {
+        }
+    });
+    webview.webview.onDidReceiveMessage(async (data: WebViewPostData) => {
+        try {
             if (data.command === "getChatHistory" && data.params?.[0] === "") {
                 let buf: Buffer;
                 if (type === "g") {
@@ -108,7 +111,7 @@ function openChatView(id: string) {
                 ret.echo = data.echo;
                 webview.webview.postMessage(ret);
             }
-        }
+        } catch { }
     });
 }
 
@@ -125,7 +128,7 @@ function postGroupEvent(data: oicq.GroupNoticeEventData | oicq.GroupMessageEvent
 export function bind() {
     client.on("message.group", function (data) {
         const id = genContactId("g", data.group_id);
-        if (webviewMap.get(id)?.active) {
+        if (webviewMap.get(id)?.visible) {
             return;
         }
         refreshContacts(id, true);
@@ -133,7 +136,7 @@ export function bind() {
 
     client.on("message.private", function (data) {
         const id = genContactId("u", data.user_id);
-        if (webviewMap.get(id)?.active) {
+        if (webviewMap.get(id)?.visible) {
             return;
         }
         refreshContacts(id, true);

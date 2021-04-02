@@ -17,11 +17,6 @@ let nick = $("env").attr("nickname");
 // 表情文件夹路径
 let facePath = $("env").attr("path") + "/faces/";
 
-// 上报window focus事件
-window.onfocus = () => {
-    vscode.postMessage("focused");
-};
-
 /**
  * 群员列表
  * @type {Map<number, import("oicq").MemberInfo>}
@@ -64,10 +59,12 @@ class TimeoutError extends Error { }
 
 /**
  * @param {string} command 
- * @param {any[]} params
  */
-function callApi(command, params) {
+function callApi(command, params = []) {
     const echo = String(Date.now()) + String(Math.random());
+    /**
+     * @type {import("../../src/chat").WebViewPostData}
+     */
     const obj = {
         command, params, echo
     };

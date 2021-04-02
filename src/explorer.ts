@@ -295,18 +295,53 @@ export async function initLists() {
 
 export function refreshContacts(id: string, flag: boolean) {
     const item = itemMap.get(id);
-    if (item) {
-        if (flag) {
-            ++item.new;
+    const { type } = parseContactId(id);
+    const provider = type === "u" ? friendListTreeDataProvider : groupListTreeDataProvider;
+    if (!item) {
+        provider.refresh();
+        pinnedTreeDataProvider.refresh();
+        return;
+    }
+    if (flag) {
+        ++item.new;
+        if (item.new > 1) {
+            provider.refresh(id);
+            pinnedTreeDataProvider.refresh(id);
+        } else {
+            provider.refresh();
+            pinnedTreeDataProvider.refresh();
+        }
+    } else {
+        if (!item.new) {
+            return;
         } else {
             item.new = 0;
+            provider.refresh();
+            pinnedTreeDataProvider.refresh();
         }
     }
-    const { type } = parseContactId(id);
-    if (type === "u") {
-        friendListTreeDataProvider.refresh();
-    } else {
-        groupListTreeDataProvider.refresh();
-    }
-    pinnedTreeDataProvider.refresh();
 }
+
+/**
+ * 列表刷新规则：
+ * 
+ *  好友增加减少时：全部刷新
+ *  群增加减少时：全部刷新
+ *  好友修改昵称时：单个刷新
+ *  群名变更时：单个刷新
+ * 
+ *  收到新消息时：
+ *      列表中不存在时：全部刷新
+ *      之前无新消息时：全部刷新(新消息+1)
+ *      之前有新消息时：单个刷新(新消息+1)
+ *      视图已打开并可见时：不刷新
+ *      视图已打开不可见时：
+ *          之前无新消息时：全部刷新(新消息+1)
+ *          之前有新消息时：单个刷新(新消息+1)
+ * 
+ *  打开视图时/视图聚焦时(需要通过webview上报window.focus事件)：
+ *      之前无新消息时：不刷新
+ *      之前有新消息时：全部刷新(新消息置0)
+ * 
+ * (全部刷新的目的在于排序)
+ */

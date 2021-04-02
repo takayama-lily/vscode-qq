@@ -7,11 +7,11 @@ interface ContactId {
     uin: number,
 }
 
-export function genContactId(type: "u" | "g", uin: number): string {
+function genContactId(type: "u" | "g", uin: number): string {
     return client.uin + type + uin;
 }
 
-export function parseContactId(id: string): ContactId {
+function parseContactId(id: string): ContactId {
     let type: ContactId["type"];
     if (id.includes("u")) {
         type = "u";
@@ -36,4 +36,4 @@ let client: oicq.Client;
 
 const NOOP = () => { };
 
-export { ctx, client, setContext, setClient, NOOP };
+export { ctx, client, setContext, setClient, NOOP, genContactId, parseContactId };
