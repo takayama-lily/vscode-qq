@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>editor</title>
     <style>
         #editor img {
             height: 40px;
@@ -16,12 +16,35 @@
             border-radius: 2em;
             padding: 0px 4px;
         }
+
+        .d-none {
+            display: none;
+        }
+
+        .d-block {
+            display: block;
+        }
     </style>
 </head>
 
 
 <body>
     <script>
+        function arr2el() {
+            //convert array to HTMLelement
+            var isObj = arguments.length >= 2 && typeof arguments[arguments.length - 1] == "object"
+                && arguments[arguments.length - 1].length > 0;
+            if (arguments.length % 2 == 0 && !isObj) { return; }
+            var el = document.createElement(arguments[0]);
+            for (var i = isObj ? arguments.length - 2 : arguments.length - 1;
+                i > 1; i -= 2) {
+                el.setAttribute(arguments[i - 1], arguments[i]);
+            }
+            if (isObj) {
+                el.appendChild(obj2el.apply(null, arguments[arguments.length - 1]));
+            }
+            return el;
+        };
         var tools = {
             add: function (obj) {
                 document.getElementById("content").appendChild(
@@ -29,49 +52,122 @@
                         document.createTextNode(obj)
                 );
             },
-            emoji: function () {
-
+            image_show: function (show) {
+                if (show) {
+                    document.getElementById("image_content").className = "d-block";
+                    document.getElementById("emoji_content").className = "d-none";
+                } else {
+                    document.getElementById("image_content").className = "d-none";
+                }
+            },
+            emoji_show: function (show) {
+                if (show) {
+                    document.getElementById("emoji_content").className = "d-block";
+                    document.getElementById("image_content").className = "d-none";
+                    var tgt = document.getElementById("emoji_menu");
+                    tgt.innerText = "";
+                    tgt.appendChild(arr2el("input",
+                        "type", "button",
+                        "value", "❌",
+                        "onclick", "tools.emoji_show(false)"
+                    ));
+                    var arr = ["表情😀", "人物👦", "手势💪", "日常👣", "手机📱", "公共🏧", "动物🙈", "植物💐", "自然🌍", "饮食🍇", "文体🎪", "恐怖😈", "旅游🌋", "物品💌", "标志🔔", "生肖🐁", "星座♈", "钟表🕛", "心形💘", "花草💐", "树叶🌿", "月亮🌑", "水果🍇", "钱币💴", "交通🚂", "建筑🏠", "办公📨", "箭头⬇️"];
+                    for (var i = 0; i < arr.length; i++) {
+                        tgt.appendChild(arr2el("input",
+                            "type", "button",
+                            "value", arr[i],
+                            "onclick", "tools.emoji_items(" + i + ")"
+                        ));
+                    }
+                    this.emoji_items(0);
+                } else {
+                    document.getElementById("emoji_content").className = "d-none";
+                }
+            },
+            emoji_items: function (index) {
+                var emoji_arr = [
+                    "😀😁😂😃😄😅😆😉😊😋😎😍😘😗😙😚☺😇😐😑😶😏😣😥😮😯😪😫😴😌😛😜😝😒😓😔😕😲😷😖😞😟😤😢😭😦😧😨😬😰😱😳😵😡😠",
+                    "👦👧👨👩👴👵👶👱👮👲👳👷👸💂🎅👰👼💆💇🙍🙎🙅🙆💁🙋🙇🙌🙏👤👥🚶🏃👯💃👫👬👭💏💑👪",
+                    "💪👈👉☝👆👇✌✋👌👍👎✊👊👋👏👐✍",
+                    "👣👀👂👃👅👄💋👓👔👕👖👗👘👙👚👛👜👝🎒💼👞👟👠👡👢👑👒🎩🎓💄💅💍🌂",
+                    "📱📲📶📳📴☎📞📟📠",
+                    "♻🏧🚮🚰♿🚹🚺🚻🚼🚾⚠🚸⛔🚫🚳🚭🚯🚱🚷🔞💈",
+                    "🙈🙉🙊🐵🐒🐶🐕🐩🐺🐱😺😸😹😻😼😽🙀😿😾🐈🐯🐅🐆🐴🐎🐮🐂🐃🐄🐷🐖🐗🐽🐏🐑🐐🐪🐫🐘🐭🐁🐀🐹🐰🐇🐻🐨🐼🐾🐔🐓🦆🦢🕊🦜🦉🐣🐤🐥🐦🐧🐸🐊🐢🐍🐲🐉🐳🐋🐬🐟🐠🐡🐙🐚🐌🐛🐜🐝🐞🦋",
+                    "💐🌸💮🌹🌺🌻🌼🌷🌱🌲🌳🌴🌵🌾🌿🍀🍁🍂🍃",
+                    "🌍🌎🌏🌐🌑🌒🌓🌔🌕🌖🌗🌘🌙🌚🌛🌜☀🌝🌞⭐🌟🌠☁⛅☔⚡❄🔥💧🌊",
+                    "🍇🍈🍉🍊🍋🍌🍍🍎🍏🍐🍑🍒🍓🍅🍆🌽🍄🌰🍞🍖🍗🍔🍟🍕🍳🍲🍱🍘🍙🍚🍛🍜🍝🍠🍢🍣🍤🍥🍡🍦🍧🍨🍩🍪🎂🍰🍫🍬🍭🍮🍯🍼☕🍵🍶🍷🍸🍹🍺🍻🍴",
+                    "🎪🎭🎨🎰🚣🛀🎫🏆⚽⚾🏀🏈🏉🎾🎱🎳⛳🎣🎽🎿🏂🏄🏇🏊🚴🚵🎯🎮🎲🎷🎸🎺🎻🎬",
+                    "😈👿👹👺💀☠👻👽👾💣",
+                    "🌋🗻🏠🏡🏢🏣🏤🏥🏦🏨🏩🏪🏫🏬🏭🏯🏰💒🗼🗽⛪⛲🌁🌃🌆🌇🌉🌌🎠🎡🎢🚂🚃🚄🚅🚆🚇🚈🚉🚊🚝🚞🚋🚌🚍🚎🚏🚐🚑🚒🚓🚔🚕🚖🚗🚘🚚🚛🚜🚲⛽🚨🚥🚦🚧⚓⛵🚤🚢✈💺🚁🚟🚠🚡🚀🎑🗿🛂🛃🛄🛅",
+                    "💌💎🔪💈🚪🚽🚿🛁⌛⏳⌚⏰🎈🎉🎊🎎🎏🎐🎀🎁📯📻📱📲☎📞📟📠🔋🔌💻💽💾💿📀🎥📺📷📹📼🔍🔎🔬🔭📡💡🔦🏮📔📕📖📗📘📙📚📓📃📜📄📰📑🔖💰💴💵💶💷💸💳✉📧📨📩📤📥📦📫📪📬📭📮✏✒📝📁📂📅📆📇📈📉📊📋📌📍📎📏📐✂🔒🔓🔏🔐🔑🔨🔫🔧🔩🔗💉💊🚬🔮🚩🎌💦💨",
+                    "♠♥♦♣🀄🎴🔇🔈🔉🔊📢📣💤💢💬💭♨🌀🔔🔕✡✝🔯📛🔰🔱⭕✅☑✔✖❌❎➕➖➗➰➿〽✳✴❇‼⁉❓❔❕❗©®™🎦🔅🔆💯🔠🔡🔢🔣🔤🅰🆎🅱🆑🆒🆓ℹ🆔Ⓜ🆕🆖🅾🆗🅿🆘🆙🆚🈁🈂🈷🈶🈯🉐🈹🈚🈲🉑🈸🈴🈳㊗㊙🈺🈵▪▫◻◼◽◾⬛⬜🔶🔷🔸🔹🔺🔻💠🔲🔳⚪⚫🔴🔵",
+                    "🐁🐂🐅🐇🐉🐍🐎🐐🐒🐓🐕🐖",
+                    "♈♉♊♋♌♍♎♏♐♑♒♓⛎",
+                    "🕛🕧🕐🕜🕑🕝🕒🕞🕓🕟🕔🕠🕕🕡🕖🕢🕗🕣🕘🕤🕙🕥🕚🕦⌛⏳⌚⏰⏱⏲🕰",
+                    "💘❤💓💔💕💖💗💙💚💛💜💝💞💟❣",
+                    "💐🌸💮🌹🌺🌻🌼🌷🌱🌿🍀",
+                    "🌿🍀🍁🍂🍃",
+                    "🌑🌒🌓🌔🌕🌖🌗🌘🌙🌚🌛🌜🌝",
+                    "🍇🍈🍉🍊🍋🍌🍍🍎🍏🍐🍑🍒🍓",
+                    "💴💵💶💷💰💸💳",
+                    "🚂🚃🚄🚅🚆🚇🚈🚉🚊🚝🚞🚋🚌🚍🚎🚏🚐🚑🚒🚓🚔🚕🚖🚗🚘🚚🚛🚜🚲⛽🚨🚥🚦🚧⚓⛵🚣🚤🚢✈💺🚁🚟🚠🚡🚀",
+                    "🏠🏡🏢🏣🏤🏥🏦🏨🏩🏪🏫🏬🏭🏯🏰💒🗼🗽⛪🌆🌇🌉",
+                    "📱📲☎📞📟📠🔋🔌💻💽💾💿📀🎥📺📷📹📼🔍🔎🔬🔭📡📔📕📖📗📘📙📚📓📃📜📄📰📑🔖💳✉📧📨📩📤📥📦📫📪📬📭📮✏✒📝📁📂📅📆📇📈📉📊📋📌📍📎📏📐✂🔒🔓🔏🔐🔑",
+                    "⬆↗➡↘⬇↙⬅↖↕↔↩↪⤴⤵🔃🔄🔙🔚🔛🔜🔝"
+                ];
+                var tgt = document.getElementById("emoji_items");
+                tgt.innerText = "";
+                var emoji = Array.from(emoji_arr[index]);
+                for (var i = 0; i < emoji.length; i++) {
+                    var a = document.createElement("a");
+                    a.innerText = emoji[i];
+                    a.setAttribute("herf", "javascript:void(0);")
+                    a.setAttribute("onclick", `tools.add("${emoji[i]}")`)
+                    tgt.appendChild(a);
+                }
             },
             image: function () {
                 //<img class="index-logo-srcnew" src="//www.baidu.com/img/flexible/logo/pc/result@2.png" alt="到百度首页" title="到百度首页">
                 var e = document.createElement("img");
                 e.src = "https://www.baidu.com/img/flexible/logo/pc/result@2.png";
-                e.setAttribute("role", "[CQ:at,qq=123456]")
+                e.setAttribute("aria-cq", "[CQ:at,qq=123456]")
                 e.alt = "到百度首页";
                 this.add(e);
             },
-            at: function () {
+            at: function (user_id = "all") {
                 var e = document.createElement("span");
+                user_id = parseInt(user_id);
+                if (user_id === 0 || isNaN(user_id)) { user_id = "all" }
                 e.className = "at";
-                e.innerText = "@Somebody"
-                e.setAttribute("role", "[CQ:at,qq=123456]")
+                e.innerText = `@${user_id}`
+                e.setAttribute("aria-cq", `[CQ:at,qq=${user_id}]`)
                 e.setAttribute("class", "at")
                 e.setAttribute("contenteditable", "false")
                 this.add(e);
             },
-            dice: function () {
-                this.add("[CQ:dice]");
-                sendMsg();
-            },
-            rps: function () {
-
-            },
-            shake: function () {
-                this.add("[CQ:shake]");
-            },
-            poke: function () { },
+            dice: function () { sendMsg(`[CQ:dice,id=${1 + Math.floor(Math.random() * 6)}]`); },
+            rps: function () { sendMsg(`[CQ:rps,id=${1 + Math.floor(Math.random() * 3)}]`); },
+            shake: function () { sendMsg("[CQ:shake]"); },
+            poke: function () { sendMsg("[CQ:poke,type=6]"); },
         }
     </script>
     <div id="editor">
-        <div id="div_emoji"></div>
-        <div id="div_image">
-            <button>使用网络图片</button> <input type="text">
+        <div id="emoji_content">
+            <div id="emoji_menu"></div>
+            <div id="emoji_items"></div>
+        </div>
+        <div id="image_content">
+            <input type="button" value="❌" onclick="tools.image_show(false)" />
+            <input id="img_url" type="text" placeholder="https://..." />
+            <button onclick="tools.image()">插入🖼️</button>
+            <!--
             <hr />
             <button>使用上传图片</button> <input type="file">
+            -->
         </div>
         <div id="buttons">
-            <button onclick="tools.emoji()">😃表情</button>
-            <button onclick="tools.image()">🖼️图片</button>
+            <button onclick="tools.emoji_show(true)">😃表情</button>
+            <button onclick="tools.image_show(true)">🖼️图片</button>
             <button onclick="tools.at()">@👤</button>
             <button onclick="tools.dice()">🎲骰子</button>
             <button onclick="tools.rps()">✌️猜拳</button>
