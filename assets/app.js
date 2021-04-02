@@ -92,6 +92,30 @@ function callApi(command, params) {
 
 }
 
+function arr2el() {//convert array to HTMLelement
+    var isObj = arguments.length >= 2 && typeof arguments[arguments.length - 1] == "object"
+        && arguments[arguments.length - 1].length > 0;
+    if (arguments.length % 2 == 0 && !isObj) { return; }
+    var el = document.createElement(arguments[0]);
+    for (var i = isObj ? arguments.length - 2 : arguments.length - 1;
+        i > 1; i--) {
+        el.setAttribute(arguments[i], arguments[i - 1]);
+    }
+    if (isObj) {
+        el.appendChild(obj2el.apply(null, arguments[arguments.length - 1]));
+    }
+    return el;
+}
+let ge = {//generate element
+    recall: function () {
+        msg = `${genLabel(data.operator_id)} 撤回了 ${data.user_id === data.operator_id ? "自己" : genLabel(data.user_id)} 的 <a href="#${data.message_id}">一条消息</>`;
+        appendRecalledText(data.message_id);
+    },
+    increase: function () {
+        msg = `${filterXss(data.nickname)}(${data.user_id}) 加入了群聊`;
+    }
+}
+
 async function updateMemberList() {
     ginfo = (await callApi("getGroupInfo", [uin])).data;
     const arr = (await callApi("getGroupMemberList", [uin])).data;

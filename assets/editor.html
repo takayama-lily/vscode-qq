@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <style>
+        #editor img {
+            height: 40px;
+        }
+
+        #editor .at {
+            background-color: rgb(47, 94, 182);
+            color: #FFF;
+            border-radius: 2em;
+            padding: 0px 4px;
+        }
+    </style>
+</head>
+
+
+<body>
+    <script>
+        var tools = {
+            add: function (obj) {
+                document.getElementById("content").appendChild(
+                    (obj.nodeType) ? obj :
+                        document.createTextNode(obj)
+                );
+            },
+            emoji: function () {
+
+            },
+            image: function () {
+                //<img class="index-logo-srcnew" src="//www.baidu.com/img/flexible/logo/pc/result@2.png" alt="到百度首页" title="到百度首页">
+                var e = document.createElement("img");
+                e.src = "https://www.baidu.com/img/flexible/logo/pc/result@2.png";
+                e.setAttribute("role", "[CQ:at,qq=123456]")
+                e.alt = "到百度首页";
+                this.add(e);
+            },
+            at: function () {
+                var e = document.createElement("span");
+                e.className = "at";
+                e.innerText = "@Somebody"
+                e.setAttribute("role", "[CQ:at,qq=123456]")
+                e.setAttribute("class", "at")
+                e.setAttribute("contenteditable", "false")
+                this.add(e);
+            },
+            dice: function () {
+                this.add("[CQ:dice]");
+                sendMsg();
+            },
+            rps: function () {
+
+            },
+            shake: function () {
+                this.add("[CQ:shake]");
+            },
+            poke: function () { },
+        }
+    </script>
+    <div id="editor">
+        <div id="div_emoji"></div>
+        <div id="div_image">
+            <button>使用网络图片</button> <input type="text">
+            <hr />
+            <button>使用上传图片</button> <input type="file">
+        </div>
+        <div id="buttons">
+            <button onclick="tools.emoji()">😃表情</button>
+            <button onclick="tools.image()">🖼️图片</button>
+            <button onclick="tools.at()">@👤</button>
+            <button onclick="tools.dice()">🎲骰子</button>
+            <button onclick="tools.rps()">✌️猜拳</button>
+            <button onclick="tools.shake()">📳抖</button>
+            <button onclick="tools.poke()">👈戳</button>
+        </div>
+        <div contenteditable="true" id="content">在此输入消息...</div>
+        <button id="send" onclick="sendMsg()">🚀发送</button>
+        <!-- <button>⚙️设置</button> -->
+        <!-- <button>👥 成员</button> -->
+        <!-- <button>🔔 公告</button> -->
+        <button id="to-bottom" onclick="$(document).scrollTop($(document).height());">⬇️底部</button>
+    </div>
+
+</body>
+
+</html>
