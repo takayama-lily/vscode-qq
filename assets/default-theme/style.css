@@ -28,7 +28,7 @@ html,body{
 }
 
 #img-preview {
-    position: absolute;
+    position: fixed;
     display: none;
     width: 200px;
     border: black 1px solid;
