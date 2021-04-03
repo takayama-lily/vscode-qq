@@ -147,4 +147,5 @@ export function bind() {
 
     client.on("notice.group", postGroupEvent);
     client.on("notice.friend.recall", postC2CEvent);
+    client.on("notice.friend.poke", postC2CEvent);
 }

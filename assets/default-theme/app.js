@@ -158,6 +158,9 @@ function genSystemMessage(data) {
     let msg = "";
     if (data.notice_type === "friend") {
         switch (data.sub_type) {
+            case "poke":
+                msg = `${data.operator_id} ${data.action} ${data.target_id} ${data.suffix}`;
+                break;
             case "recall":
                 msg = `有人想撤回 <a href="#${data.message_id}">一条消息</>`;
                 appendRecalledText(data.message_id);
@@ -198,6 +201,11 @@ function genSystemMessage(data) {
                 break;
             case "poke":
                 msg = `${genLabel(data.operator_id)} ${data.action} ${genLabel(data.user_id)} ${data.suffix}`;
+                break;
+            case "setting":
+                if (data.group_name) {
+                    msg = `群名已变更为 ` + data.group_name;
+                }
                 break;
         }
     }
@@ -372,7 +380,7 @@ function parseMessage(message) {
 }
 
 /**
- * 双击加入at元素到输入框
+ * 加入at元素到输入框
  * @param {number|"all"} uid 
  */
 function addAt(uid) {
@@ -380,18 +388,22 @@ function addAt(uid) {
         return;
     }
     const cqcode = `[CQ:at,qq=${uid}] `;
-    currentTextareaContent += cqcode;
-    document.querySelector("#content").value = currentTextareaContent;
+    addStr2Textarea(cqcode);
 }
 
 /**
- * 双击加入表情到输入框
+ * 加入表情到输入框
  * @param {number} id 
  */
 function addFace(id) {
     const cqcode = `[CQ:face,id=${id}]`;
-    currentTextareaContent += cqcode;
+    addStr2Textarea(cqcode);
+}
+
+function addStr2Textarea(str) {
+    currentTextareaContent += str;
     document.querySelector("#content").value = currentTextareaContent;
+    document.querySelector("#content").focus();
 }
 
 let currentTextareaContent = "";
@@ -407,11 +419,60 @@ document.querySelector("body").insertAdjacentHTML("beforeend", `<div class="lite
 <div id="footer">
     <textarea id="content" rows="10" placeholder="在此输入消息..."></textarea>
     <button id="send" onclick="sendMsg()">发送</button>Ctrl+Enter　
-    (发文字以外内容暂时只能使用<a href="https://github.com/takayama-lily/oicq/wiki/90.%E5%A6%82%E4%BD%95%E5%8F%91%E9%80%81%E5%A4%9A%E5%AA%92%E4%BD%93%E5%86%85%E5%AE%B9(CQ%E7%A0%81)" target="_blank">CQ码</a>)
+    <span id="show-face-box" style="cursor:pointer;">😀</span>
+    <div class="face-box"></div>
+    <span id="show-emoji-box" style="cursor:pointer;">颜</span>
+    <div class="emoji-box"></div>
+    <span id="insert-pic" style="cursor:pointer;">🖼️</span>
     <span id="to-bottom" onclick="window.scroll(0, document.body.scrollHeight);">↓底部</span>
 </div>`);
 
-const previewElement = document.querySelector("#img-preview");
+const idPreviewElement = document.querySelector("#img-preview");
+const idShowFaceBox = document.querySelector('#show-face-box');
+const idShowEmojiBox = document.querySelector('#show-emoji-box');
+
+// add face to document
+let tmpFaceStep = 0;
+for (let i = 0; i <= 310; ++i) {
+    if (i === 275 || (i > 247 && i < 260)) {
+        continue;
+    }
+    ++tmpFaceStep;
+    let html = `<img onclick="addFace(${i})" style="margin:5px;cursor:pointer" width="28" height="28" src="${facePath+i+".png"}">` + (tmpFaceStep % 12 === 0 ? "<br>" : "");
+    document.querySelector('.face-box').insertAdjacentHTML("beforeend", html);
+}
+document.querySelector("body").addEventListener("click", (e) => {
+    document.querySelector('.face-box').style.display = 'none';
+    document.querySelector('.emoji-box').style.display = 'none';
+    if (e.target === idShowFaceBox) {
+        document.querySelector('.face-box').style.display = 'block';
+    } else if (e.target === idShowEmojiBox) {
+        document.querySelector('.emoji-box').style.display = 'block';
+    }
+});
+document.querySelector("#insert-pic").addEventListener("click", () => {
+    const cqcode = `[CQ:image,file=替换为本地图片或网络URL路径]`;
+    addStr2Textarea(cqcode);
+});
+
+let tmpEmojiStep = 0;
+function addEmoji2Box(from, to) {
+    for (let i = from; i <= to; ++i) {
+        ++tmpEmojiStep;
+        let str = String.fromCodePoint(i);
+        let html = `<span onclick="addStr2Textarea('${str}')" style="cursor:pointer">` + str + (tmpEmojiStep % 18 === 0 ? "</span><br>" : "</span>");
+        document.querySelector('.emoji-box').insertAdjacentHTML("beforeend", html);
+    }
+}
+addEmoji2Box(0x1F600, 0x1F64F);
+addEmoji2Box(0x1F90D, 0x1F945);
+addEmoji2Box(0x1F400, 0x1F4FF);
+addEmoji2Box(0x1F300, 0x1F320);
+addEmoji2Box(0x1F32D, 0x1F394);
+addEmoji2Box(0x1F3A0, 0x1F3FA);
+addEmoji2Box(0x1F680, 0x1F6C5);
+addEmoji2Box(0x1F004, 0x1F004);
+
 /**
  * 图片预览
  * @param {Element} obj 
@@ -423,11 +484,11 @@ function previewImage(obj) {
         left -= 200;
     }
     let top = obj.getBoundingClientRect().y - 5;
-    previewElement.src = url;
-    previewElement.style.left = left + "px";
-    previewElement.style.top = top + "px";
-    previewElement.style.display = "block";
-    obj.onmouseleave = () => previewElement.style.display = "none";
+    idPreviewElement.src = url;
+    idPreviewElement.style.left = left + "px";
+    idPreviewElement.style.top = top + "px";
+    idPreviewElement.style.display = "block";
+    obj.onmouseleave = () => idPreviewElement.style.display = "none";
 }
 
 // Ctrl+Enter
@@ -451,13 +512,11 @@ document.querySelector("#content").oninput = function () {
     if (diff.startsWith(facePath)) {
         const faceId = diff.substr(facePath.length).split(".")[0];
         const cqcode = `[CQ:face,id=${faceId}]`;
-        currentTextareaContent += cqcode;
-        this.value = currentTextareaContent;
+        addStr2Textarea(cqcode);
     } else if (diff.endsWith("&vscodeDragFlag=1")) {
         const file = new URL(diff).searchParams.get("file");
         const cqcode = `[CQ:image,file=${file}]`;
-        currentTextareaContent += cqcode;
-        this.value = currentTextareaContent;
+        addStr2Textarea(cqcode);
     } else {
         currentTextareaContent = content;
     }

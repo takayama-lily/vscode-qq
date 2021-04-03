@@ -6,8 +6,17 @@ html,body{
     margin: 0;
     padding: 0;
 }
+.lite-chatbox .name {
+    color: var(--vscode-editor-foreground);
+}
+.lite-chatbox .name b.operation {
+    cursor: pointer;
+    background-color: var(--vscode-focusBorder);
+    padding: 0 2px;
+}
 .lite-chatbox .content img {
     width: auto;
+    vertical-align: bottom;
 }
 .lite-chatbox .content a {
     text-decoration: none;
@@ -37,6 +46,8 @@ html,body{
     width: 100%;
     resize: none;
     box-sizing: border-box;
+    background-color: var(--vscode-editor-background);
+    color: var(--vscode-editor-foreground);
 }
 button#send {
     margin: 10px;
@@ -53,4 +64,39 @@ button#send {
     width: 100%;
     bottom: 0;
     background-color: var(--vscode-editor-background);
+}
+.face-box {
+    height: 240px;
+    overflow-y: auto;
+    background-color: var(--vscode-editor-background);
+    max-height: 240px;
+    display: none;
+    position: absolute;
+    bottom: 20px;
+    left: 160px;
+    padding: 5px;
+    border: solid 1px gainsboro;
+}
+.emoji-box {
+    height: 240px;
+    overflow-y: auto;
+    background-color: var(--vscode-editor-background);
+    max-height: 240px;
+    display: none;
+    position: absolute;
+    bottom: 20px;
+    left: 160px;
+    padding: 5px;
+    border: solid 1px gainsboro;
+    font-size: 20px;
+}
+.pic-box {
+    height: 50px;
+    background-color: var(--vscode-editor-background);
+    display: none;
+    position: absolute;
+    bottom: 20px;
+    left: 180px;
+    padding: 5px;
+    border: solid 1px gainsboro;
 }
