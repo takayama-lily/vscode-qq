@@ -107,9 +107,9 @@
 		"@types/mocha": "^8.2.2",
 		"@types/node": "^12.20.7",
 		"@types/vscode": "^1.53.0",
-		"@types/ws": "^7.4.0",
-		"@typescript-eslint/eslint-plugin": "^4.19.0",
-		"@typescript-eslint/parser": "^4.19.0",
+		"@types/ws": "^7.4.1",
+		"@typescript-eslint/eslint-plugin": "^4.20.0",
+		"@typescript-eslint/parser": "^4.20.0",
 		"eslint": "^7.23.0",
 		"glob": "^7.1.6",
 		"mocha": "^8.3.2",
@@ -118,7 +118,7 @@
 	},
 	"dependencies": {
 		"get-port": "^5.1.1",
-		"oicq": "^1.14.3",
+		"oicq": "^1.14.4",
 		"ws": "^7.4.4"
 	},
 	"publisher": "takayama",
