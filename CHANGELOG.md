@@ -1,5 +1,12 @@
 # VS Code QQ Extension Change Log
 
+## Version 0.4.0: 2021/4/5
+
+* [default-theme] 增加表情、颜文字、图片的选择框和按钮
+* [default-theme] 支持查看头像
+* [default-theme] 输入框的颜色和vscode主题保持一致
+* [Explorer] 优化性能
+
 ## Version 0.3.0: 2021/4/2
 
 * [Config] 增加 `theme` `theme_css` `theme_js` 配置项，以支持自定义UI界面
