@@ -88,8 +88,10 @@ async function updateMemberList() {
 function getChatHistory(message_id = "", count = 20) {
     callApi("getChatHistory", [message_id, count]).then((data) => {
         let html = "";
+        let tmp = [];
         for (let msg of data.data) {
-            if (msg.message_id !== message_id) {
+            if (msg.message_id !== message_id && !tmp.includes(msg.message_id)) {
+                tmp.push(msg.message_id);
                 html += genUserMessage(msg);
             }
         }
@@ -335,26 +337,28 @@ function parseMessage(message) {
                 if (!c2c) {
                     v.data.url = v.data.url.replace(/\/[0-9]+\//, "/0/").replace(/[0-9]+-/g, "0-");
                 }
-                msg += `<a href="${v.data.url}&file=${v.data.file}&vscodeDragFlag=1" target="_blank" onmouseenter="previewImage(this)">${v.type === "image" ? "图片" : "闪照"}</a>`;
+                let split = v.data.file.split("-");
+                let width = parseInt(split[1]), height = parseInt(split[2]);
+                msg += `<a href="${v.data.url}&file=${v.data.file}&vscodeDragFlag=1" target="_blank" onmouseenter="previewImage(this,${width},${height})">${v.type === "image" ? "图片" : "闪照"}</a>`;
                 break;
             case "record":
-                msg += `<a href="${v.data.url}" target="_blank">[语音]</a>`;
+                msg += `<a href="${v.data.url}" target="_blank">语音消息</a>`;
                 break;
             case "video":
-                msg += `<a href="${v.data.url}" target="_blank">[视频]</a>`;
+                msg += `<a href="${v.data.url}" target="_blank">视频消息</a>`;
                 break;
             case "xml":
                 if (v.data.type === 35) {
                     msg += "[合并转发(暂不支持查看)]";
                 } else {
-                    msg += "[xml卡片]";
+                    msg += "[xml卡片消息]";
                 }
                 break;
             case "json":
-                msg += "[json卡片]";
+                msg += "[json卡片消息]";
                 break;
             case "file":
-                msg += `<a href="${v.data.url}" target="_blank">[文件:${filterXss(v.data.name)}(${v.data.size / 1e6}MB)]</a>`;
+                msg += `<a href="${v.data.url}" target="_blank">文件: ${filterXss(v.data.name)} (${v.data.size / 1e6}MB)</a>`;
                 break;
             case "reply":
                 if (message[1]?.type === "at" && message[3]?.type === "at" && message[1]?.data.qq === message[3]?.data.qq) {
@@ -410,7 +414,7 @@ let currentTextareaContent = "";
 
 document.querySelector("body").insertAdjacentHTML("beforeend", `<div class="lite-chatbox">
     <div class="tips">
-        <span ondblclick='getChatHistory(document.querySelector(".msgid")?.attributes.id.value ?? "", 10);'>双击加载历史消息</span>
+        <span ondblclick='getChatHistory(document.querySelector(".msgid")?.attributes.id.value ?? "");'>双击加载历史消息</span>
     </div>
 </div>
 <div class="lite-chatbox" id="lite-chatbox"></div>
@@ -477,8 +481,28 @@ addEmoji2Box(0x1F004, 0x1F004);
  * 图片预览
  * @param {Element} obj 
  */
-function previewImage(obj) {
+function previewImage(obj, width, height) {
     const url = obj.href ?? obj.src.replace("100", "640");
+    if (width > 0 && width <= 200) {
+        width = width + "px";
+        height = "auto";
+    } else if (height > 0 && height <= 200) {
+        width = "auto";
+        height = height + "px";
+    } else if (height > 200 && width > 200) {
+        if (width >= height) {
+            width = "auto";
+            height = "200px";
+        } else {
+            width = "200px";
+            height = "auto";
+        }
+    } else {
+        width = "200px";
+        height = "auto";
+    }
+    idPreviewElement.style.width = width;
+    idPreviewElement.style.height = height;
     let left = obj.getBoundingClientRect().x + 20;
     if (left + 150 > window.innerWidth) {
         left -= 200;
@@ -501,7 +525,7 @@ window.onkeydown = function (event) {
 //滚动到顶部加载消息
 window.onscroll = function () {
     if (window.scrollY === 0) {
-        getChatHistory(document.querySelector(".msgid")?.attributes.id.value ?? "", 10);
+        getChatHistory(document.querySelector(".msgid")?.attributes.id.value ?? "");
     }
 };
 
