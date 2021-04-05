@@ -419,11 +419,11 @@ document.querySelector("body").insertAdjacentHTML("beforeend", `<div class="lite
 <div id="footer">
     <textarea id="content" rows="10" placeholder="在此输入消息..."></textarea>
     <button id="send" onclick="sendMsg()">发送</button>Ctrl+Enter　
-    <span id="show-face-box" style="cursor:pointer;">😀</span>
+    <span id="show-face-box" class="insert-button">😀</span>
     <div class="face-box"></div>
-    <span id="show-emoji-box" style="cursor:pointer;">颜</span>
+    <span id="show-emoji-box" class="insert-button">颜</span>
     <div class="emoji-box"></div>
-    <span id="insert-pic" style="cursor:pointer;">🖼️</span>
+    <span id="insert-pic" class="insert-button">🖼️</span>
     <span id="to-bottom" onclick="window.scroll(0, document.body.scrollHeight);">↓底部</span>
 </div>`);
 

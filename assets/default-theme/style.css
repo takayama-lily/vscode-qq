@@ -29,7 +29,7 @@
     border:1px solid #c5d4c4
 }
 .lite-chatbox .name{
-    color:#8b8b8b;
+    color:var(--vscode-input-foreground);
     font-size:12px;
     display:block;
     line-height:18px
@@ -37,7 +37,7 @@
 .lite-chatbox .name .htitle{
     display:inline-block;
     padding:0 3px;
-    background-color:#ccc;
+    background-color:#aaa;
     color:#fff;
     -moz-border-radius:4px;
     -webkit-border-radius:4px;
@@ -67,8 +67,8 @@
     height:auto
 }
 .lite-chatbox .content a{
-    color:#0072C1;
-    margin:0 5px;
+    color:var(--vscode-editorLink-activeForeground);
+    margin:0 2px;
     cursor:hand
 }
 .lite-chatbox .tips{
@@ -79,7 +79,7 @@
 .lite-chatbox .tips span{
     display:inline-block;
     padding:4px;
-    background-color:#ccc;
+    background-color:#aaa;
     color:#fff;
     -moz-border-radius:6px;
     -webkit-border-radius:6px;
@@ -105,10 +105,10 @@
 .lite-chatbox .cright .content{
     margin:0 48px 0 0;
     -webkit-border-radius:20px 0 20px 20px;
-    border: 2px solid rgba(255,255,255,0.05);
+    border: 2px solid var(--vscode-quickInputTitle-background);
     border-radius:20px 0 20px 20px;
-    color:#aaa;
-    background:var(--vscode-editor-background);
+    /* color:#aaa; */
+    background:var(--vscode-sideBar-background);
     -webkit-box-shadow:5px 5px 15px 0 rgba(102,102,102,0.15);
     box-shadow:5px 5px 15px 0 rgba(102,102,102,0.15)
 }
@@ -116,9 +116,9 @@
     margin:0 0 0 48px;
     -webkit-border-radius:0 20px 20px 20px;
     border-radius:0 20px 20px 20px;
-    color:#aaa;
-    border: 2px solid rgba(255,255,255,0.05);
-    background: var(--vscode-editor-background);
+    /* color:#aaa; */
+    border: 2px solid var(--vscode-quickInputTitle-background);
+    background: var(--vscode-sideBar-background);
     -webkit-box-shadow:5px 5px 15px 0 rgba(102,102,102,0.1);
     box-shadow:5px 5px 15px 0 rgba(102,102,102,0.1)
 }
@@ -157,9 +157,6 @@ html,body{
     margin: 0;
     padding: 0;
 }
-.lite-chatbox .name {
-    color: var(--vscode-editor-foreground);
-}
 .lite-chatbox .name b.operation {
     cursor: pointer;
     background-color: var(--vscode-focusBorder);
@@ -191,7 +188,7 @@ html,body{
     position: fixed;
     display: none;
     width: 200px;
-    border: black 1px solid;
+    border: var(--vscode-editor-foreground) 1px solid;
 }
 #content {
     width: 100%;
@@ -223,10 +220,10 @@ button#send {
     max-height: 240px;
     display: none;
     position: absolute;
-    bottom: 20px;
-    left: 160px;
+    bottom: 35px;
+    left: 165px;
     padding: 5px;
-    border: solid 1px gainsboro;
+    border: solid 1px var(--vscode-editor-foreground);
 }
 .emoji-box {
     height: 240px;
@@ -235,19 +232,14 @@ button#send {
     max-height: 240px;
     display: none;
     position: absolute;
-    bottom: 20px;
-    left: 160px;
+    bottom: 35px;
+    left: 165px;
     padding: 5px;
-    border: solid 1px gainsboro;
+    border: solid 1px var(--vscode-editor-foreground);
     font-size: 20px;
 }
-.pic-box {
-    height: 50px;
-    background-color: var(--vscode-editor-background);
-    display: none;
-    position: absolute;
-    bottom: 20px;
-    left: 180px;
-    padding: 5px;
-    border: solid 1px gainsboro;
+.insert-button {
+    cursor: pointer;
+    font-size: 18px;
+    padding: 2px;
 }
