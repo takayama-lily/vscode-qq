@@ -16,7 +16,8 @@ vscode.commands.registerCommand("oicq.group.open", openChatView);
 const webviewMap: Map<string, vscode.WebviewPanel> = new Map;
 
 const availableThemes = [
-    "default"
+    "default",
+    "console"
 ];
 
 function getHtml(id: string, webview: vscode.Webview) {
