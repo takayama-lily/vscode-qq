@@ -56,7 +56,7 @@ function createClient(uin: number) {
             enableScripts: true,
             enableCommandUris: true
         });
-        webview.webview.html = `<script>location.href="${data.url}";</script>`;
+        webview.webview.html = `<html style="height:100%"><body style="height:100%;padding:0"><iframe width="100%" height="100%" style="border:0" src="${data.url}"></iframe></body></html>`;
         webview.reveal();
         webview.onDidDispose(() => {
             client.login();

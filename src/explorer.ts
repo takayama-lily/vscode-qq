@@ -184,7 +184,12 @@ vscode.commands.registerCommand("oicq.group.delete", (id: string) => {
         .then((value) => {
             const { uin } = parseContactId(id);
             if (value === "是") {
-                client.setGroupLeave(uin);
+                client.setGroupLeave(uin).then(() => {
+                    setTimeout(() => {
+                        groupListTreeDataProvider.refresh();
+                        pinnedTreeDataProvider.refresh();
+                    }, 500);
+                });
             }
         });
 });
