@@ -1,6 +1,13 @@
 # VS Code QQ Extension Change Log
 
-## Version 0.4.0: 2021/4/5
+## Version 0.5.0: 2021/4/7
+
+* [console-theme] 添加一枚console风格的主题
+* [default-theme] 调节色彩与vscode所使用的主题一致
+* [default-theme] 优化图片预览
+* [Explorer] 修复设备锁验证会黑屏的问题
+
+## Version 0.4.0: 2021/4/4
 
 * [default-theme] 增加表情、颜文字、图片的选择框和按钮
 * [default-theme] 支持查看头像
