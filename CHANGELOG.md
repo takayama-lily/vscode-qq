@@ -1,6 +1,6 @@
 # VS Code QQ Extension Change Log
 
-## Version 0.5.0: 2021/4/7
+## Version 1.0.0: 2021/4/7
 
 * [console-theme] 添加一枚console风格的主题
 * [default-theme] 调节色彩与vscode所使用的主题一致
