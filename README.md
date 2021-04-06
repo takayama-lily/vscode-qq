@@ -20,6 +20,6 @@
 
 ----
 
-![预览图](https://user-images.githubusercontent.com/12014361/112642602-cfeb5380-8e86-11eb-88fd-930657040e39.png)
+![预览图](https://raw.githubusercontent.com/takayama-lily/vscode-qq/master/preview.gif)
 
 > 使用的UI库：[https://github.com/MorFansLab/LiteWebChat_Frame](https://github.com/MorFansLab/LiteWebChat_Frame)
