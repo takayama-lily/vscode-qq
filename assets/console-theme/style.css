@@ -14,6 +14,7 @@ pre {
     box-sizing: border-box;
     min-height: 500px;
     padding: 5px;
+    overflow-x: hidden;
 }
 #commandline{
     border: 5px solid var(--vscode-editor-background);
