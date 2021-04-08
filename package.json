@@ -38,6 +38,11 @@
 			{
 				"command": "oicq.group.delete",
 				"title": "退群"
+			},
+			{
+				"command": "oicq.statusBar.click",
+				"title": "Login",
+				"category": "QQ Explorer"
 			}
 		],
 		"viewsContainers": {
