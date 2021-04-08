@@ -1,3 +1,6 @@
+/**
+ * 该文件在页面生成时自动加载
+ */
 ;(() => {
 
     /**
@@ -15,13 +18,16 @@
     /**
      * @type {Function}
      */
-    const postMessage = acquireVsCodeApi().postMessage;
+    const postMessage = window.acquireVsCodeApi().postMessage;
+    window.acquireVsCodeApi = () => {
+        return { postMessage };
+    };
 
     const env = window.document.querySelector("env");
-    vsc.self_id = Number(env.attributes.self_id?.value);
+    vsc.self_uin = Number(env.attributes.self_id?.value);
     vsc.nickname = String(env.attributes.nickname?.value);
     vsc.c2c = env.attributes.c2c?.value === "1";
-    vsc.target_id = Number(env.attributes.target_id?.value);
+    vsc.target_uin = Number(env.attributes.target_id?.value);
     vsc.assets_path = env.attributes.path?.value + "/";
     vsc.faces_path = vsc.assets_path + "faces/";
 
@@ -73,11 +79,43 @@
         "sendGroupPoke", "setGroupCard", "setGroupAdmin", "setGroupSpecialTitle",
         "setGroupKick", "setGroupBan", "setGroupWholeBan", "setGroupAnonymousBan",
         "getForwardMsg", "getGroupInfo", "getGroupMemberList", "getGroupMemberInfo",
+        "getStrangerInfo"
     ];
 
     for (let name of available_apis) {
         vsc[name] = (...args) => vsc.callApi(name, args);
     }
+
+    vsc.sendMsg = (message, auto_escape = false) => {
+        const method = vsc.c2c ? "sendPrivateMsg" : "sendGroupMsg";
+        return vsc.callApi(method, [vsc.target_uin, message, auto_escape]);
+    };
+
+    vsc.scrollHome = () => window.scroll(0, 0);
+    vsc.scrollEnd = () => window.scroll(0, document.body.scrollHeight);
+    vsc.getUserAvaterUrlSmall = (uin) => "http://q1.qlogo.cn/g?b=qq&s=100&nk=" + uin;
+    vsc.getUserAvaterUrlLarge = (uin) => "http://q1.qlogo.cn/g?b=qq&s=640&nk=" + uin;
+    vsc.getGroupAvaterUrlSmall = (uin) => `http://p.qlogo.cn/gh/${uin}/${uin}/100`;
+    vsc.getGroupAvaterUrlLarge = (uin) => `http://p.qlogo.cn/gh/${uin}/${uin}/640`;
+
+    vsc.timestamp = (unixstamp) => {
+        const date = new Date(unixstamp ? unixstamp * 1000 : Date.now());
+        return date.getHours()
+            + ":"
+            + String(date.getMinutes()).padStart(2, "0")
+            + ":"
+            + String(date.getSeconds()).padStart(2, "0");
+    };
+    vsc.datetime = (unixstamp) => {
+        const date = new Date(unixstamp ? unixstamp * 1000 : Date.now());
+        return date.getFullYear()
+            + "/"
+            + String(date.getMonth()).padStart(2, "0")
+            + "/"
+            + String(date.getDate()).padStart(2, "0")
+            + " "
+            + vsc.timestamp(unixstamp);
+    };
 
     window.webview = vsc;
 

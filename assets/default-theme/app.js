@@ -1,15 +1,14 @@
 /**
- * @type {import("vscode").Webview}
+ * window.webview 是一个内置全局变量，封装了一些与宿主交互的方法
+ * @type {import("../types").Webview}
  */
-const vscode = acquireVsCodeApi();
+var webview;
 
-let me = Number(document.querySelector("env").attributes.self_id.value);
-let c2c = document.querySelector("env").attributes.c2c.value == "1";
-let uin = Number(document.querySelector("env").attributes.target_id.value);
-let nick = String(document.querySelector("env").attributes.nickname.value);
-
-// 表情文件夹路径
-let facePath = document.querySelector("env").attributes.path.value + "/faces/";
+let me = webview.self_uin;
+let c2c = webview.c2c;
+let uin = webview.target_uin;
+let nick = webview.nickname;
+let facePath = webview.faces_path;
 
 /**
  * 群员列表
@@ -23,62 +22,26 @@ let members = new Map;
  */
 let ginfo;
 
-// 监听来自vscode的消息
-window.addEventListener("message", async function (event) {
-    if (!event.data.echo) {
-        // 消息和通知事件
-        if (window.innerHeight + window.scrollY + 100 > document.body.scrollHeight) {
-            var flag = 1;
-        }
-        if (event.data.post_type === "message") {
-            document.querySelector("#lite-chatbox").insertAdjacentHTML("beforeend", genUserMessage(event.data));
-        } else if (event.data.post_type === "notice") {
-            document.querySelector("#lite-chatbox").insertAdjacentHTML("beforeend", genSystemMessage(event.data));
-        }
-        if (flag) {
-            scroll(0, document.body.scrollHeight);
-        }
-    } else {
-        // api返回值
-        handlers.get(event.data?.echo)?.call(null, event.data);
-        handlers.delete(event.data.echo);
-    }
+// 监听消息和通知
+webview.on("message", (data) => {
+    appendMsg(genUserMessage(data.detail));
 });
-
-/**
- * @type {Map<string, Function>}
- */
-const handlers = new Map;
-class TimeoutError extends Error { }
-
-/**
- * 发消息给vscode
- * @param {string} command 
- */
-function callApi(command, params = []) {
-    const echo = String(Date.now()) + String(Math.random());
-    /**
-     * @type {import("../../src/chat").WebViewPostData}
-     */
-    const obj = {
-        command, params, echo
-    };
-    return new Promise((resolve, reject) => {
-        vscode.postMessage(obj);
-        const id = setTimeout(() => {
-            reject(new TimeoutError);
-            handlers.delete(echo);
-        }, 5000);
-        handlers.set(echo, (data) => {
-            clearTimeout(id);
-            resolve(data);
-        });
-    });
+webview.on("notice", (data) => {
+    appendMsg(genSystemMessage(data.detail));
+});
+function appendMsg(msg) {
+    if (window.innerHeight + window.scrollY + 100 > document.body.scrollHeight) {
+        var flag = 1;
+    }
+    document.querySelector("#lite-chatbox").insertAdjacentHTML("beforeend", msg);
+    if (flag) {
+        scroll(0, document.body.scrollHeight);
+    }
 }
 
 async function updateMemberList() {
-    ginfo = (await callApi("getGroupInfo", [uin])).data;
-    const arr = (await callApi("getGroupMemberList", [uin])).data;
+    ginfo = (await webview.getGroupInfo(uin)).data;
+    const arr = (await webview.getGroupMemberList(uin)).data;
     members = new Map;
     for (let v of arr) {
         members.set(v.user_id, v);
@@ -86,7 +49,7 @@ async function updateMemberList() {
 }
 
 function getChatHistory(message_id = "", count = 20) {
-    callApi("getChatHistory", [message_id, count]).then((data) => {
+    webview.getChatHistory(message_id, count).then((data) => {
         let html = "";
         let tmp = [];
         for (let msg of data.data) {
@@ -115,7 +78,7 @@ function sendMsg() {
     }
     sending = true;
     document.querySelector("#send").disabled = true;
-    callApi(c2c ? "sendPrivateMsg" : "sendGroupMsg", [uin, message]).then((data) => {
+    webview.sendMsg(message).then((data) => {
         if (data.retcode > 1) {
             let msg = data.error?.message;
             if (msg?.includes("禁言")) {
@@ -300,7 +263,7 @@ function filterXss(str) {
  * @param {number} user_id 
  */
 function genAvaterUrl(user_id) {
-    return `http://q1.qlogo.cn/g?b=qq&s=100&nk=` + user_id;
+    return webview.getUserAvaterUrlSmall(user_id);
 }
 
 /**
@@ -547,23 +510,10 @@ document.querySelector("#content").oninput = function () {
 };
 
 function timestamp(unixstamp) {
-    const date = new Date(unixstamp ? unixstamp * 1000 : Date.now());
-    return date.getHours()
-        + ":"
-        + String(date.getMinutes()).padStart(2, "0")
-        + ":"
-        + String(date.getSeconds()).padStart(2, "0");
-    
+    return webview.timestamp(unixstamp);
 }
 function datetime(unixstamp) {
-    const date = new Date(unixstamp ? unixstamp * 1000 : Date.now());
-    return date.getFullYear()
-        + "/"
-        + String(date.getMonth()).padStart(2, "0")
-        + "/"
-        + String(date.getDate()).padStart(2, "0")
-        + " "
-        + timestamp(unixstamp);
+    return webview.datetime(unixstamp);
 }
 
 //init

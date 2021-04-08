@@ -1,66 +1,28 @@
 /**
- * @type {import("vscode").Webview}
+ * window.webview 是一个内置全局变量，封装了一些与宿主交互的方法
+ * @type {import("../types").Webview}
  */
-const vscode = acquireVsCodeApi();
+var webview;
 
-let me = Number(document.querySelector("env").attributes.self_id.value);
-let c2c = document.querySelector("env").attributes.c2c.value == "1";
-let uin = Number(document.querySelector("env").attributes.target_id.value);
-
-// 监听来自vscode的消息
-window.addEventListener("message", async function (event) {
-    if (!event.data.echo) {
-        // 消息和通知事件
-        if (event.data.post_type === "message") {
-            document.querySelector("#console").insertAdjacentHTML("beforeend", genUserMessage(event.data));
-        } else if (event.data.post_type === "notice") {
-            document.querySelector("#console").insertAdjacentHTML("beforeend", genSystemMessage(event.data));
-        }
-        scroll(0, document.body.scrollHeight);
-    } else {
-        // api返回值
-        handlers.get(event.data?.echo)?.call(null, event.data);
-        handlers.delete(event.data.echo);
-    }
+// 监听消息和通知
+webview.on("message", (data) => {
+    const msg = data.detail;
+    document.querySelector("#console").insertAdjacentHTML("beforeend", genUserMessage(msg));
+    webview.scrollEnd();
 });
-
-/**
- * @type {Map<string, Function>}
- */
-const handlers = new Map;
-class TimeoutError extends Error { }
-
-/**
- * 发消息给vscode
- * @param {string} command 
- */
-function callApi(command, params = []) {
-    const echo = String(Date.now()) + String(Math.random());
-    /**
-     * @type {import("../../src/chat").WebViewPostData}
-     */
-    const obj = {
-        command, params, echo
-    };
-    return new Promise((resolve, reject) => {
-        vscode.postMessage(obj);
-        const id = setTimeout(() => {
-            reject(new TimeoutError);
-            handlers.delete(echo);
-        }, 5000);
-        handlers.set(echo, (data) => {
-            clearTimeout(id);
-            resolve(data);
-        });
-    });
-}
+webview.on("notice", (data) => {
+    const msg = data.detail;
+    document.querySelector("#console").insertAdjacentHTML("beforeend", genSystemMessage(msg));
+    webview.scrollEnd();
+});
 
 function sendMsg() {
     const message = document.querySelector("#commandline").value;
     if (!message) {
         return;
     }
-    callApi(c2c ? "sendPrivateMsg" : "sendGroupMsg", [uin, message]).then((data) => {
+    webview.sendMsg(message).then((data) => {
+        // 发送失败
         if (data.retcode > 1) {
             document.querySelector("#console").insertAdjacentHTML("beforeend", `<div class="cmsg">
     <span class="name">
@@ -70,12 +32,14 @@ function sendMsg() {
 </div>`);
             return;
         }
-        if (c2c && data.data.message_id) {
+
+        // 私聊需要自己打印消息
+        if (webview.c2c && data.data.message_id) {
             const html = `<div class="cmsg">
     <span class="name">
         <font color="green">[INFO]</font>
-        - ${new Date} -
-        me<${me}>:
+        - ${webview.datetime()} -
+        me<${webview.self_uin}>:
     </span><br>
     <pre class="content">${filterXss(message)}</pre>
 </div>`;
@@ -85,7 +49,7 @@ function sendMsg() {
     }).catch(() => {
         document.querySelector("#commandline").value = "";
     }).finally(() => {
-        scroll(0, document.body.scrollHeight);
+        webview.scrollEnd();
     });
 }
 
@@ -98,14 +62,14 @@ function filterXss(str) {
 }
 
 /**
- * 生成一般消息
+ * 生成聊天消息
  * @param {import("oicq").PrivateMessageEventData | import("oicq").GroupMessageEventData} data 
  */
 function genUserMessage(data) {
     return `<div class="cmsg">
     <span class="name">
         <font color="green">[INFO]</font>
-        - ${new Date(data.time*1000)} -
+        - ${webview.datetime(data.time)} -
         ${filterXss(data.sender.card ? data.sender.card : data.sender.nickname)}<${data.user_id}>:
     </span><br>
     <pre class="content">${filterXss(data.raw_message)}</pre>
@@ -119,7 +83,6 @@ function genUserMessage(data) {
 function genSystemMessage(data) {
     let msg = "";
     if (data.notice_type === "group") {
-        // updateMemberList();
         switch (data.sub_type) {
             case "increase":
                 msg = `${data.user_id} joined the group.`;
@@ -145,7 +108,7 @@ function genSystemMessage(data) {
     return `<div class="cmsg">
     <span class="name">
         <font color="orange">[NOTICE]</font>
-        - ${new Date(data.time*1000)} - ${msg}
+        - ${webview.datetime(data.time)} - ${msg}
     </span>
 </div>`;
 }
@@ -158,24 +121,17 @@ window.onkeydown = function (event) {
 };
 
 //init
-(()=>{
-    document.querySelector("body").insertAdjacentHTML("beforeend", `<div id="container">
+document.querySelector("body").insertAdjacentHTML("beforeend", `<div id="container">
     <div id="console"></div>
     <textarea id="commandline" rows="1" type="text" name="command_line" placeholder=" send by Ctrl+Enter"></textarea>
 </div>`);
-    callApi("getChatHistory", ["", 10]).then((data) => {
-        let html = "";
-        let tmp = [];
-        for (let msg of data.data) {
-            if (!tmp.includes(msg.message_id)) {
-                tmp.push(msg.message_id);
-                html += genUserMessage(msg);
-            }
-        }
-        if (!html) {
-            return;
-        }
-        document.querySelector("#console").insertAdjacentHTML("afterbegin", html);
-        scroll(0, document.body.scrollHeight);
-    });
-})();
+
+//加载10条历史消息
+webview.getChatHistory("", 10).then((data) => {
+    let html = "";
+    for (let msg of data.data) {
+        html += genUserMessage(msg);
+    }
+    document.querySelector("#console").insertAdjacentHTML("afterbegin", html);
+    webview.scrollEnd();
+});

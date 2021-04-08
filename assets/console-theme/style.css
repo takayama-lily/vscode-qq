@@ -30,3 +30,7 @@ pre {
 .cmsg {
     margin-bottom: 5px;
 }
+.cmsg pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}

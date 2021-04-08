@@ -21,6 +21,7 @@ const availableThemes = [
 ];
 
 function getHtml(id: string, webview: vscode.Webview) {
+    let preload = webview.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, "assets", "preload.js")).toString();
     let css: string, js: string;
     const config = getConfig();
     if (config.theme_css && config.theme_js) {
@@ -53,6 +54,7 @@ function getHtml(id: string, webview: vscode.Webview) {
 </head>
 <body>
     <env self_id="${self}" nickname="${client.nickname}" c2c="${type === "u" ? 1 : 0}" target_id="${uin}" temp="0" path="${path}">
+    <script src="${preload}"></script>
     <script src="${js}"></script>
 </body>
 </html>`;

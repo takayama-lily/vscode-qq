@@ -2,19 +2,26 @@ import * as oicq from "oicq";
 type MessageEventData = oicq.PrivateMessageEventData | oicq.GroupMessageEventData;
 type NoticeEventData = oicq.FriendNoticeEventData | oicq.GroupNoticeEventData;
 
+/**
+ * webview类型参考
+ */
 export interface Webview extends EventTarget {
-    readonly self_id: number;
-    readonly nickname: string;
-    readonly c2c: boolean;
-    readonly target_id: number;
-    readonly assets_path: string;
-    readonly faces_path: string;
-    readonly TimeoutError: typeof Error
+    readonly self_uin: number; //自己账号
+    readonly nickname: string; //自己昵称
+    readonly c2c: boolean; //私聊为true，群聊为false
+    readonly target_uin: number; //私聊时为对方账号，群聊时为群号
+    readonly assets_path: string; //assets文件夹路径("/"结尾)
+    readonly faces_path: string; //表情文件夹路径("/"结尾)
+    readonly TimeoutError: typeof Error;
+
+    // 监听新消息事件
     on(type: "message", listener: (data: CustomEvent<MessageEventData>) => void): void;
+    // 监听新系统通知事件
     on(type: "notice", listener: (data: CustomEvent<NoticeEventData>) => void): void;
 
     callApi(command: keyof oicq.Client, params?: any[]): Promise<oicq.Ret<unknown>>;
 
+    sendMsg(message: string | oicq.MessageElem | Iterable<oicq.MessageElem>, auto_escape?: boolean): Promise<oicq.Ret<{ message_id: string }>>;
     sendPrivateMsg: oicq.Client["sendPrivateMsg"];
     sendGroupMsg: oicq.Client["sendGroupMsg"];
     deleteMsg: oicq.Client["deleteMsg"];
@@ -28,6 +35,7 @@ export interface Webview extends EventTarget {
     setGroupWholeBan: oicq.Client["setGroupWholeBan"];
     setGroupAnonymousBan: oicq.Client["setGroupAnonymousBan"];
     
+    getStrangerInfo: oicq.Client["getStrangerInfo"];
     getGroupInfo: oicq.Client["getGroupInfo"];
     getGroupMemberList(uin: number): Promise<oicq.Ret<oicq.MemberInfo[]>>;
     getGroupMemberInfo: oicq.Client["getGroupMemberInfo"];
@@ -35,9 +43,10 @@ export interface Webview extends EventTarget {
 
     scrollHome(): void;
     scrollEnd(): void;
-    timestamp(unixtime: number): string;
-    datetime(unixtime: number): string;
+    timestamp(unixtime?: number): string;
+    datetime(unixtime?: number): string;
     getUserAvaterUrlSmall(uin: number): string;
     getUserAvaterUrlLarge(uin: number): string;
-    getGroupAvaterUrl(uin: number): string;
+    getGroupAvaterUrlSmall(uin: number): string;
+    getGroupAvaterUrlLarge(uin: number): string;
 }
