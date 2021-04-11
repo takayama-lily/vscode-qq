@@ -71,6 +71,8 @@ export class Cdp extends EventEmitter {
         ws.on("close", () => {
             if (!this.ticket) {
                 this.emit("error", UNFINISHED_ERROR);
+            } else {
+                this.emit("ticket", this.ticket);
             }
         });
         ws.on("message", (data) => {
@@ -87,9 +89,10 @@ export class Cdp extends EventEmitter {
                 } else if (obj.id === 2) {
                     const body = JSON.parse(obj.result.body);
                     this.ticket = body.ticket;
-                    if (this.ticket) {
-                        this.emit("ticket", this.ticket);
-                    }
+                    ws.send(JSON.stringify({
+                        id: 3,
+                        method: "Browser.close"
+                    }));
                     ws.close();
                 }
             } catch { }
