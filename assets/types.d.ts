@@ -40,6 +40,9 @@ export interface Webview extends EventTarget {
     getGroupMemberList(uin: number): Promise<oicq.Ret<oicq.MemberInfo[]>>;
     getGroupMemberInfo: oicq.Client["getGroupMemberInfo"];
     getForwardMsg: oicq.Client["getForwardMsg"];
+    getGroupNotice: oicq.Client["getGroupNotice"];
+    getRoamingStamp: oicq.Client["getRoamingStamp"];
+    getMsg: oicq.Client["getMsg"];
 
     scrollHome(): void;
     scrollEnd(): void;

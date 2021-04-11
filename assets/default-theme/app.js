@@ -367,6 +367,15 @@ function addFace(id) {
     addStr2Textarea(cqcode);
 }
 
+/**
+ * 加入图片到输入框
+ * @param {string} file 
+ */
+ function addImage(file) {
+    const cqcode = `[CQ:image,file=${file}]`;
+    addStr2Textarea(cqcode);
+}
+
 function addStr2Textarea(str) {
     currentTextareaContent += str;
     document.querySelector("#content").value = currentTextareaContent;
@@ -386,17 +395,33 @@ document.querySelector("body").insertAdjacentHTML("beforeend", `<div class="lite
 <div id="footer">
     <textarea id="content" rows="10" placeholder="在此输入消息..."></textarea>
     <button id="send" onclick="sendMsg()">发送</button>Ctrl+Enter　
+    <span id="show-stamp-box" class="insert-button">🧡</span>
+    <div class="stamp-box box"></div>
     <span id="show-face-box" class="insert-button">😀</span>
-    <div class="face-box"></div>
+    <div class="face-box box"></div>
     <span id="show-emoji-box" class="insert-button">颜</span>
-    <div class="emoji-box"></div>
+    <div class="emoji-box box"></div>
     <span id="insert-pic" class="insert-button">🖼️</span>
     <span id="to-bottom" onclick="window.scroll(0, document.body.scrollHeight);">↓底部</span>
 </div>`);
 
 const idPreviewElement = document.querySelector("#img-preview");
+const idShowStampBox = document.querySelector('#show-stamp-box');
 const idShowFaceBox = document.querySelector('#show-face-box');
 const idShowEmojiBox = document.querySelector('#show-emoji-box');
+
+// add face to document
+webview.getRoamingStamp().then((data) => {
+    if (data.retcode === 0) {
+        let tmpStampStep = 0;
+        for (let i = data.data.length - 1; i >= 0; --i) {
+            ++tmpStampStep;
+            const url = data.data[i];
+            let html = `<img onclick="addImage('${url}')" src="${url}">` + (tmpStampStep % 6 === 0 ? "<br>" : "");
+            document.querySelector('.stamp-box').insertAdjacentHTML("beforeend", html);
+        }
+    }
+});
 
 // add face to document
 let tmpFaceStep = 0;
@@ -411,7 +436,10 @@ for (let i = 0; i <= 310; ++i) {
 document.querySelector("body").addEventListener("click", (e) => {
     document.querySelector('.face-box').style.display = 'none';
     document.querySelector('.emoji-box').style.display = 'none';
-    if (e.target === idShowFaceBox) {
+    document.querySelector('.stamp-box').style.display = 'none';
+    if (e.target === idShowStampBox) {
+        document.querySelector('.stamp-box').style.display = 'block';
+    } else if (e.target === idShowFaceBox) {
         document.querySelector('.face-box').style.display = 'block';
     } else if (e.target === idShowEmojiBox) {
         document.querySelector('.emoji-box').style.display = 'block';

@@ -79,7 +79,7 @@
         "sendGroupPoke", "setGroupCard", "setGroupAdmin", "setGroupSpecialTitle",
         "setGroupKick", "setGroupBan", "setGroupWholeBan", "setGroupAnonymousBan",
         "getForwardMsg", "getGroupInfo", "getGroupMemberList", "getGroupMemberInfo",
-        "getStrangerInfo"
+        "getStrangerInfo", "getGroupNotice", "getRoamingStamp", "getMsg"
     ];
 
     for (let name of available_apis) {

@@ -1,5 +1,11 @@
 # VS Code QQ Extension Change Log
 
+## Version 1.1.0: 2021/4/12
+
+* 漫游表情包支持
+* 完成了前端接口的抽象
+* [Explorer] 命令面板添加了 `QQ: Login`
+
 ## Version 1.0.0: 2021/4/7
 
 * [console-theme] 添加一枚console风格的主题

@@ -213,30 +213,26 @@ button#send {
     bottom: 0;
     background-color: var(--vscode-editor-background);
 }
-.face-box {
+.box {
     height: 240px;
     overflow-y: auto;
     background-color: var(--vscode-editor-background);
     max-height: 240px;
     display: none;
     position: absolute;
-    bottom: 35px;
-    left: 165px;
-    padding: 5px;
-    border: solid 1px var(--vscode-editor-foreground);
-}
-.emoji-box {
-    height: 240px;
-    overflow-y: auto;
-    background-color: var(--vscode-editor-background);
-    max-height: 240px;
-    display: none;
-    position: absolute;
-    bottom: 35px;
-    left: 165px;
+    bottom: 40px;
+    left: 180px;
     padding: 5px;
     border: solid 1px var(--vscode-editor-foreground);
     font-size: 20px;
+}
+.stamp-box img {
+    margin:5px;
+    cursor:pointer;
+    max-width:64px;
+    max-height:64px;
+    min-width:64px;
+    vertical-align: middle;
 }
 .insert-button {
     cursor: pointer;
