@@ -28,12 +28,10 @@ const EMOJI_GROUP = String.fromCodePoint(0x1f465);
 /**
  * @abstract
  */
-class ContactListTreeDataProvider implements vscode.TreeDataProvider<string> {
+abstract class ContactListTreeDataProvider implements vscode.TreeDataProvider<string> {
     _onDidChangeTreeData = new vscode.EventEmitter<string | undefined | null | void>();
     onDidChangeTreeData = this._onDidChangeTreeData.event;
-    getChildren(): string[] | Promise<string[]> {
-        return [];
-    }
+    abstract getChildren(): string[] | Promise<string[]>;
     getTreeItem(id: string) {
         const { type, uin } = parseContactId(id);
         let item = itemMap.get(id);
@@ -232,7 +230,9 @@ export async function initLists() {
         client.on("notice.group.decrease", function (data) {
             if (data.user_id === this.uin) {
                 let msg: string;
-                if (data.operator_id === this.uin) {
+                if (data.dismiss) {
+                    msg = `群 ${data.group_id} 已解散`;
+                } else if (data.operator_id === this.uin) {
                     msg = `你退出了群：${data.group_id}`;
                 } else {
                     msg = `${data.operator_id} 将你踢出了群：${data.group_id}`;
