@@ -160,7 +160,7 @@ function genSystemMessage(data) {
                 break;
             case "ban":
                 if (data.user_id > 0)
-                    msg = `${genLabel(data.operator_id)} 禁言 ${data.user_id === 80000000 ? "匿名用户(" + data.nickname + ")" : genLabel(data.user_id)} ${data.duration}秒`;
+                    msg = `${genLabel(data.operator_id)} 禁言 ${data.user_id === 80000000 ? "匿名用户(" + data.nickname + ")" : genLabel(data.user_id)} ${~~(data.duration/60)}分钟`;
                 else
                     msg = `${genLabel(data.operator_id)} ${data.duration > 0 ? "开启" : "关闭"}了全员禁言`;
                 break;
@@ -230,7 +230,8 @@ function genUserMessage(data) {
     }
     return `<a class="msgid" id="${data.message_id}"></a><div class="${data.user_id === data.self_id ? "cright" : "cleft"} cmsg">
     <img class="headIcon radius" onmouseenter="previewImage(this)" src="${genAvaterUrl(data.user_id)}" />
-    <span ondblclick="addAt(${data.user_id})" class="name" title="${filterXss(data.sender.nickname)}(${data.user_id}) ${datetime(data.time)}">
+    <span uid="${data.user_id}" ondblclick="addAt(${data.user_id})" class="name" title="${filterXss(data.sender.nickname)}(${data.user_id}) ${datetime(data.time)}">
+        ${c2c?"":'<b class="operation">...</b>'}
         ${title}${filterXss(data.sender.card ? data.sender.card : data.sender.nickname)} ${timestamp(data.time)}
     </span>
     <span class="content">${parseMessage(data.message)}</span>
@@ -392,6 +393,19 @@ document.querySelector("body").insertAdjacentHTML("beforeend", `<div class="lite
 <div class="lite-chatbox" id="lite-chatbox"></div>
 <div style="width: 100%; height: 30px;"></div>
 <img id="img-preview" style="z-index: 999;">
+<div class="menu-msg">
+    <div class="menu-msg-reply">回复</div>
+    <div class="menu-msg-at">@ TA</div>
+    <div class="menu-msg-recall">撤回消息</div>
+    <div class="menu-msg-mute">禁言</div>
+    <div class="menu-msg-kick">从本群中删除</div>
+</div>
+<div class="modal-dialog">
+    <div class="modal-title"></div>
+    <div class="modal-button">
+        <button class="modal-confirm">确定</button>　<button onclick="closeModalDialog()">取消</button>
+    </div>
+</div>
 <div id="footer">
     <textarea id="content" rows="10" placeholder="在此输入消息..."></textarea>
     <button id="send" onclick="sendMsg()">发送</button>Ctrl+Enter　
@@ -424,6 +438,7 @@ document.querySelector("body").addEventListener("click", (e) => {
     document.querySelector('.face-box').style.display = 'none';
     document.querySelector('.emoji-box').style.display = 'none';
     document.querySelector('.stamp-box').style.display = 'none';
+    document.querySelector('.menu-msg').style.display = 'none';
     if (e.target === idShowStampBox) {
         document.querySelector('.stamp-box').style.display = 'block';
         if (!document.querySelector('.stamp-box img')) {
@@ -444,6 +459,37 @@ document.querySelector("body").addEventListener("click", (e) => {
         document.querySelector('.face-box').style.display = 'block';
     } else if (e.target === idShowEmojiBox) {
         document.querySelector('.emoji-box').style.display = 'block';
+    } else if (e.target.classList.contains("operation")) {
+        const msgid = e.target.parentNode.parentNode.previousElementSibling.id;
+        document.querySelector('.menu-msg').style.left = e.target.getBoundingClientRect().x + 12 + "px";
+        document.querySelector('.menu-msg').style.top = e.target.getBoundingClientRect().y + "px";
+        document.querySelector('.menu-msg').style.display = 'block';
+        document.querySelector('.menu-msg .menu-msg-at').onclick = e.target.parentNode.ondblclick;
+        document.querySelector('.menu-msg .menu-msg-reply').onclick = () => {
+            addStr2Textarea(`[CQ:reply,id=${msgid}]`);
+            e.target.parentNode.ondblclick();
+        };
+        document.querySelector('.menu-msg .menu-msg-recall').onclick = () => {
+            showModalDialog("确定撤回此消息？", () => {
+                webview.deleteMsg(msgid);
+            });
+        };
+        const uid = Number(e.target.parentNode.attributes.uid.value);
+        const member = members.get(uid);
+        const label = filterXss(member?.card || member?.nickname || "未知用户") + "(" + uid + ")";
+        document.querySelector('.menu-msg .menu-msg-mute').onclick = () => {
+            showModalDialog(`禁言以下成员 <input id="mute-minutes" size="1" maxlength="5" value="10"> 分钟<br>` + label, () => {
+                const duration = document.querySelector("#mute-minutes").value;
+                if (duration >= 0) {
+                    webview.setGroupBan(webview.target_uin, uid, Number(duration) * 60);
+                }
+            });
+        };
+        document.querySelector('.menu-msg .menu-msg-kick').onclick = () => {
+            showModalDialog(`确定要删除以下成员：<br>` + label, () => {
+                webview.setGroupKick(webview.target_uin, uid);
+            });
+        };
     }
 });
 document.querySelector("#insert-pic").addEventListener("click", () => {
@@ -544,6 +590,18 @@ function timestamp(unixstamp) {
 function datetime(unixstamp) {
     return webview.datetime(unixstamp);
 }
+
+function showModalDialog(title, cb) {
+    document.querySelector(".modal-title").innerHTML = title;
+    document.querySelector(".modal-dialog").style.display = "block";
+    document.querySelector(".modal-dialog").style.top = window.innerHeight / 2 - 50 + "px";
+    document.querySelector(".modal-dialog").style.left = window.innerWidth / 2 - 100 + "px";
+    document.querySelector(".modal-confirm").onclick = cb;
+}
+function closeModalDialog() {
+    document.querySelector(".modal-dialog").style.display = "none";
+}
+document.querySelector(".modal-confirm").addEventListener("click", closeModalDialog);
 
 //init
 (async()=>{

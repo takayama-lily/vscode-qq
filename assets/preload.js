@@ -92,7 +92,7 @@
     };
 
     vsc.scrollHome = () => window.scroll(0, 0);
-    vsc.scrollEnd = () => window.scroll(0, document.body.scrollHeight);
+    vsc.scrollEnd = () => window.scroll(0, window.document.body.scrollHeight);
     vsc.getUserAvaterUrlSmall = (uin) => "http://q1.qlogo.cn/g?b=qq&s=100&nk=" + uin;
     vsc.getUserAvaterUrlLarge = (uin) => "http://q1.qlogo.cn/g?b=qq&s=640&nk=" + uin;
     vsc.getGroupAvaterUrlSmall = (uin) => `http://p.qlogo.cn/gh/${uin}/${uin}/100`;
