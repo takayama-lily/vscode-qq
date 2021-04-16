@@ -29,13 +29,14 @@ webview.on("message", (data) => {
 webview.on("notice", (data) => {
     appendMsg(genSystemMessage(data.detail));
 });
+
 function appendMsg(msg) {
-    if (window.innerHeight + window.scrollY + 100 > document.body.scrollHeight) {
+    if (document.querySelector(".content-left").scrollTop + document.querySelector(".content-left").offsetHeight + 100 > document.querySelector(".content-left").scrollHeight) {
         var flag = 1;
     }
     document.querySelector("#lite-chatbox").insertAdjacentHTML("beforeend", msg);
     if (flag) {
-        scroll(0, document.body.scrollHeight);
+        document.querySelector(".content-left").scroll(0, document.querySelector(".content-left").scrollHeight);
     }
 }
 
@@ -43,9 +44,20 @@ async function updateMemberList() {
     ginfo = (await webview.getGroupInfo(uin)).data;
     const arr = (await webview.getGroupMemberList(uin)).data;
     members = new Map;
+    const element = document.querySelector(".group-members");
+    element.innerHTML = "";
+    let owner_html = "";
     for (let v of arr) {
         members.set(v.user_id, v);
+        const role = v.role === "owner" ? "🤴" : (v.role === "admin" ? "🧟" : "");
+        const html = `<p title="${filterXss(v.nickname)}(${v.user_id})" class="group-member" uid="${v.user_id}">${role + filterXss(v.card || v.nickname)}</p>`;
+        if (v.role === "owner") {
+            owner_html = html;
+            continue;
+        }
+        element.insertAdjacentHTML(v.role === "member" ? "beforeend" : "afterbegin", html);
     }
+    element.insertAdjacentHTML("afterbegin", owner_html);
 }
 
 function getChatHistory(message_id = "", count = 20) {
@@ -65,7 +77,7 @@ function getChatHistory(message_id = "", count = 20) {
         if (message_id) {
             window.location.hash = "#" + message_id;
         } else {
-            scroll(0, document.body.scrollHeight);
+            document.querySelector(".content-left").scroll(0, document.querySelector(".content-left").scrollHeight);
         }
     });
 }
@@ -111,7 +123,7 @@ function sendMsg() {
     }).finally(() => {
         sending = false;
         document.querySelector("#send").disabled = false;
-        scroll(0, document.body.scrollHeight);
+        document.querySelector(".content-left").scroll(0, document.querySelector(".content-left").scrollHeight);
     });
 }
 
@@ -385,7 +397,7 @@ function addStr2Textarea(str) {
 
 let currentTextareaContent = "";
 
-document.querySelector("body").insertAdjacentHTML("beforeend", `<div class="lite-chatbox">
+document.querySelector("body").insertAdjacentHTML("beforeend", `<div class="content-left"><div class="lite-chatbox">
     <div class="tips">
         <span ondblclick='getChatHistory(document.querySelector(".msgid")?.attributes.id.value ?? "");'>双击加载历史消息</span>
     </div>
@@ -416,7 +428,22 @@ document.querySelector("body").insertAdjacentHTML("beforeend", `<div class="lite
     <span id="show-emoji-box" class="insert-button">颜</span>
     <div class="emoji-box box"></div>
     <span id="insert-pic" class="insert-button">🖼️</span>
-    <span id="to-bottom" onclick="window.scroll(0, document.body.scrollHeight);">↓底部</span>
+    <span id="to-bottom" onclick="showHideRightBar()">显示/隐藏侧栏</span>
+</div>
+</div>
+<div class="content-right">
+    <div class="group-info">
+        <img class="headIcon radius" src="${webview.getGroupAvaterUrlSmall(webview.target_uin)}">
+    </div>
+    <hr>
+    <div class="group-members"></div>
+    <div class="menu-member">
+        <div class="menu-member-at">@ TA</div>
+        <div class="menu-member-admin1">设置为管理员</div>
+        <div class="menu-member-admin0">取消管理员</div>
+        <div class="menu-member-mute">禁言</div>
+        <div class="menu-member-kick">从本群中删除</div>
+    </div>
 </div>`);
 
 const idPreviewElement = document.querySelector("#img-preview");
@@ -439,6 +466,7 @@ document.querySelector("body").addEventListener("click", (e) => {
     document.querySelector('.emoji-box').style.display = 'none';
     document.querySelector('.stamp-box').style.display = 'none';
     document.querySelector('.menu-msg').style.display = 'none';
+    document.querySelector('.menu-member').style.display = 'none';
     if (e.target === idShowStampBox) {
         document.querySelector('.stamp-box').style.display = 'block';
         if (!document.querySelector('.stamp-box img')) {
@@ -489,6 +517,35 @@ document.querySelector("body").addEventListener("click", (e) => {
             showModalDialog(`确定要删除以下成员：<br>` + label, () => {
                 webview.setGroupKick(webview.target_uin, uid);
             });
+        };
+    } else if (e.target.classList.contains("group-member")) {
+        document.querySelector('.menu-member').style.left = e.target.getBoundingClientRect().x + 50 + "px";
+        document.querySelector('.menu-member').style.top = e.target.getBoundingClientRect().y + 10 + "px";
+        document.querySelector('.menu-member').style.display = 'block';
+        const uid = Number(e.target.attributes.uid.value);
+        const member = members.get(uid);
+        const label = filterXss(member?.card || member?.nickname || "未知用户") + "(" + uid + ")";
+        document.querySelector('.menu-member .menu-member-at').onclick = () => {
+            addAt(uid);
+        };
+        document.querySelector('.menu-member .menu-member-mute').onclick = () => {
+            showModalDialog(`禁言以下成员 <input id="mute-minutes" size="1" maxlength="5" value="10"> 分钟<br>` + label, () => {
+                const duration = document.querySelector("#mute-minutes").value;
+                if (duration >= 0) {
+                    webview.setGroupBan(webview.target_uin, uid, Number(duration) * 60);
+                }
+            });
+        };
+        document.querySelector('.menu-member .menu-member-kick').onclick = () => {
+            showModalDialog(`确定要删除以下成员：<br>` + label, () => {
+                webview.setGroupKick(webview.target_uin, uid);
+            });
+        };
+        document.querySelector('.menu-member .menu-member-admin1').onclick = () => {
+            webview.setGroupAdmin(webview.target_uin, uid, true);
+        };
+        document.querySelector('.menu-member .menu-member-admin0').onclick = () => {
+            webview.setGroupAdmin(webview.target_uin, uid, false);
         };
     }
 });
@@ -561,8 +618,8 @@ window.onkeydown = function (event) {
 };
 
 //滚动到顶部加载消息
-window.onscroll = function () {
-    if (window.scrollY === 0) {
+document.querySelector(".content-left").onscroll = function () {
+    if (document.querySelector(".content-left").scrollTop === 0) {
         getChatHistory(document.querySelector(".msgid")?.attributes.id.value ?? "");
     }
 };
@@ -602,6 +659,14 @@ function closeModalDialog() {
     document.querySelector(".modal-dialog").style.display = "none";
 }
 document.querySelector(".modal-confirm").addEventListener("click", closeModalDialog);
+
+function showHideRightBar() {
+    if (document.querySelector(".content-right").style.display === "block") {
+        document.querySelector(".content-right").style.display = "none";
+    } else {
+        document.querySelector(".content-right").style.display = "block";
+    }
+}
 
 //init
 (async()=>{

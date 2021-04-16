@@ -157,6 +157,9 @@ html,body{
     margin: 0;
     padding: 0;
 }
+body {
+    display: flex;
+}
 .lite-chatbox .name b.operation {
     cursor: pointer;
     background-color: var(--vscode-editor-background);
@@ -287,6 +290,60 @@ button#send {
     padding: 2px;
 }
 .menu-msg div:hover {
+    background-color: var(--vscode-input-foreground);
+    color: var(--vscode-editor-background);
+}
+
+.content-left {
+    overflow-y: auto;
+    flex: 1;
+}
+
+.content-right {
+    width: 200px;
+    border-left: solid 1px var(--vscode-input-foreground);
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: none;
+}
+.group-info {
+    height: 100px;
+    position: sticky;
+}
+.group-info img {
+    width: 80px;
+    height: 80px;
+    border: 1px solid #c5d4c4;
+    border-radius: 100%;
+    margin: 10px 60px;
+}
+.group-member  {
+    cursor: pointer;
+    padding: 5px 10px;
+    margin: 0;
+    width: 190px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.group-member:hover {
+    background-color: var(--vscode-sideBar-background);
+}
+
+.menu-member {
+    position: fixed;
+    display: none;
+    z-index: 100;
+    border: solid 1px var(--vscode-input-foreground);
+    width: 100px;
+    opacity: 0.85;
+}
+.menu-member div {
+    cursor: pointer;
+    background-color: var(--vscode-sideBar-background);
+    padding: 2px;
+}
+.menu-member div:hover {
     background-color: var(--vscode-input-foreground);
     color: var(--vscode-editor-background);
 }
