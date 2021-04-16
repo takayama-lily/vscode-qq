@@ -411,19 +411,6 @@ const idShowFaceBox = document.querySelector('#show-face-box');
 const idShowEmojiBox = document.querySelector('#show-emoji-box');
 
 // add face to document
-webview.getRoamingStamp().then((data) => {
-    if (data.retcode === 0) {
-        let tmpStampStep = 0;
-        for (let i = data.data.length - 1; i >= 0; --i) {
-            ++tmpStampStep;
-            const url = data.data[i];
-            let html = `<img onclick="addImage('${url}')" src="${url}">` + (tmpStampStep % 6 === 0 ? "<br>" : "");
-            document.querySelector('.stamp-box').insertAdjacentHTML("beforeend", html);
-        }
-    }
-});
-
-// add face to document
 let tmpFaceStep = 0;
 for (let i = 0; i <= 310; ++i) {
     if (i === 275 || (i > 247 && i < 260)) {
@@ -439,6 +426,20 @@ document.querySelector("body").addEventListener("click", (e) => {
     document.querySelector('.stamp-box').style.display = 'none';
     if (e.target === idShowStampBox) {
         document.querySelector('.stamp-box').style.display = 'block';
+        if (!document.querySelector('.stamp-box img')) {
+            // add stamp to document
+            webview.getRoamingStamp().then((data) => {
+                if (data.retcode === 0) {
+                    let tmpStampStep = 0;
+                    for (let i = data.data.length - 1; i >= 0; --i) {
+                        ++tmpStampStep;
+                        const url = data.data[i];
+                        let html = `<img onclick="addImage('${url}')" src="${url}">` + (tmpStampStep % 6 === 0 ? "<br>" : "");
+                        document.querySelector('.stamp-box').insertAdjacentHTML("beforeend", html);
+                    }
+                }
+            });
+        }
     } else if (e.target === idShowFaceBox) {
         document.querySelector('.face-box').style.display = 'block';
     } else if (e.target === idShowEmojiBox) {
