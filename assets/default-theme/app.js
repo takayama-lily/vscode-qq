@@ -49,7 +49,7 @@ async function updateMemberList() {
     let owner_html = "";
     for (let v of arr) {
         members.set(v.user_id, v);
-        const role = v.role === "owner" ? "🤴" : (v.role === "admin" ? "🧟" : "");
+        const role = v.role === "owner" ? "🟡" : (v.role === "admin" ? "🟢" : "");
         const html = `<p title="${filterXss(v.nickname)}(${v.user_id})" class="group-member" uid="${v.user_id}">${role + filterXss(v.card || v.nickname)}</p>`;
         if (v.role === "owner") {
             owner_html = html;
@@ -408,6 +408,7 @@ document.querySelector("body").insertAdjacentHTML("beforeend", `<div class="cont
 <div class="menu-msg">
     <div class="menu-msg-reply">回复</div>
     <div class="menu-msg-at">@ TA</div>
+    <div class="menu-msg-poke">戳一戳</div>
     <div class="menu-msg-recall">撤回消息</div>
     <div class="menu-msg-mute">禁言</div>
     <div class="menu-msg-kick">从本群中删除</div>
@@ -428,17 +429,17 @@ document.querySelector("body").insertAdjacentHTML("beforeend", `<div class="cont
     <span id="show-emoji-box" class="insert-button">颜</span>
     <div class="emoji-box box"></div>
     <span id="insert-pic" class="insert-button">🖼️</span>
-    <span id="to-bottom" onclick="showHideRightBar()">显示/隐藏侧栏</span>
+    ${c2c ? "" : '<span id="to-bottom" onclick="showHideRightBar()">显示/隐藏侧栏</span>'}
 </div>
 </div>
 <div class="content-right">
     <div class="group-info">
         <img class="headIcon radius" src="${webview.getGroupAvaterUrlSmall(webview.target_uin)}">
     </div>
-    <hr>
     <div class="group-members"></div>
     <div class="menu-member">
         <div class="menu-member-at">@ TA</div>
+        <div class="menu-member-poke">戳一戳</div>
         <div class="menu-member-admin1">设置为管理员</div>
         <div class="menu-member-admin0">取消管理员</div>
         <div class="menu-member-mute">禁言</div>
@@ -518,6 +519,9 @@ document.querySelector("body").addEventListener("click", (e) => {
                 webview.setGroupKick(webview.target_uin, uid);
             });
         };
+        document.querySelector('.menu-msg .menu-msg-poke').onclick = () => {
+            webview.sendGroupPoke(webview.target_uin, uid);
+        };
     } else if (e.target.classList.contains("group-member")) {
         document.querySelector('.menu-member').style.left = e.target.getBoundingClientRect().x + 50 + "px";
         document.querySelector('.menu-member').style.top = e.target.getBoundingClientRect().y + 10 + "px";
@@ -525,6 +529,9 @@ document.querySelector("body").addEventListener("click", (e) => {
         const uid = Number(e.target.attributes.uid.value);
         const member = members.get(uid);
         const label = filterXss(member?.card || member?.nickname || "未知用户") + "(" + uid + ")";
+        document.querySelector('.menu-member .menu-member-poke').onclick = () => {
+            webview.sendGroupPoke(webview.target_uin, uid);
+        };
         document.querySelector('.menu-member .menu-member-at').onclick = () => {
             addAt(uid);
         };
@@ -661,6 +668,9 @@ function closeModalDialog() {
 document.querySelector(".modal-confirm").addEventListener("click", closeModalDialog);
 
 function showHideRightBar() {
+    if (c2c) {
+        return;
+    }
     if (document.querySelector(".content-right").style.display === "block") {
         document.querySelector(".content-right").style.display = "none";
     } else {

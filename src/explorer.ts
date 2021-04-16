@@ -22,9 +22,6 @@ class ContactTreeItem extends vscode.TreeItem {
     }
 }
 
-const EMOJI_PERSON = String.fromCodePoint(0x1f464);
-const EMOJI_GROUP = String.fromCodePoint(0x1f465);
-
 /**
  * @abstract
  */
@@ -49,9 +46,10 @@ abstract class ContactListTreeDataProvider implements vscode.TreeDataProvider<st
             itemMap.set(id, item);
         }
         if (type === "u") {
-            item.updateLabel(EMOJI_PERSON + client.fl.get(uin)?.nickname);
+            const emoji = client.fl.get(uin)?.sex === "female" ? "🙎‍♀️" : "🙎‍♂️";
+            item.updateLabel(emoji + client.fl.get(uin)?.nickname);
         } else {
-            item.updateLabel(EMOJI_GROUP + client.gl.get(uin)?.group_name);
+            item.updateLabel("👨‍👦‍👦" + client.gl.get(uin)?.group_name);
         }
         return item;
     }

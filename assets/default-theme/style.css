@@ -236,9 +236,9 @@ button#send {
 .stamp-box img {
     margin:5px;
     cursor:pointer;
-    max-width:64px;
-    max-height:64px;
-    min-width:64px;
+    max-width:48px;
+    max-height:48px;
+    min-width:48px;
     vertical-align: middle;
 }
 .insert-button {
@@ -309,13 +309,19 @@ button#send {
 .group-info {
     height: 100px;
     position: sticky;
+    top: 0;
+    background-color: var(--vscode-editor-background);
+    border-bottom: solid 1px var(--vscode-input-foreground);
 }
 .group-info img {
     width: 80px;
     height: 80px;
     border: 1px solid #c5d4c4;
     border-radius: 100%;
-    margin: 10px 60px;
+    margin: 10px 55px;
+}
+.group-members  {
+    padding: 5px 0;
 }
 .group-member  {
     cursor: pointer;
