@@ -7,6 +7,8 @@ let friendListTreeDataProvider: FriendListTreeDataProvider;
 let groupListTreeDataProvider: GroupListTreeDataProvider;
 let pinnedTreeDataProvider: PinnedTreeDataProvider;
 let itemMap: Map<string, ContactTreeItem> = new Map;
+let firendTreeView: vscode.TreeView<string>;
+let groupTreeView: vscode.TreeView<string>;
 
 class ContactTreeItem extends vscode.TreeItem {
     new = 0;
@@ -29,6 +31,9 @@ abstract class ContactListTreeDataProvider implements vscode.TreeDataProvider<st
     _onDidChangeTreeData = new vscode.EventEmitter<string | undefined | null | void>();
     onDidChangeTreeData = this._onDidChangeTreeData.event;
     abstract getChildren(): string[] | Promise<string[]>;
+    getParent(id: string) {
+        return null;
+    }
     getTreeItem(id: string) {
         const { type, uin } = parseContactId(id);
         let item = itemMap.get(id);
@@ -163,6 +168,74 @@ vscode.commands.registerCommand("oicq.contact.profile", async (id: string) => {
     vscode.window.showQuickPick(arr);
 });
 
+vscode.commands.registerCommand("oicq.friend.search", () => {
+    if (!firendTreeView) {
+        return vscode.window.showErrorMessage("请先登录");
+    }
+    const arr = [];
+    for (let [k, v] of client.fl) {
+        arr.push(v.nickname + " (" + v.user_id + ")");
+    }
+    vscode.window.showQuickPick(arr).then((value) => {
+        if (value) {
+            const uin = value.slice(value.lastIndexOf("(") + 1, -1);
+            firendTreeView.reveal(genContactId("u", Number(uin)), { focus: true, select: true });
+        }
+    });
+});
+vscode.commands.registerCommand("oicq.group.search", () => {
+    if (!groupTreeView) {
+        return vscode.window.showErrorMessage("请先登录");
+    }
+    const arr = [];
+    for (let [k, v] of client.gl) {
+        arr.push(v.group_name + " (" + v.group_id + ")");
+    }
+    vscode.window.showQuickPick(arr).then((value) => {
+        if (value) {
+            const uin = value.slice(value.lastIndexOf("(") + 1, -1);
+            groupTreeView.reveal(genContactId("g", Number(uin)), { focus: true, select: true });
+        }
+    });
+});
+
+vscode.commands.registerCommand("oicq.group.invite", (id: string) => {
+    const { uin, type } = parseContactId(id);
+    let placeHolder: string, gid: number, uid: number;
+    const arr = [];
+    if (type === "u") {
+        uid = uin;
+        for (let [k, v] of client.gl) {
+            arr.push("👨‍👦‍👦" + v.group_name + " (" + v.group_id + ")");
+        }
+        placeHolder = "选择一个群，邀请好友 " + itemMap.get(id)?.tooltip + " 加入";
+    } else {
+        gid = uin;
+        for (let [k, v] of client.fl) {
+            arr.push(v.nickname + " (" + v.user_id + ")");
+        }
+        placeHolder = "选择好友，邀请TA加入群 " + itemMap.get(id)?.tooltip;
+    }
+    vscode.window.showQuickPick(arr, { placeHolder }).then((value) => {
+        if (value) {
+            const uin = value.slice(value.lastIndexOf("(") + 1, -1);
+            if (!gid) {
+                gid = Number(uin);
+            }
+            if (!uid) {
+                uid = Number(uin);
+            }
+            client.inviteFriend(gid, uid).then((data) => {
+                if (data.retcode === 0) {
+                    vscode.window.showInformationMessage("邀请发送成功。");
+                } else {
+                    vscode.window.showErrorMessage("邀请失败，请确认你是否有邀请的权限，或对方已经入群。");
+                }
+            });
+        }
+    });
+});
+
 vscode.commands.registerCommand("oicq.friend.delete", (id: string) => {
     vscode.window.showInformationMessage(`确定要删除好友 ${itemMap.get(id)?.tooltip} ？`, "仅删除", "删除并拉黑")
         .then((value) => {
@@ -198,6 +271,12 @@ export async function initLists() {
     vscode.window.registerTreeDataProvider("chat-groups", groupListTreeDataProvider);
     pinnedTreeDataProvider = new PinnedTreeDataProvider;
     vscode.window.registerTreeDataProvider("chat-pinned", pinnedTreeDataProvider);
+    firendTreeView = vscode.window.createTreeView("chat-friends", {
+        treeDataProvider: friendListTreeDataProvider
+    });
+    groupTreeView = vscode.window.createTreeView("chat-groups", {
+        treeDataProvider: groupListTreeDataProvider
+    });
 
     if (!client.listenerCount("notice.friend.increase")) {
         client.on("notice.friend.increase", function (data) {
@@ -228,12 +307,13 @@ export async function initLists() {
         client.on("notice.group.decrease", function (data) {
             if (data.user_id === this.uin) {
                 let msg: string;
+                const label = itemMap.get(genContactId("g", data.group_id))?.tooltip;
                 if (data.dismiss) {
-                    msg = `群 ${data.group_id} 已解散`;
+                    msg = label + ` 已解散`;
                 } else if (data.operator_id === this.uin) {
-                    msg = `你退出了群：${data.group_id}`;
+                    msg = `你退出了群 ` + label;
                 } else {
-                    msg = `${data.operator_id} 将你踢出了群：${data.group_id}`;
+                    msg = `${data.operator_id} 将你踢出了群 ` + label;
                 }
                 vscode.window.showInformationMessage(msg);
                 groupListTreeDataProvider.refresh();
@@ -246,6 +326,22 @@ export async function initLists() {
                 const id = genContactId("g", data.group_id);
                 groupListTreeDataProvider.refresh(id);
                 pinnedTreeDataProvider.refresh(id);
+            }
+        });
+
+        client.on("notice.group.transfer", function (data) {
+            if (data.user_id === this.uin) {
+                const label = itemMap.get(genContactId("g", data.group_id))?.tooltip;
+                const msg = `${label} 群主已将群主身份转让给你`;
+                vscode.window.showInformationMessage(msg);
+            }
+        });
+
+        client.on("notice.group.admin", function (data) {
+            if (data.user_id === this.uin) {
+                const label = itemMap.get(genContactId("g", data.group_id))?.tooltip;
+                const msg = data.set ? `你已成为群 ${label} 的管理员` : `你被取消了群 ${label} 的管理员`;
+                vscode.window.showInformationMessage(msg);
             }
         });
 

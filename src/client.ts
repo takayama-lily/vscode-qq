@@ -95,7 +95,7 @@ function inputAccount() {
         return createClient(uin);
     }
     vscode.window.showInputBox({
-        prompt: "请输入你的QQ账号",
+        placeHolder: "输入QQ账号...",
     }).then((uin) => {
         if (!uin) {
             return;
@@ -117,6 +117,7 @@ function inputPassword() {
         return client.login(password);
     }
     vscode.window.showInputBox({
+        placeHolder: "输入密码...",
         prompt: `输入账号 ${client.uin} 的密码`,
         password: true
     }).then((pass) => {
@@ -133,7 +134,7 @@ function inputPassword() {
  * input ticket from slider catpcha
  */
 function inputTicket() {
-    vscode.window.showInputBox({ prompt: "输入验证码ticket" })
+    vscode.window.showInputBox({ placeHolder: "输入验证码ticket" })
         .then((ticket) => {
             if (!ticket) {
                 inputTicket();
@@ -157,7 +158,7 @@ function showProfile() {
                 vscode.env.clipboard.writeText(`${client.nickname} (${client.uin})`);
                 break;
             case arr[1]:
-                vscode.window.showInputBox({ prompt: "输入新的昵称；当前为：" + client.nickname})
+                vscode.window.showInputBox({ placeHolder: "输入新的昵称...", prompt: "当前昵称为：" + client.nickname})
                     .then((value) => {
                         if (value) {
                             client.setNickname(value);
@@ -165,7 +166,7 @@ function showProfile() {
                     });
                 break;
             case arr[2]:
-                vscode.window.showInputBox({ prompt: "输入性别数字，0: unknown; 1: male; 2: female"})
+                vscode.window.showInputBox({ placeHolder: "输入性别数字...", prompt: "0: unknown; 1: male; 2: female"})
                     .then((value) => {
                         if (value) {
                             //@ts-ignore
@@ -174,7 +175,7 @@ function showProfile() {
                     });
                 break;
             case arr[3]:
-                vscode.window.showInputBox({ prompt: "输入生日(20020202的形式)"})
+                vscode.window.showInputBox({ placeHolder: "输入生日...", prompt: "格式为：20020202"})
                     .then((value) => {
                         if (value) {
                             client.setBirthday(value);
@@ -182,7 +183,7 @@ function showProfile() {
                     });
                 break;
             case arr[4]:
-                vscode.window.showInputBox({ prompt: "输入个性签名"})
+                vscode.window.showInputBox({ placeHolder: "输入个性签名..."})
                     .then((value) => {
                         if (value) {
                             client.setSignature(value);

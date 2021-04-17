@@ -2,7 +2,7 @@
 	"name": "vscode-qq",
 	"displayName": "QQ",
 	"description": "lite qq for chat in working",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"engines": {
 		"vscode": "^1.53.0"
 	},
@@ -40,8 +40,22 @@
 				"title": "退群"
 			},
 			{
+				"command": "oicq.group.invite",
+				"title": "邀请好友入群"
+			},
+			{
 				"command": "oicq.statusBar.click",
 				"title": "Login",
+				"category": "QQ Explorer"
+			},
+			{
+				"command": "oicq.friend.search",
+				"title": "搜索好友",
+				"category": "QQ Explorer"
+			},
+			{
+				"command": "oicq.group.search",
+				"title": "搜索群",
 				"category": "QQ Explorer"
 			}
 		],
@@ -93,6 +107,10 @@
 					"when": "view == chat-friends"
 				},
 				{
+					"command": "oicq.group.invite",
+					"when": "view == chat-friends || view == chat-groups || view == chat-pinned"
+				},
+				{
 					"command": "oicq.group.delete",
 					"when": "view == chat-groups"
 				}
@@ -123,7 +141,7 @@
 	},
 	"dependencies": {
 		"get-port": "^5.1.1",
-		"oicq": "^1.15.1",
+		"oicq": "^1.15.2",
 		"ws": "^7.4.4"
 	},
 	"publisher": "takayama",
