@@ -353,3 +353,7 @@ button#send {
     background-color: var(--vscode-input-foreground);
     color: var(--vscode-editor-background);
 }
+
+.msg-forward p {
+    color: var(--vscode-input-foreground);
+}

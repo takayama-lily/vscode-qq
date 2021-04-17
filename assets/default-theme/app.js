@@ -144,7 +144,6 @@ function genSystemMessage(data) {
                 break;
         }
     } else if (data.notice_type === "group") {
-        updateMemberList();
         switch (data.sub_type) {
             case "recall":
                 msg = `${genLabel(data.operator_id)} 撤回了 ${data.user_id === data.operator_id ? "自己" : genLabel(data.user_id)} 的<a href="#${data.message_id}">一条消息</>`;
@@ -152,6 +151,7 @@ function genSystemMessage(data) {
                 break;
             case "increase":
                 msg = `${filterXss(data.nickname)}(${data.user_id}) 加入了群聊`;
+                updateMemberList();
                 break;
             case "decrease":
                 if (data.dismiss) {
@@ -163,18 +163,23 @@ function genSystemMessage(data) {
                 } else {
                     msg = `${genLabel(data.operator_id)} 踢出了 ${genLabel(data.user_id)}`;
                 }
+                updateMemberList();
                 break;
             case "admin":
                 msg = `${genLabel(data.user_id)} ${data.set ? "成为了" : "被取消了"}管理员`;
+                updateMemberList();
                 break;
             case "transfer":
                 msg = `${genLabel(data.operator_id)} 将群主转让给了 ${genLabel(data.user_id)}`;
+                updateMemberList();
                 break;
             case "ban":
-                if (data.user_id > 0)
+                if (data.user_id > 0) {
                     msg = `${genLabel(data.operator_id)} 禁言 ${data.user_id === 80000000 ? "匿名用户(" + data.nickname + ")" : genLabel(data.user_id)} ${~~(data.duration/60)}分钟`;
-                else
+                } else {
                     msg = `${genLabel(data.operator_id)} ${data.duration > 0 ? "开启" : "关闭"}了全员禁言`;
+                }
+                updateMemberList();
                 break;
             case "poke":
                 msg = `${genLabel(data.operator_id)} ${data.action} ${genLabel(data.user_id)} ${data.suffix}`;
@@ -318,23 +323,28 @@ function parseMessage(message) {
                 msg += `<a href="${v.data.url}&file=${v.data.file}&vscodeDragFlag=1" target="_blank" onmouseenter="previewImage(this,${width},${height})">${v.type === "image" ? "图片" : "闪照"}</a>`;
                 break;
             case "record":
-                msg += `<a href="${v.data.url}" target="_blank">语音消息</a>`;
+                msg = `<a href="${v.data.url}" target="_blank">语音消息</a>`;
                 break;
             case "video":
-                msg += `<a href="${v.data.url}" target="_blank">视频消息</a>`;
+                msg = `<a href="${v.data.url}" target="_blank">视频消息</a>`;
                 break;
             case "xml":
                 if (v.data.type === 35) {
-                    msg += "[合并转发(暂不支持查看)]";
+                    try {
+                        const resid = /resid="[^"]+"/.exec(v.data.data)[0].replace("resid=\"", "").replace("\"", "");
+                        msg = `<a href="javascript:void(0)" onclick="triggerForwardMsg(this)" id="${resid}">[合并转发]</a><span class="msg-forward"></span>`;
+                    } catch {
+                        msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[嵌套转发]</a><span style="display:none">${filterXss(v.data.data)}</span>`;
+                    }
                 } else {
-                    msg += "[xml卡片消息]";
+                    msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[XML卡片消息]</a><span style="display:none">${filterXss(v.data.data)}</span>`;
                 }
                 break;
             case "json":
-                msg += "[json卡片消息]";
+                msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[JSON卡片消息]</a><span style="display:none">${filterXss(v.data.data)}</span>`;
                 break;
             case "file":
-                msg += `<a href="${v.data.url}" target="_blank">文件: ${filterXss(v.data.name)} (${v.data.size / 1e6}MB)</a>`;
+                msg = `<a href="${v.data.url}" target="_blank">文件: ${filterXss(v.data.name)} (${v.data.size / 1e6}MB)</a>`;
                 break;
             case "reply":
                 if (message[1]?.type === "at" && message[3]?.type === "at" && message[1]?.data.qq === message[3]?.data.qq) {
@@ -349,10 +359,10 @@ function parseMessage(message) {
                 msg += "[骰子]";
                 break;
             case "shake":
-                msg += "[窗口抖动]";
+                msg = "[窗口抖动]";
                 break;
             case "poke":
-                msg += "[戳一戳]";
+                msg = "[戳一戳]";
                 break;
         }
     }
@@ -429,7 +439,7 @@ document.querySelector("body").insertAdjacentHTML("beforeend", `<div class="cont
     <span id="show-emoji-box" class="insert-button">颜</span>
     <div class="emoji-box box"></div>
     <span id="insert-pic" class="insert-button">🖼️</span>
-    ${c2c ? "" : '<span id="to-bottom" onclick="showHideRightBar()">显示/隐藏侧栏</span>'}
+    ${c2c ? "" : '<span id="to-bottom" onclick="triggerRightBar()">显示/隐藏侧栏</span>'}
 </div>
 </div>
 <div class="content-right">
@@ -667,7 +677,7 @@ function closeModalDialog() {
 }
 document.querySelector(".modal-confirm").addEventListener("click", closeModalDialog);
 
-function showHideRightBar() {
+function triggerRightBar() {
     if (c2c) {
         return;
     }
@@ -675,6 +685,29 @@ function showHideRightBar() {
         document.querySelector(".content-right").style.display = "none";
     } else {
         document.querySelector(".content-right").style.display = "block";
+    }
+}
+
+function triggerForwardMsg(obj) {
+    const resid = obj.id;
+    const elememt = obj.nextElementSibling;
+    if (elememt.style.display === "block") {
+        elememt.style.display = "none";
+    } else {
+        elememt.style.display = "block";
+    }
+    if (elememt.innerHTML === "" || elememt.innerHTML === "加载失败") {
+        elememt.innerHTML = "...";
+        webview.getForwardMsg(resid).then(data=>{
+            let html = "";
+            for (let v of data.data) {
+                html +=  `<p>👤${filterXss(v.nickname)}(${v.user_id}) ${datetime(v.time)}</p>${parseMessage(v.message)}`;
+            }
+            if (!html) {
+                html = "加载失败";
+            }
+            elememt.innerHTML = html;
+        });
     }
 }
 
