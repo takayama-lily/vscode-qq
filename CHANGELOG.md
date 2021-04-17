@@ -1,6 +1,6 @@
 # VS Code QQ Extension Change Log
 
-## Version 1.1.0: 2021/4/18
+## Version 1.2.0: 2021/4/18
 
 * [default-theme] 支持查看合并转发，以及各种xml/json卡片消息
 * [default-theme] 新增回复、戳一戳、撤回、禁言、踢人、设置管理员等功能
