@@ -1,5 +1,15 @@
 # VS Code QQ Extension Change Log
 
+## Version 1.1.0: 2021/4/18
+
+* [default-theme] 支持查看合并转发，以及各种xml/json卡片消息
+* [default-theme] 新增回复、戳一戳、撤回、禁言、踢人、设置管理员等功能
+* [default-theme] 新增侧栏用于查看群成员，以及对其进行操作
+* [default-theme] 优化了内存占用
+* [Explorer] 右键栏新增`邀请好友入群`
+* [Explorer] 修改了群和好友图标，以方便辨识
+* [Command] 命令面板新增`群搜索`和`好友搜索`
+
 ## Version 1.1.0: 2021/4/12
 
 * 漫游表情包支持

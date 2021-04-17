@@ -2,7 +2,7 @@
 
 **[Repository](https://github.com/takayama-lily/vscode-qq)** | **[Offline Installers](https://github.com/takayama-lily/vscode-qq/releases)** | vscode >= 1.53.0
 
-> 暂时实现了一些最基础的功能，可用于上班时缓解工作压力~摸鱼~  
+> 已实现大部分常用功能，可用于上班时缓解工作压力~摸鱼~  
 > 在扩展市场搜索qq或在release中下载。安装后点击右下状态栏里的按钮登录。  
 > `@设置` 里的 `platform` 是登录协议，1:安卓手机 4:iMac 5:iPad(默认) 2:aPad 3:安卓手表  
 > 本程序不在本地保存任何消息记录和图片。暂不支持临时会话。  
@@ -13,6 +13,14 @@
 * 当前支持两种主题 `default`(默认) 、`console`(控制台风格)  
 * 可在`@设置`中加入 `"theme": "console"` 来切换  
 * 欢迎为本项目贡献UI，详细翻阅 [修改/自定义UI主题](https://github.com/takayama-lily/vscode-qq/wiki/%E8%87%AA%E5%AE%9A%E4%B9%89%E8%81%8A%E5%A4%A9UI%E7%95%8C%E9%9D%A2)
+
+## 可用命令
+
+> Ctrl+Shift+P 打开命令面板
+
+* QQ Explorer: Login
+* QQ Explorer: 搜索好友
+* QQ Explorer: 搜索群
 
 ## 其他
 
