@@ -57,6 +57,21 @@
 				"command": "oicq.group.search",
 				"title": "搜索群",
 				"category": "QQ Explorer"
+			},
+			{
+				"command": "oicq.pinned.refresh",
+				"icon": "$(refresh)",
+				"title": "刷新"
+			},
+			{
+				"command": "oicq.friends.refresh",
+				"icon": "$(refresh)",
+				"title": "刷新"
+			},
+			{
+				"command": "oicq.groups.refresh",
+				"icon": "$(refresh)",
+				"title": "刷新"
 			}
 		],
 		"viewsContainers": {
@@ -112,6 +127,23 @@
 				},
 				{
 					"command": "oicq.group.delete",
+					"when": "view == chat-groups"
+				}
+			],
+			"view/title": [
+				{
+					"command": "oicq.pinned.refresh",
+					"group": "navigation",
+					"when": "view == chat-pinned"
+				},
+				{
+					"command": "oicq.friends.refresh",
+					"group": "navigation",
+					"when": "view == chat-friends"
+				},
+				{
+					"command": "oicq.groups.refresh",
+					"group": "navigation",
 					"when": "view == chat-groups"
 				}
 			]

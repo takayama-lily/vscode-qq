@@ -3,6 +3,8 @@ import { readPinned, writePinned } from "./config";
 import { client, genContactId, parseContactId } from "./global";
 import * as chat from "./chat";
 
+// 声明
+
 let friendListTreeDataProvider: FriendListTreeDataProvider;
 let groupListTreeDataProvider: GroupListTreeDataProvider;
 let pinnedTreeDataProvider: PinnedTreeDataProvider;
@@ -24,9 +26,6 @@ class ContactTreeItem extends vscode.TreeItem {
     }
 }
 
-/**
- * @abstract
- */
 abstract class ContactListTreeDataProvider implements vscode.TreeDataProvider<string> {
     _onDidChangeTreeData = new vscode.EventEmitter<string | undefined | null | void>();
     onDidChangeTreeData = this._onDidChangeTreeData.event;
@@ -117,6 +116,8 @@ class PinnedTreeDataProvider extends ContactListTreeDataProvider {
     }
 }
 
+// 注册指令
+
 vscode.commands.registerCommand("oicq.contact.pin", (id: string) => {
     const item = itemMap.get(id);
     if (item) {
@@ -125,7 +126,6 @@ vscode.commands.registerCommand("oicq.contact.pin", (id: string) => {
     pinnedTreeDataProvider.refresh();
     pinnedTreeDataProvider.getChildren().then(writePinned);
 });
-
 vscode.commands.registerCommand("oicq.contact.unpin", (id: string) => {
     const item = itemMap.get(id);
     if (item) {
@@ -247,7 +247,6 @@ vscode.commands.registerCommand("oicq.friend.delete", (id: string) => {
             }
         });
 });
-
 vscode.commands.registerCommand("oicq.group.delete", (id: string) => {
     vscode.window.showInformationMessage(`确定要退出群 ${itemMap.get(id)?.tooltip} ？`, "是")
         .then((value) => {
@@ -263,6 +262,19 @@ vscode.commands.registerCommand("oicq.group.delete", (id: string) => {
         });
 });
 
+vscode.commands.registerCommand("oicq.pinned.refresh", () => {
+    pinnedTreeDataProvider?.refresh();
+});
+vscode.commands.registerCommand("oicq.friends.refresh", () => {
+    friendListTreeDataProvider?.refresh();
+});
+vscode.commands.registerCommand("oicq.groups.refresh", () => {
+    groupListTreeDataProvider?.refresh();
+});
+
+/**
+ * system.online
+ */
 export async function initLists() {
     itemMap = new Map;
     friendListTreeDataProvider = new FriendListTreeDataProvider;
@@ -274,9 +286,11 @@ export async function initLists() {
     firendTreeView = vscode.window.createTreeView("chat-friends", {
         treeDataProvider: friendListTreeDataProvider
     });
+    firendTreeView.reveal("");
     groupTreeView = vscode.window.createTreeView("chat-groups", {
         treeDataProvider: groupListTreeDataProvider
     });
+    groupTreeView.reveal("");
 
     if (!client.listenerCount("notice.friend.increase")) {
         client.on("notice.friend.increase", function (data) {
@@ -392,6 +406,10 @@ export async function initLists() {
     }
 }
 
+/**
+ * 刷新treeItems
+ * @param flag true:有新消息 false:解除新消息
+ */
 export function refreshContacts(id: string, flag: boolean) {
     const item = itemMap.get(id);
     const { type } = parseContactId(id);
@@ -408,15 +426,15 @@ export function refreshContacts(id: string, flag: boolean) {
             pinnedTreeDataProvider.refresh(id);
         } else {
             provider.refresh();
-            pinnedTreeDataProvider.refresh();
+            pinnedTreeDataProvider.refresh(id);
         }
     } else {
         if (!item.new) {
             return;
         } else {
             item.new = 0;
-            provider.refresh();
-            pinnedTreeDataProvider.refresh();
+            provider.refresh(id);
+            pinnedTreeDataProvider.refresh(id);
         }
     }
 }
@@ -440,7 +458,7 @@ export function refreshContacts(id: string, flag: boolean) {
  * 
  *  打开视图时/视图聚焦时(需要通过webview上报window.focus事件)：
  *      之前无新消息时：不刷新
- *      之前有新消息时：全部刷新(新消息置0)
+ *      之前有新消息时：单个刷新(新消息置0)
  * 
  * (全部刷新的目的在于排序)
  */

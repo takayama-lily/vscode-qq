@@ -341,7 +341,7 @@ function parseMessage(message) {
                 }
                 break;
             case "json":
-                msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[JSON卡片消息]</a><span style="display:none">${filterXss(v.data.data)}</span>`;
+                msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[JSON卡片消息]</a><span style="display:none">${filterXss(JSON.stringify(JSON.parse(v.data.data), null, 4))}</span>`;
                 break;
             case "file":
                 msg = `<a href="${v.data.url}" target="_blank">文件: ${filterXss(v.data.name)} (${v.data.size / 1e6}MB)</a>`;
