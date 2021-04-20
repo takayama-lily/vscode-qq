@@ -33,3 +33,16 @@
 
 > 使用的UI库：[https://github.com/MorFansLab/LiteWebChat_Frame](https://github.com/MorFansLab/LiteWebChat_Frame)  
 > QQ协议库：[https://github.com/takayama-lily/oicq](https://github.com/takayama-lily/oicq)
+
+----
+
+## 自行编译此扩展
+
+```bash
+# clone此项目
+npm i
+npm i typescript -g
+npm i vsce -g
+vsce package
+```
+
