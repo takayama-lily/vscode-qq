@@ -16,7 +16,7 @@ const params = [
 ];
 
 export const NO_CHROME_ERROR = Symbol("no chrome");
-export const TIMEOUT_ERROR = Symbol("failed too many time");
+export const TIMEOUT_ERROR = Symbol("failed too many times");
 export const UNFINISHED_ERROR = Symbol("chrome closed but no ticket");
 
 export class Cdp extends EventEmitter {

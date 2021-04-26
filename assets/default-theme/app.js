@@ -99,7 +99,7 @@ function sendMsg() {
                 } else if (ginfo.shutup_time_whole) {
                     msg += " (全员禁言)";
                 }
-            } else if (msg === "bot not online") {
+            } else if (data.retcode === 104) {
                 msg = "断线了，发送失败";
             }
             document.querySelector("#lite-chatbox").insertAdjacentHTML("beforeend", `<div class="tips">

@@ -45,4 +45,3 @@ npm i typescript -g
 npm i vsce -g
 vsce package
 ```
-

@@ -1,5 +1,10 @@
 # VS Code QQ Extension Change Log
 
+## Version 1.2.1: 2021/4/27
+
+* [default-theme] 头像和图片使用 `https` url
+* 修复一些体验方面的问题
+
 ## Version 1.2.0: 2021/4/18
 
 * [default-theme] 支持查看合并转发，以及各种xml/json卡片消息
