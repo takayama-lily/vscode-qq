@@ -24,6 +24,7 @@
 
 ## 其他
 
+* 注意：不同Code之间暂时无法检测到是否有登录，如果你打开了多个Code，切勿重复登录。
 * [清除登录信息](https://github.com/takayama-lily/vscode-qq/wiki/%E6%B8%85%E9%99%A4%E7%99%BB%E5%BD%95%E4%BF%A1%E6%81%AF)
 * [外网被限制无法登录的解决方法](https://github.com/takayama-lily/vscode-qq/wiki/%E6%88%91%E7%9A%84%E6%9C%BA%E5%99%A8%E6%B2%A1%E6%9C%89%E5%A4%96%E7%BD%91%E6%80%8E%E4%B9%88%E5%8A%9E)
 
