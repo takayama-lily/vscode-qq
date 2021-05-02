@@ -6,6 +6,8 @@ import * as path from 'path';
 import * as global from "./global";
 import * as client from "./client";
 
+let timer: NodeJS.Timeout | undefined;
+
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -19,6 +21,14 @@ export function activate(context: vscode.ExtensionContext) {
         fs.mkdirSync(path.join(context.globalStoragePath, "tmp"));
     }
 
+    if (!timer) {
+        timer = setInterval(() => {
+            if (global.client?.isOnline()) {
+                fs.writeFile(path.join(global.client.dir, "online.lock"), "114514", () => { });
+            }
+        }, 5000);
+    }
+
     // creat status bar item
     const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
     statusBarItem.text = "QQ";
@@ -28,4 +38,9 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() { }
+export function deactivate() {
+    if (timer) {
+        clearInterval(timer);
+        timer = undefined;
+    }
+}

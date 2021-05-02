@@ -1,5 +1,9 @@
 # VS Code QQ Extension Change Log
 
+## Version 1.2.2: 2021/5/2
+
+* 增加账号重复登录检测，以避免出现多个Code中重复登录的情况
+
 ## Version 1.2.1: 2021/4/27
 
 * [default-theme] 头像和图片使用 `https` url

@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import * as crypto from 'crypto';
 import * as vscode from 'vscode';
 import * as oicq from 'oicq';
@@ -26,6 +28,16 @@ const statusMap: { [k: number]: string } = {
  */
 function createClient(uin: number) {
     const c = oicq.createClient(uin, genClientConfig());
+
+    try {
+        const stat = fs.statSync(path.join(c.dir, "online.lock"), { bigint: true });
+        const diff = Date.now() - Number(stat.mtimeMs);
+        if (diff >= 0 && diff < 10000) {
+            vscode.window.showErrorMessage("你已经在另一个Code中登录了此账号。");
+            return;
+        }
+    } catch { }
+
     setClient(c);
 
     client.on("system.login.error", function (data) {
