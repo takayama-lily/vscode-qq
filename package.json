@@ -14,6 +14,32 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
+		"configuration": {
+			"title": "VSCode QQ",
+			"properties": {
+				"vscode-qq.theme.theme": {
+					"type": "string",
+					"default": "default",
+					"enum": ["default", "console", "vscode"],
+					"enumDescriptions": [
+						"默认的 UI 主题",
+						"控制台风格的 UI 主题",
+						"基于 VSCode 布局和配色优化的主题"
+					],
+					"description": "修改聊天页面的主题"
+				},
+				"vscode-qq.theme.themeCSS": {
+					"type": "string",
+					"default": "",
+					"description": "嵌入自定义的 CSS 样式来修改主题，可以使用链接或文件路径指向一个样式文件，需要和 Theme JS 一同设置方可生效"
+				},
+				"vscode-qq.theme.themeJS": {
+					"type": "string",
+					"default": "",
+					"description": "嵌入自定义的 JS 脚本来修改主题，可以使用链接或文件路径指向一个脚本文件，需要和 Theme CSS 一同设置方可生效"
+				}
+			}
+		},
 		"commands": [
 			{
 				"command": "oicq.contact.pin",

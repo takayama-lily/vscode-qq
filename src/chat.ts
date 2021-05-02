@@ -17,28 +17,32 @@ const webviewMap: Map<string, vscode.WebviewPanel> = new Map;
 
 const availableThemes = [
     "default",
+    "vscode",
     "console"
 ];
 
 function getHtml(id: string, webview: vscode.Webview) {
     let preload = webview.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, "assets", "preload.js")).toString();
     let css: string, js: string;
-    const config = getConfig();
-    if (config.theme_css && config.theme_js) {
-        if (config.theme_css.startsWith("http")) {
-            css = config.theme_css;
+    const theme_config = vscode.workspace.getConfiguration("vscode-qq.theme");
+    const config_theme = theme_config.get<string>("theme");
+    const theme_js = theme_config.get<string>("themeJS");
+    const theme_css = theme_config.get<string>("themeCSS");
+    if (theme_css && theme_js) {
+        if (theme_css.startsWith("http")) {
+            css = theme_css;
         } else {
-            css = webview.asWebviewUri(vscode.Uri.file(config.theme_css)).toString();
+            css = webview.asWebviewUri(vscode.Uri.file(theme_css)).toString();
         }
-        if (config.theme_js.startsWith("http")) {
-            js = config.theme_js;
+        if (theme_js.startsWith("http")) {
+            js = theme_js;
         } else {
-            js = webview.asWebviewUri(vscode.Uri.file(config.theme_js)).toString();
+            js = webview.asWebviewUri(vscode.Uri.file(theme_js)).toString();
         }
     } else {
         let theme = "default";
-        if (availableThemes.includes(String(config.theme))) {
-            theme = String(config.theme);
+        if (config_theme && availableThemes.includes(config_theme)) {
+            theme = config_theme;
         }
         css = webview.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, "assets", theme + "-theme", "style.css")).toString();
         js = webview.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, "assets", theme + "-theme", "app.js")).toString();
@@ -64,10 +68,13 @@ function openChatView(id: string) {
 
     const { type, uin } = parseContactId(id);
     let label: string;
+    let icon: string;
     if (type === "u") {
         label = String(client.fl.get(uin)?.nickname);
+        icon = "https://q1.qlogo.cn/g?b=qq&s=100&nk=" + uin;
     } else {
         label = String(client.gl.get(uin)?.group_name);
+        icon = `https://p.qlogo.cn/gh/${uin}/${uin}/100`;
     }
 
     if (webviewMap.has(id)) {
@@ -78,6 +85,10 @@ function openChatView(id: string) {
         enableCommandUris: true,
         retainContextWhenHidden: true
     });
+    webview.iconPath = {
+        light: vscode.Uri.parse(icon),
+        dark: vscode.Uri.parse(icon),
+    };
     webviewMap.set(id, webview);
     webview.webview.html = getHtml(id, webview.webview);
     webview.reveal();
