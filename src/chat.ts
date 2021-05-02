@@ -10,8 +10,36 @@ export interface WebViewPostData {
     echo: string,
 }
 
+const DEFAULT_ICON = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBmaWxsPSJjdXJyZW50Q29sb3IiPjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNCAxMS4yOWwxLTF2MS40MmwtMS4xNSAxLjE0TDMgMTIuNVYxMEgxLjVMMSA5LjV2LThsLjUtLjVoMTJsLjUuNVY2aC0xVjJIMnY3aDEuNWwuNS41djEuNzl6TTEwLjI5IDEzbDEuODYgMS44NS44NS0uMzVWMTNoMS41bC41LS41di01bC0uNS0uNWgtOGwtLjUuNXY1bC41LjVoMy43OXptLjIxLTFIN1Y4aDd2NGgtMS41bC0uNS41di43OWwtMS4xNS0xLjE0LS4zNS0uMTV6Ii8+PC9zdmc+";
+
 vscode.commands.registerCommand("oicq.c2c.open", openChatView);
 vscode.commands.registerCommand("oicq.group.open", openChatView);
+
+vscode.workspace.onDidChangeConfiguration(evt => {
+    if (evt.affectsConfiguration('vscode-qq.theme')) {
+        const theme_config = vscode.workspace.getConfiguration("vscode-qq.theme");
+        if (theme_config.get<boolean>('autoReload')) {
+            reloadChatViews();
+        }
+    }
+    if (evt.affectsConfiguration('vscode-qq.QQ.showAvatarOnTab')) {
+        const show_avatar = vscode.workspace.getConfiguration().get<boolean>("vscode-qq.QQ.showAvatarOnTab");
+        webviewMap.forEach((webview, id) => {
+            if (show_avatar) {
+                const { type, uin } = parseContactId(id);
+                let icon: string;
+                if (type === "u") {
+                    icon = "https://q1.qlogo.cn/g?b=qq&s=100&nk=" + uin;
+                } else {
+                    icon = `https://p.qlogo.cn/gh/${uin}/${uin}/100`;
+                }
+                webview.iconPath = vscode.Uri.parse(icon);
+            } else {
+                webview.iconPath = undefined;
+            }
+        });
+    }
+});
 
 const webviewMap: Map<string, vscode.WebviewPanel> = new Map;
 
@@ -64,6 +92,12 @@ function getHtml(id: string, webview: vscode.Webview) {
 </html>`;
 }
 
+function reloadChatViews() {
+    webviewMap.forEach((webview, id) => {
+        webview.webview.html = getHtml(id, webview.webview);
+    });
+}
+
 function openChatView(id: string) {
 
     const { type, uin } = parseContactId(id);
@@ -85,10 +119,11 @@ function openChatView(id: string) {
         enableCommandUris: true,
         retainContextWhenHidden: true
     });
-    webview.iconPath = {
-        light: vscode.Uri.parse(icon),
-        dark: vscode.Uri.parse(icon),
-    };
+    if (vscode.workspace.getConfiguration().get<boolean>('vscode-qq.QQ.showAvatarOnTab')) {
+        webview.iconPath = vscode.Uri.parse(icon);
+    } else {
+        webview.iconPath = undefined;
+    }
     webviewMap.set(id, webview);
     webview.webview.html = getHtml(id, webview.webview);
     webview.reveal();

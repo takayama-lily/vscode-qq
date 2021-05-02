@@ -17,6 +17,16 @@
 		"configuration": {
 			"title": "VSCode QQ",
 			"properties": {
+				"vscode-qq.QQ.showAvatarOnTab": {
+					"type": "boolean",
+					"default": true,
+					"description": "是否使用用户/群组头像作为每个会话窗口的图标"
+				},
+				"vscode-qq.theme.autoReload": {
+					"type": "boolean",
+					"default": false,
+					"description": "在主题发生变更时自动重载已有会话的主题（会重新加载每个会话）"
+				},
 				"vscode-qq.theme.theme": {
 					"type": "string",
 					"default": "default",
