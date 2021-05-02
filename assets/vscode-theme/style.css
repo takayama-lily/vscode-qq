@@ -334,7 +334,9 @@ body {
 
 .content-right {
     width: 200px;
-    border-left: solid 1px var(--vscode-input-foreground);
+    border-left: solid 1px var(--vscode-sideBar-border);
+    background-color: var(--vscode-sideBar-background);
+    color: var(--vscode-sideBar-foreground);
     overflow-y: auto;
     overflow-x: hidden;
     display: none;
@@ -342,16 +344,17 @@ body {
 
 .group-info {
     height: 100px;
+    padding: 12px 0px;
     position: sticky;
     top: 0;
-    background-color: var(--vscode-editor-background);
-    border-bottom: solid 1px var(--vscode-input-foreground);
+    background-color: var(--vscode-sideBar-background);
+    border-bottom: solid 1px var(--vscode-sideBarSectionHeader-border);
 }
 
 .group-info img {
     width: 80px;
     height: 80px;
-    border: 1px solid #c5d4c4;
+    border: 1px solid var(--vscode-sideBar-border);
     border-radius: 100%;
     margin: 10px 55px;
 }
@@ -372,7 +375,8 @@ body {
 }
 
 .group-member:hover {
-    background-color: var(--vscode-sideBar-background);
+    background-color: var(--vscode-list-focusBackground);
+    color: var(--vscode-list-focusForeground);
 }
 
 .menu-member {
