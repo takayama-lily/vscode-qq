@@ -82,10 +82,54 @@ function getChatHistory(message_id = "", count = 20) {
     });
 }
 
+function getEditorCQMessage() {
+    let result = '';
+    let currentChild = document.querySelector("#content").firstChild;
+    while (currentChild) {
+        console.log(currentChild, currentChild.nodeName);
+        switch (currentChild.nodeType) {
+            case Node.ELEMENT_NODE:
+            {
+                switch (currentChild.nodeName) {
+                    case 'IMG':
+                    {
+                        switch (currentChild.getAttribute('oicq-type')) {
+                            case 'image':
+                            {
+                                const data = currentChild.src.match(/data:image(\/.+?)?;base64,(?<data>.*)/);
+                                if (data) {
+                                    result += "[CQ:image,file=base64://" + data.groups.data + "]";
+                                } else {
+                                    result += "[CQ:image,file=" + currentChild.src + "]";
+                                }
+                                break;
+                            }
+                            case 'face':
+                            {
+                                const id = currentChild.getAttribute('oicq-face-id');
+                                result += "[CQ:face,id=" + id + "]";
+                                break;
+                            }
+                        }
+                    }
+                }
+                break;
+            }
+            case Node.TEXT_NODE: // TEXT_NODE
+            {
+                result += currentChild.nodeValue;
+                break;
+            }
+        }
+        currentChild = currentChild.nextSibling;
+    }
+    return result;
+}
+
 let sending = false;
 function sendMsg() {
-    const message = document.querySelector("#content").value;
-    if (sending || !message) {
+    const message = getEditorCQMessage();
+    if (sending || message.length === 0) {
         return;
     }
     sending = true;
@@ -115,11 +159,10 @@ function sendMsg() {
 </div>`;
             document.querySelector("#lite-chatbox").insertAdjacentHTML("beforeend", html);
         }
-        document.querySelector("#content").value = "";
+        document.querySelector("#content").innerHTML = "";
         currentTextareaContent = "";
     }).catch(() => {
-        document.querySelector("#content").value = "";
-        currentTextareaContent = "";
+        document.querySelector("#content").innerHTML = "";
     }).finally(() => {
         sending = false;
         document.querySelector("#send").disabled = false;
@@ -386,8 +429,11 @@ function addAt(uid) {
  * @param {number} id 
  */
 function addFace(id) {
-    const cqcode = `[CQ:face,id=${id}]`;
-    addStr2Textarea(cqcode);
+    const child = document.createElement('img');
+    child.setAttribute('oicq-type', 'face');
+    child.setAttribute('oicq-face-id', id);
+    child.src = facePath + id + '.png';
+    insertToEditor(child);
 }
 
 /**
@@ -395,17 +441,46 @@ function addFace(id) {
  * @param {string} file 
  */
 function addImage(file) {
-    const cqcode = `[CQ:image,file=${file}]`;
-    addStr2Textarea(cqcode);
+    const child = document.createElement('img');
+    child.setAttribute('oicq-type', 'image');
+    child.src = file;
+    insertToEditor(child);
+}
+
+/**
+ * 根据用户选区插入元素/替换选区到编辑器内
+ * @param {Node | string} el 
+ */
+function insertToEditor(el) {
+    let insertEl = el;
+    if (typeof el === 'string') {
+        insertEl = document.createTextNode(el);
+    }
+    const editorEl = document.querySelector('#content');
+    const selection = getSelection();
+    console.log(selection);
+    console.log(selection.focusNode.parentElement.id);
+    if (editorEl.contains(selection.focusNode)) {
+        // 根据光标位置/选中的区域替换/插入
+        const range = selection.getRangeAt(0);
+        console.log(range);
+        range.deleteContents();
+        range.insertNode(el);
+        range.setStartAfter(el);
+        range.setEndAfter(el);
+    } else {
+        // 在末尾插入
+        document.querySelector('#content').appendChild(el);
+        const range = selection.getRangeAt(0);
+        console.log(range);
+        range.setStartAfter(el);
+        range.setEndAfter(el);
+    }
 }
 
 function addStr2Textarea(str) {
-    currentTextareaContent += str;
-    document.querySelector("#content").value = currentTextareaContent;
-    document.querySelector("#content").focus();
+    insertToEditor(document.createTextNode(str));
 }
-
-let currentTextareaContent = "";
 
 document.querySelector("body").insertAdjacentHTML("beforeend", `
 <div class="chatbox">
@@ -433,7 +508,7 @@ document.querySelector("body").insertAdjacentHTML("beforeend", `
             </div>
         </div>
         <div id="footer">
-            <textarea id="content" rows="10" placeholder="在此输入消息..."></textarea>
+            <div id="content" placeholder="在此输入消息..." contenteditable="true"></div>
             <div id="footer-controls">
                 <button id="send" class="button-primary" onclick="sendMsg()">发送 (Ctrl + Enter)</button> 
                 <span id="show-stamp-box" class="button-secondary"><i class="icon icon-heart secondary-button"></i></span>
@@ -652,17 +727,34 @@ document.querySelector(".content-left").onscroll = function () {
 //表情、图片拖动
 document.querySelector("#content").oninput = function () {
     const content = this.value;
-    const diff = content.substr(currentTextareaContent.length);
+    const diff = content.substr(this.value.length);
     if (diff.startsWith(facePath)) {
         const faceId = diff.substr(facePath.length).split(".")[0];
         const cqcode = `[CQ:face,id=${faceId}]`;
         addStr2Textarea(cqcode);
     } else if (diff.endsWith("&vscodeDragFlag=1")) {
         const file = new URL(diff).searchParams.get("file");
-        const cqcode = `[CQ:image,file=${file}]`;
-        addStr2Textarea(cqcode);
+        // const cqcode = `[CQ:image,file=${file}]`;
+        addImage(file);
     } else {
         currentTextareaContent = content;
+    }
+};
+
+document.querySelector("#content").onpaste = function (event) {
+    var items = (event.clipboardData || event.originalEvent.clipboardData).items;
+    console.log(items); // will give you the mime types
+    for (index in items) {
+        var item = items[index];
+        if (item.kind === 'file') {
+            var blob = item.getAsFile();
+            var reader = new FileReader();
+            reader.onload = function (evt) {
+                const result = evt.target.result;
+                addImage(result);
+            }; // data url!
+            reader.readAsDataURL(blob);
+        }
     }
 };
 

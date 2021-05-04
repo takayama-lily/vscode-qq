@@ -101,7 +101,7 @@ function createClient(uin: number) {
 /**
  * input account
  */
-function inputAccount() {
+export function inputAccount() {
     const uin = Number(getConfig().account);
     if (uin > 10000 && uin < 0xffffffff) {
         return createClient(uin);
