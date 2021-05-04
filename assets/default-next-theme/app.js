@@ -29,6 +29,11 @@ webview.on("message", (data) => {
 webview.on("notice", (data) => {
     appendMsg(genSystemMessage(data.detail));
 });
+webview.on("insert-image", (data) => {
+    for (const file of data.detail) {
+        addImage(file);
+    }
+});
 
 function appendMsg(msg) {
     if (document.querySelector(".content-left").scrollTop + document.querySelector(".content-left").offsetHeight + 100 > document.querySelector(".content-left").scrollHeight) {
@@ -650,8 +655,7 @@ document.querySelector("body").addEventListener("click", (e) => {
     }
 });
 document.querySelector("#insert-pic").addEventListener("click", () => {
-    const cqcode = `[CQ:image,file=替换为本地图片或网络URL路径]`;
-    addStr2Textarea(cqcode);
+    webview.openImageDialog();
 });
 
 let tmpEmojiStep = 0;

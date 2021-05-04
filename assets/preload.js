@@ -30,6 +30,11 @@
     vsc.target_uin = Number(env.attributes.target_id?.value);
     vsc.assets_path = env.attributes.path?.value + "/";
     vsc.faces_path = vsc.assets_path + "faces/";
+    vsc.openImageDialog = () => {
+        postMessage({
+            command: 'openImageDialog'
+        });
+    };
 
     /**
      * @param {import("oicq").CommonEventData} data 
@@ -40,6 +45,10 @@
                 vsc.dispatchEvent(new window.CustomEvent("message", { detail: data }));
             } else if (data.post_type === "notice") {
                 vsc.dispatchEvent(new window.CustomEvent("notice", { detail: data }));
+            } else if (data.post_type === "system") {
+                if (data.sub_type === "insert-image") {
+                    vsc.dispatchEvent(new window.CustomEvent("insert-image", { detail: data.files }))
+                }
             }
         } else {
             handlers.get(data?.echo)?.call(null, data);

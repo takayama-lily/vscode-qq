@@ -1,7 +1,7 @@
 import * as oicq from "oicq";
 type MessageEventData = oicq.PrivateMessageEventData | oicq.GroupMessageEventData;
 type NoticeEventData = oicq.FriendNoticeEventData | oicq.GroupNoticeEventData;
-
+type InsertImageData = string[];
 /**
  * webview类型参考
  */
@@ -14,6 +14,11 @@ export interface Webview extends EventTarget {
     readonly faces_path: string; //表情文件夹路径("/"结尾)
     readonly TimeoutError: typeof Error;
 
+    // 打开一个仅限图片的打开对话框，用于发送图片，如果用户选择了图片则会触发 "insert-image" 事件
+    openImageDialog(): void;
+
+    // 监听插入图片事件
+    on(type: "insert-image", listener: (data: CustomEvent<InsertImageData>) => void): void;
     // 监听新消息事件
     on(type: "message", listener: (data: CustomEvent<MessageEventData>) => void): void;
     // 监听新系统通知事件

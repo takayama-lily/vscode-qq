@@ -3,14 +3,13 @@ import * as oicq from 'oicq';
 import { refreshContacts } from "./explorer";
 import { getConfig } from "./config";
 import { client, ctx, genContactId, parseContactId } from "./global";
+import { promises } from 'fs';
 
 export interface WebViewPostData {
-    command: keyof oicq.Client,
+    command: keyof oicq.Client & 'openImageDialog',
     params: any[],
     echo: string,
 }
-
-const DEFAULT_ICON = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBmaWxsPSJjdXJyZW50Q29sb3IiPjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNCAxMS4yOWwxLTF2MS40MmwtMS4xNSAxLjE0TDMgMTIuNVYxMEgxLjVMMSA5LjV2LThsLjUtLjVoMTJsLjUuNVY2aC0xVjJIMnY3aDEuNWwuNS41djEuNzl6TTEwLjI5IDEzbDEuODYgMS44NS44NS0uMzVWMTNoMS41bC41LS41di01bC0uNS0uNWgtOGwtLjUuNXY1bC41LjVoMy43OXptLjIxLTFIN1Y4aDd2NGgtMS41bC0uNS41di43OWwtMS4xNS0xLjE0LS4zNS0uMTV6Ii8+PC9zdmc+";
 
 vscode.commands.registerCommand("oicq.c2c.open", openChatView);
 vscode.commands.registerCommand("oicq.group.open", openChatView);
@@ -45,7 +44,7 @@ const webviewMap: Map<string, vscode.WebviewPanel> = new Map;
 
 const availableThemes = [
     "default",
-    "vscode",
+    "default-next",
     "console"
 ];
 
@@ -137,6 +136,32 @@ function openChatView(id: string) {
     });
     webview.webview.onDidReceiveMessage(async (data: WebViewPostData) => {
         try {
+            if (data.command === "openImageDialog") {
+                vscode.window.showOpenDialog({
+                    title: "请选择要插入的图片",
+                    canSelectMany: true,
+                    openLabel: "插入",
+                    filters: {
+                        "图片图像": ["png", "jpg", "jpeg", "gif"],
+                    }
+                }).then(async value => {
+                    if (value) {
+                        const files = await Promise.all(
+                            value.map(async v => {
+                                const f = await promises.readFile(v.fsPath);
+                                const ext = v.fsPath.substring(v.fsPath.lastIndexOf('.') + 1);
+                                return "data:image/" + ext + ";base64," + f.toString("base64");
+                            })
+                        );
+                        webview.webview.postMessage({
+                            post_type: "system",
+                            sub_type: "insert-image",
+                            files
+                        });
+                    }
+                });
+                return;
+            }
             if (data.command === "getChatHistory" && data.params?.[0] === "") {
                 let buf: Buffer;
                 if (type === "g") {
@@ -144,7 +169,7 @@ function openChatView(id: string) {
                 } else {
                     buf = Buffer.alloc(17);
                 }
-                buf.writeUInt32BE(uin, 0); 
+                buf.writeUInt32BE(uin, 0);
                 data.params[0] = buf.toString("base64");
             }
             const fn = client[data.command];
