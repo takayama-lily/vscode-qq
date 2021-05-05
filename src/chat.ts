@@ -43,8 +43,8 @@ vscode.workspace.onDidChangeConfiguration(evt => {
 const webviewMap: Map<string, vscode.WebviewPanel> = new Map;
 
 const availableThemes = [
+    "default-old",
     "default",
-    "default-next",
     "console"
 ];
 

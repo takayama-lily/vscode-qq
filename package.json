@@ -49,11 +49,11 @@
 				"vscode-qq.theme.theme": {
 					"type": "string",
 					"default": "default",
-					"enum": ["default", "console", "default-next"],
+					"enum": ["default", "console", "default-old"],
 					"enumDescriptions": [
 						"默认的 UI 主题",
 						"控制台风格的 UI 主题",
-						"下一代默认主题，基于 VSCode 布局和配色优化的主题（实验性）"
+						"旧的默认主题，如果当前版本的默认主题出现问题可以使用这个"
 					],
 					"description": "修改聊天页面的主题"
 				},

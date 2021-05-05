@@ -1,0 +1,360 @@
+/*! LiteWebChat_Frame v2.1.0 | MorFans Lab(c) 2017, BY:SuperPaxxs & Haswikr | https://lab.morfans.cn / Released under the LGPL License */
+.lite-chatbox{
+    padding:0;
+    width:100%;
+    position:relative;
+    overflow-y:auto;
+    overflow-x:hidden;
+    font:18px Helvetica,"PingFang SC","Microsoft YaHei",sans-serif
+}
+.lite-chatbox .cmsg{
+    position:relative;
+    margin:4px 7px;
+    min-height:50px;
+    border:0
+}
+.lite-chatbox .cright{
+    text-align:right;
+    margin-left:64px
+}
+.lite-chatbox .cleft{
+    text-align:left;
+    margin-right:64px
+}
+.lite-chatbox img.headIcon{
+    width:34px;
+    height:34px;
+    top:9px;
+    position:absolute;
+    border:1px solid #c5d4c4
+}
+.lite-chatbox .name{
+    color:var(--vscode-input-foreground);
+    font-size:12px;
+    display:block;
+    line-height:18px
+}
+.lite-chatbox .name .htitle{
+    display:inline-block;
+    padding:0 3px;
+    background-color:#aaa;
+    color:#fff;
+    -moz-border-radius:4px;
+    -webkit-border-radius:4px;
+    border-radius:4px;
+    margin-right:4px;
+    font-size:11px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    vertical-align:middle;
+    max-width:50px
+}
+.lite-chatbox .content{
+    word-break:break-all;
+    word-wrap:break-word;
+    text-align:left;
+    position:relative;
+    display:inline-block;
+    font-size:15px;
+    padding:10px 15px;
+    line-height:20px;
+    min-width:9px;
+    min-height:18px
+}
+.lite-chatbox .content img{
+    width:100%;
+    height:auto
+}
+.lite-chatbox .content a{
+    color:var(--vscode-editorLink-activeForeground);
+    margin:0 2px;
+    cursor:hand
+}
+.lite-chatbox .tips{
+    margin:12px;
+    text-align:center;
+    font-size:12px
+}
+.lite-chatbox .tips span{
+    display:inline-block;
+    padding:4px;
+    background-color:#aaa;
+    color:#fff;
+    -moz-border-radius:6px;
+    -webkit-border-radius:6px;
+    border-radius:6px
+}
+.lite-chatbox img.radius{
+    -moz-border-radius:100%;
+    -webkit-border-radius:100%;
+    border-radius:100%
+}
+.lite-chatbox .cright img.headIcon{
+    right:0
+}
+.lite-chatbox .cleft img.headIcon{
+    left:0
+}
+.lite-chatbox .cright .name{
+    margin:0 48px 2px 0
+}
+.lite-chatbox .cleft .name{
+    margin:0 0 2px 48px
+}
+.lite-chatbox .cright .content{
+    margin:0 48px 0 0;
+    -webkit-border-radius:20px 0 20px 20px;
+    border: 2px solid var(--vscode-quickInputTitle-background);
+    border-radius:20px 0 20px 20px;
+    /* color:#aaa; */
+    background:var(--vscode-sideBar-background);
+    -webkit-box-shadow:5px 5px 15px 0 rgba(102,102,102,0.15);
+    box-shadow:5px 5px 15px 0 rgba(102,102,102,0.15)
+}
+.lite-chatbox .cleft .content{
+    margin:0 0 0 48px;
+    -webkit-border-radius:0 20px 20px 20px;
+    border-radius:0 20px 20px 20px;
+    /* color:#aaa; */
+    border: 2px solid var(--vscode-quickInputTitle-background);
+    background: var(--vscode-sideBar-background);
+    -webkit-box-shadow:5px 5px 15px 0 rgba(102,102,102,0.1);
+    box-shadow:5px 5px 15px 0 rgba(102,102,102,0.1)
+}
+.lite-chatbox .cright .content:after{
+    right:-12px;
+    top:8px
+}
+.lite-chatbox .cleft .content:after{
+    left:-12px;
+    top:8px
+}
+.lite-chatbox .tips .tips-primary{
+    background-color:#3986c8
+}
+.lite-chatbox .tips .tips-success{
+    background-color:#49b649
+}
+.lite-chatbox .tips .tips-info{
+    background-color:#5bb6d1
+}
+.lite-chatbox .tips .tips-warning{
+    background-color:#eea948
+}
+.lite-chatbox .tips .tips-danger{
+    background-color:#e24d48
+}
+.lite-chatbox .name .admin{
+    background-color:#72D6A0
+}
+.lite-chatbox .name .owner{
+    background-color:#F2BF25
+}
+ 
+html,body{
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+body {
+    display: flex;
+}
+.lite-chatbox .name b.operation {
+    cursor: pointer;
+    background-color: var(--vscode-editor-background);
+    padding: 0 2px;
+    color: var(--vscode-editor-foreground);
+}
+.lite-chatbox .name b.operation:hover {
+    background-color: var(--vscode-focusBorder);
+}
+.lite-chatbox .content img {
+    width: auto;
+    vertical-align: bottom;
+}
+.lite-chatbox .content a {
+    text-decoration: none;
+}
+.lite-chatbox .cmsg {
+    margin: 10px 15px;
+}
+.lite-chatbox .cleft .content {
+    border-radius: 0 10px 10px 10px;
+    font-size: 14px;
+    padding: 8px 15px;
+}
+
+.lite-chatbox .cright .content {
+    border-radius: 10px 0px 10px 10px;
+    font-size: 14px;
+    padding: 8px 15px;
+}
+
+#img-preview {
+    position: fixed;
+    display: none;
+    width: 200px;
+    border: var(--vscode-editor-foreground) 1px solid;
+}
+#content {
+    width: 100%;
+    resize: none;
+    box-sizing: border-box;
+    background-color: var(--vscode-editor-background);
+    color: var(--vscode-editor-foreground);
+}
+button#send {
+    margin: 10px;
+}
+#to-bottom {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    margin: 10px;
+    cursor: pointer;
+}
+#footer {
+    position: sticky;
+    width: 100%;
+    bottom: 0;
+    background-color: var(--vscode-editor-background);
+}
+.box {
+    height: 240px;
+    overflow-y: auto;
+    background-color: var(--vscode-editor-background);
+    max-height: 240px;
+    display: none;
+    position: absolute;
+    bottom: 40px;
+    left: 180px;
+    padding: 5px;
+    border: solid 1px var(--vscode-editor-foreground);
+    font-size: 20px;
+}
+.stamp-box img {
+    margin:5px;
+    cursor:pointer;
+    max-width:48px;
+    max-height:48px;
+    min-width:48px;
+    vertical-align: middle;
+}
+.insert-button {
+    cursor: pointer;
+    font-size: 18px;
+    padding: 2px;
+}
+
+.modal-dialog {
+    position: fixed;
+    z-index: 9999;
+    display: none;
+    width: 200px;
+    height: auto;
+    max-width: 200px;
+    border: solid 1px var(--vscode-input-foreground);
+    background-color: var(--vscode-sideBar-background);
+}
+.modal-title {
+    padding: 10px 20px 0px 20px;
+    line-height: 20px;
+}
+.modal-button {
+    position: relative;
+    bottom: 0;
+    padding: 15px 50px;
+}
+
+.menu-msg {
+    position: fixed;
+    display: none;
+    z-index: 100;
+    border: solid 1px var(--vscode-input-foreground);
+    width: 100px;
+    opacity: 0.85;
+}
+.menu-msg hr {
+    background-color: var(--vscode-sideBar-background);
+    height: 2px;
+    border-top:ridge 1px var(--vscode-input-foreground);
+    border-bottom: 0;
+    border-left: 0;
+    border-right: 0;
+    margin: 0;
+}
+.menu-msg div {
+    cursor: pointer;
+    background-color: var(--vscode-sideBar-background);
+    padding: 2px;
+}
+.menu-msg div:hover {
+    background-color: var(--vscode-input-foreground);
+    color: var(--vscode-editor-background);
+}
+
+.content-left {
+    overflow-y: auto;
+    flex: 1;
+}
+
+.content-right {
+    width: 200px;
+    border-left: solid 1px var(--vscode-input-foreground);
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: none;
+}
+.group-info {
+    height: 100px;
+    position: sticky;
+    top: 0;
+    background-color: var(--vscode-editor-background);
+    border-bottom: solid 1px var(--vscode-input-foreground);
+}
+.group-info img {
+    width: 80px;
+    height: 80px;
+    border: 1px solid #c5d4c4;
+    border-radius: 100%;
+    margin: 10px 55px;
+}
+.group-members  {
+    padding: 5px 0;
+    margin-bottom: 150px;
+}
+.group-member  {
+    cursor: pointer;
+    padding: 5px 10px;
+    margin: 0;
+    width: 190px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.group-member:hover {
+    background-color: var(--vscode-sideBar-background);
+}
+
+.menu-member {
+    position: fixed;
+    display: none;
+    z-index: 100;
+    border: solid 1px var(--vscode-input-foreground);
+    width: 100px;
+    opacity: 0.85;
+}
+.menu-member div {
+    cursor: pointer;
+    background-color: var(--vscode-sideBar-background);
+    padding: 2px;
+}
+.menu-member div:hover {
+    background-color: var(--vscode-input-foreground);
+    color: var(--vscode-editor-background);
+}
+
+.msg-forward p {
+    color: var(--vscode-input-foreground);
+}

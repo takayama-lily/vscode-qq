@@ -47,7 +47,7 @@
                 vsc.dispatchEvent(new window.CustomEvent("notice", { detail: data }));
             } else if (data.post_type === "system") {
                 if (data.sub_type === "insert-image") {
-                    vsc.dispatchEvent(new window.CustomEvent("insert-image", { detail: data.files }))
+                    vsc.dispatchEvent(new window.CustomEvent("insert-image", { detail: data.files }));
                 }
             }
         } else {

@@ -29,11 +29,6 @@ webview.on("message", (data) => {
 webview.on("notice", (data) => {
     appendMsg(genSystemMessage(data.detail));
 });
-webview.on("insert-image", (data) => {
-    for (const file of data.detail) {
-        addImage(file);
-    }
-});
 
 function appendMsg(msg) {
     if (document.querySelector(".content-left").scrollTop + document.querySelector(".content-left").offsetHeight + 100 > document.querySelector(".content-left").scrollHeight) {
@@ -87,54 +82,10 @@ function getChatHistory(message_id = "", count = 20) {
     });
 }
 
-function getEditorCQMessage() {
-    let result = '';
-    let currentChild = document.querySelector("#content").firstChild;
-    while (currentChild) {
-        console.log(currentChild, currentChild.nodeName);
-        switch (currentChild.nodeType) {
-            case Node.ELEMENT_NODE:
-            {
-                switch (currentChild.nodeName) {
-                    case 'IMG':
-                    {
-                        switch (currentChild.getAttribute('oicq-type')) {
-                            case 'image':
-                            {
-                                const data = currentChild.src.match(/data:image(\/.+?)?;base64,(?<data>.*)/);
-                                if (data) {
-                                    result += "[CQ:image,file=base64://" + data.groups.data + "]";
-                                } else {
-                                    result += "[CQ:image,file=" + currentChild.src + "]";
-                                }
-                                break;
-                            }
-                            case 'face':
-                            {
-                                const id = currentChild.getAttribute('oicq-face-id');
-                                result += "[CQ:face,id=" + id + "]";
-                                break;
-                            }
-                        }
-                    }
-                }
-                break;
-            }
-            case Node.TEXT_NODE: // TEXT_NODE
-            {
-                result += currentChild.nodeValue;
-                break;
-            }
-        }
-        currentChild = currentChild.nextSibling;
-    }
-    return result;
-}
-
 let sending = false;
 function sendMsg() {
-    const message = getEditorCQMessage();
-    if (sending || message.length === 0) {
+    const message = document.querySelector("#content").value;
+    if (sending || !message) {
         return;
     }
     sending = true;
@@ -164,10 +115,11 @@ function sendMsg() {
 </div>`;
             document.querySelector("#lite-chatbox").insertAdjacentHTML("beforeend", html);
         }
-        document.querySelector("#content").innerHTML = "";
+        document.querySelector("#content").value = "";
         currentTextareaContent = "";
     }).catch(() => {
-        document.querySelector("#content").innerHTML = "";
+        document.querySelector("#content").value = "";
+        currentTextareaContent = "";
     }).finally(() => {
         sending = false;
         document.querySelector("#send").disabled = false;
@@ -223,7 +175,7 @@ function genSystemMessage(data) {
                 break;
             case "ban":
                 if (data.user_id > 0) {
-                    msg = `${genLabel(data.operator_id)} 禁言 ${data.user_id === 80000000 ? "匿名用户(" + data.nickname + ")" : genLabel(data.user_id)} ${~~(data.duration / 60)}分钟`;
+                    msg = `${genLabel(data.operator_id)} 禁言 ${data.user_id === 80000000 ? "匿名用户(" + data.nickname + ")" : genLabel(data.user_id)} ${~~(data.duration/60)}分钟`;
                 } else {
                     msg = `${genLabel(data.operator_id)} ${data.duration > 0 ? "开启" : "关闭"}了全员禁言`;
                 }
@@ -296,7 +248,7 @@ function genUserMessage(data) {
     return `<a class="msgid" id="${data.message_id}"></a><div class="${data.user_id === data.self_id ? "cright" : "cleft"} cmsg">
     <img class="headIcon radius" onmouseenter="previewImage(this)" src="${genAvaterUrl(data.user_id)}" />
     <span uid="${data.user_id}" ondblclick="addAt(${data.user_id})" class="name" title="${filterXss(data.sender.nickname)}(${data.user_id}) ${datetime(data.time)}">
-        ${c2c ? "" : '<b class="operation">...</b>'}
+        ${c2c?"":'<b class="operation">...</b>'}
         ${title}${filterXss(data.sender.card ? data.sender.card : data.sender.nickname)} ${timestamp(data.time)}
     </span>
     <span class="content">${parseMessage(data.message)}</span>
@@ -434,116 +386,76 @@ function addAt(uid) {
  * @param {number} id 
  */
 function addFace(id) {
-    const child = document.createElement('img');
-    child.setAttribute('oicq-type', 'face');
-    child.setAttribute('oicq-face-id', id);
-    child.src = facePath + id + '.png';
-    insertToEditor(child);
+    const cqcode = `[CQ:face,id=${id}]`;
+    addStr2Textarea(cqcode);
 }
 
 /**
  * 加入图片到输入框
  * @param {string} file 
  */
-function addImage(file) {
-    const child = document.createElement('img');
-    child.setAttribute('oicq-type', 'image');
-    child.src = file;
-    insertToEditor(child);
-}
-
-/**
- * 根据用户选区插入元素/替换选区到编辑器内
- * @param {Node | string} el 
- */
-function insertToEditor(el) {
-    let insertEl = el;
-    if (typeof el === 'string') {
-        insertEl = document.createTextNode(el);
-    }
-    const editorEl = document.querySelector('#content');
-    const selection = getSelection();
-    console.log(selection);
-    console.log(selection.focusNode.parentElement.id);
-    if (editorEl.contains(selection.focusNode)) {
-        // 根据光标位置/选中的区域替换/插入
-        const range = selection.getRangeAt(0);
-        console.log(range);
-        range.deleteContents();
-        range.insertNode(el);
-        range.setStartAfter(el);
-        range.setEndAfter(el);
-    } else {
-        // 在末尾插入
-        document.querySelector('#content').appendChild(el);
-        const range = selection.getRangeAt(0);
-        console.log(range);
-        range.setStartAfter(el);
-        range.setEndAfter(el);
-    }
+ function addImage(file) {
+    const cqcode = `[CQ:image,file=${file}]`;
+    addStr2Textarea(cqcode);
 }
 
 function addStr2Textarea(str) {
-    insertToEditor(document.createTextNode(str));
+    currentTextareaContent += str;
+    document.querySelector("#content").value = currentTextareaContent;
+    document.querySelector("#content").focus();
 }
 
-document.querySelector("body").insertAdjacentHTML("beforeend", `
-<div class="chatbox">
-    <div class="content-left">
-        <div class="lite-chatbox">
-            <div class="tips">
-                <span ondblclick='getChatHistory(document.querySelector(".msgid")?.attributes.id.value ?? "");'>双击加载历史消息</span>
-            </div>
-        </div>
-        <div class="lite-chatbox" id="lite-chatbox">
-            <img id="img-preview" style="z-index: 999;">
-            <div class="menu-msg">
-                <div class="menu-msg-reply">回复</div>
-                <div class="menu-msg-at">@ TA</div>
-                <div class="menu-msg-poke">戳一戳</div>
-                <div class="menu-msg-recall">撤回消息</div>
-                <div class="menu-msg-mute">禁言</div>
-                <div class="menu-msg-kick">从本群中删除</div>
-            </div>
-        </div>
-        <div class="modal-dialog">
-            <div class="modal-title"></div>
-            <div class="modal-button">
-                <button class="modal-confirm">确定</button>　<button onclick="closeModalDialog()">取消</button>
-            </div>
-        </div>
-        <div id="footer">
-            <div id="content" placeholder="在此输入消息..." contenteditable="true"></div>
-            <div id="footer-controls">
-                <button id="send" class="button-primary" onclick="sendMsg()">发送 (Ctrl + Enter)</button> 
-                <span id="show-stamp-box" class="button-secondary"><i class="icon icon-heart secondary-button"></i></span>
-                <div class="stamp-box box"></div>
-                <span id="show-face-box" class="button-secondary"><i class="icon icon-smiley secondary-button"></i></span>
-                <div class="face-box box"></div>
-                <span id="show-emoji-box" class="button-secondary">颜</span>
-                <div class="emoji-box box"></div>
-                <span id="insert-pic" class="button-secondary"><i class="icon icon-file-image secondary-button"></i></span>
-                <span class="spacer"></span>
-                ${c2c ? "" : '<span id="to-bottom" class="button-secondary end" onclick="triggerRightBar()">显示/隐藏侧栏</span>'}
-            </div>
-        </div>
-    </div>
-    <div class="content-right">
-        <div class="group-info">
-            <img class="headIcon radius" src="${webview.getGroupAvaterUrlSmall(webview.target_uin)}">
-        </div>
-        <div class="group-members"></div>
-        <div class="menu-member">
-            <div class="menu-member-at">@ TA</div>
-            <div class="menu-member-poke">戳一戳</div>
-            <div class="menu-member-admin1">设置为管理员</div>
-            <div class="menu-member-admin0">取消管理员</div>
-            <div class="menu-member-mute">禁言</div>
-            <div class="menu-member-kick">从本群中删除</div>
-        </div>
+let currentTextareaContent = "";
+
+document.querySelector("body").insertAdjacentHTML("beforeend", `<div class="content-left"><div class="lite-chatbox">
+    <div class="tips">
+        <span ondblclick='getChatHistory(document.querySelector(".msgid")?.attributes.id.value ?? "");'>双击加载历史消息</span>
     </div>
 </div>
-`);
+<div class="lite-chatbox" id="lite-chatbox"></div>
+<div style="width: 100%; height: 30px;"></div>
+<img id="img-preview" style="z-index: 999;">
+<div class="menu-msg">
+    <div class="menu-msg-reply">回复</div>
+    <div class="menu-msg-at">@ TA</div>
+    <div class="menu-msg-poke">戳一戳</div>
+    <div class="menu-msg-recall">撤回消息</div>
+    <div class="menu-msg-mute">禁言</div>
+    <div class="menu-msg-kick">从本群中删除</div>
+</div>
+<div class="modal-dialog">
+    <div class="modal-title"></div>
+    <div class="modal-button">
+        <button class="modal-confirm">确定</button>　<button onclick="closeModalDialog()">取消</button>
+    </div>
+</div>
+<div id="footer">
+    <textarea id="content" rows="10" placeholder="在此输入消息..."></textarea>
+    <button id="send" onclick="sendMsg()">发送</button>Ctrl+Enter　
+    <span id="show-stamp-box" class="insert-button">🧡</span>
+    <div class="stamp-box box"></div>
+    <span id="show-face-box" class="insert-button">😀</span>
+    <div class="face-box box"></div>
+    <span id="show-emoji-box" class="insert-button">颜</span>
+    <div class="emoji-box box"></div>
+    <span id="insert-pic" class="insert-button">🖼️</span>
+    ${c2c ? "" : '<span id="to-bottom" onclick="triggerRightBar()">显示/隐藏侧栏</span>'}
+</div>
+</div>
+<div class="content-right">
+    <div class="group-info">
+        <img class="headIcon radius" src="${webview.getGroupAvaterUrlSmall(webview.target_uin)}">
+    </div>
+    <div class="group-members"></div>
+    <div class="menu-member">
+        <div class="menu-member-at">@ TA</div>
+        <div class="menu-member-poke">戳一戳</div>
+        <div class="menu-member-admin1">设置为管理员</div>
+        <div class="menu-member-admin0">取消管理员</div>
+        <div class="menu-member-mute">禁言</div>
+        <div class="menu-member-kick">从本群中删除</div>
+    </div>
+</div>`);
 
 const idPreviewElement = document.querySelector("#img-preview");
 const idShowStampBox = document.querySelector('#show-stamp-box');
@@ -557,7 +469,7 @@ for (let i = 0; i <= 310; ++i) {
         continue;
     }
     ++tmpFaceStep;
-    let html = `<img onclick="addFace(${i})" style="margin:5px;cursor:pointer" width="28" height="28" src="${facePath + i + ".png"}">` + (tmpFaceStep % 12 === 0 ? "<br>" : "");
+    let html = `<img onclick="addFace(${i})" style="margin:5px;cursor:pointer" width="28" height="28" src="${facePath+i+".png"}">` + (tmpFaceStep % 12 === 0 ? "<br>" : "");
     document.querySelector('.face-box').insertAdjacentHTML("beforeend", html);
 }
 document.querySelector("body").addEventListener("click", (e) => {
@@ -655,7 +567,8 @@ document.querySelector("body").addEventListener("click", (e) => {
     }
 });
 document.querySelector("#insert-pic").addEventListener("click", () => {
-    webview.openImageDialog();
+    const cqcode = `[CQ:image,file=替换为本地图片或网络URL路径]`;
+    addStr2Textarea(cqcode);
 });
 
 let tmpEmojiStep = 0;
@@ -731,34 +644,17 @@ document.querySelector(".content-left").onscroll = function () {
 //表情、图片拖动
 document.querySelector("#content").oninput = function () {
     const content = this.value;
-    const diff = content.substr(this.value.length);
+    const diff = content.substr(currentTextareaContent.length);
     if (diff.startsWith(facePath)) {
         const faceId = diff.substr(facePath.length).split(".")[0];
         const cqcode = `[CQ:face,id=${faceId}]`;
         addStr2Textarea(cqcode);
     } else if (diff.endsWith("&vscodeDragFlag=1")) {
         const file = new URL(diff).searchParams.get("file");
-        // const cqcode = `[CQ:image,file=${file}]`;
-        addImage(file);
+        const cqcode = `[CQ:image,file=${file}]`;
+        addStr2Textarea(cqcode);
     } else {
         currentTextareaContent = content;
-    }
-};
-
-document.querySelector("#content").onpaste = function (event) {
-    var items = (event.clipboardData || event.originalEvent.clipboardData).items;
-    console.log(items); // will give you the mime types
-    for (index in items) {
-        var item = items[index];
-        if (item.kind === 'file') {
-            var blob = item.getAsFile();
-            var reader = new FileReader();
-            reader.onload = function (evt) {
-                const result = evt.target.result;
-                addImage(result);
-            }; // data url!
-            reader.readAsDataURL(blob);
-        }
     }
 };
 
@@ -802,10 +698,10 @@ function triggerForwardMsg(obj) {
     }
     if (elememt.innerHTML === "" || elememt.innerHTML === "加载失败") {
         elememt.innerHTML = "...";
-        webview.getForwardMsg(resid).then(data => {
+        webview.getForwardMsg(resid).then(data=>{
             let html = "";
             for (let v of data.data) {
-                html += `<p>👤${filterXss(v.nickname)}(${v.user_id}) ${datetime(v.time)}</p>${parseMessage(v.message)}`;
+                html +=  `<p>👤${filterXss(v.nickname)}(${v.user_id}) ${datetime(v.time)}</p>${parseMessage(v.message)}`;
             }
             if (!html) {
                 html = "加载失败";
@@ -816,7 +712,7 @@ function triggerForwardMsg(obj) {
 }
 
 //init
-(async () => {
+(async()=>{
     if (!c2c) {
         //加载群资料、群员列表
         await updateMemberList();
