@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - test
+    
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: npm install
+      - run: npm install vsce --save-dev
+      - run: ./node_modules/.bin/vsce package
+      - uses: actions/upload-artifact@v2
+        with:
+          name: vscode-qq-pre.vsix
+          path: ./vscode-qq-*
