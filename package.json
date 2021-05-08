@@ -17,25 +17,6 @@
 		"configuration": {
 			"title": "VSCode QQ",
 			"properties": {
-				"vscode-qq.QQ.autoLogin": {
-					"type": "boolean",
-					"default": false,
-					"description": "是否在打开 VSCode 时自动登录 QQ 账户"
-				},
-				"vscode-qq.QQ.autoLoginStatus": {
-					"type": "number",
-					"default": 11,
-					"enum": [11, 60, 31, 50, 70, 41],
-					"enumDescriptions": [
-						"我在线上",
-						"Q我吧",
-						"离开",
-						"忙碌",
-						"请勿打扰",
-						"隐身"
-					],
-					"description": "当自动登录 QQ 账户选项开启时，登录之后的用户状态"
-				},
 				"vscode-qq.QQ.showAvatarOnTab": {
 					"type": "boolean",
 					"default": true,
@@ -49,11 +30,10 @@
 				"vscode-qq.theme.theme": {
 					"type": "string",
 					"default": "default",
-					"enum": ["default", "console", "default-old"],
+					"enum": ["default", "console"],
 					"enumDescriptions": [
 						"默认的 UI 主题",
-						"控制台风格的 UI 主题",
-						"旧的默认主题，如果当前版本的默认主题出现问题可以使用这个"
+						"控制台风格的 UI 主题"
 					],
 					"description": "修改聊天页面的主题"
 				},

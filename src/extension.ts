@@ -37,21 +37,6 @@ export function activate(context: vscode.ExtensionContext) {
     statusBarItem.command = "oicq.statusBar.click";
     statusBarItem.show();
     vscode.commands.registerCommand("oicq.statusBar.click", client.invoke);
-    // Check auto login
-    const config = vscode.workspace.getConfiguration('vscode-qq.QQ');
-    const autoLogin = config.get<boolean>('autoLogin');
-    if (autoLogin) {
-        const loginStatus = config.get<number>('autoLoginStatus') || 11;
-        if (global.client) {
-            if (!global.client.isOnline()) {
-                client.inputAccount();
-            } else {
-                global.client.setOnlineStatus(loginStatus)
-            }
-        } else {
-            client.inputAccount();
-        }
-    }
 }
 
 // this method is called when your extension is deactivated
