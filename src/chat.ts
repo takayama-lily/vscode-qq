@@ -42,12 +42,6 @@ vscode.workspace.onDidChangeConfiguration(evt => {
 
 const webviewMap: Map<string, vscode.WebviewPanel> = new Map;
 
-const availableThemes = [
-    "default-old",
-    "default",
-    "console"
-];
-
 function getHtml(id: string, webview: vscode.Webview) {
     let preload = webview.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, "assets", "preload.js")).toString();
     let css: string, js: string;
@@ -67,12 +61,8 @@ function getHtml(id: string, webview: vscode.Webview) {
             js = webview.asWebviewUri(vscode.Uri.file(theme_js)).toString();
         }
     } else {
-        let theme = "default";
-        if (config_theme && availableThemes.includes(config_theme)) {
-            theme = config_theme;
-        }
-        css = webview.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, "assets", theme + "-theme", "style.css")).toString();
-        js = webview.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, "assets", theme + "-theme", "app.js")).toString();
+        css = webview.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, "assets", config_theme + "-theme", "style.css")).toString();
+        js = webview.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, "assets", config_theme + "-theme", "app.js")).toString();
     }
     const { self, type, uin } = parseContactId(id);
     const path = webview.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, "assets")).toString();
