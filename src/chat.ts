@@ -148,9 +148,7 @@ function openChatView(id: string) {
                     if (value) {
                         const files = await Promise.all(
                             value.map(async v => {
-                                const f = await promises.readFile(v.fsPath);
-                                const ext = v.fsPath.substring(v.fsPath.lastIndexOf('.') + 1);
-                                return "data:image/" + ext + ";base64," + f.toString("base64");
+                                return webview.webview.asWebviewUri(vscode.Uri.parse(v.fsPath));
                             })
                         );
                         webview.webview.postMessage({
