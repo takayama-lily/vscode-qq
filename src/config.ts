@@ -8,9 +8,6 @@ interface Config extends oicq.ConfBot {
     account?: number,
     password?: string,
     show_me_add_group_request?: boolean,
-    theme?: string,
-    theme_css?: string,
-    theme_js?: string,
 }
 
 const optimized: Config = {
@@ -18,9 +15,6 @@ const optimized: Config = {
     password: "",
     platform: 5,
     show_me_add_group_request: false,
-    theme: "default",
-    theme_css: "",
-    theme_js: "",
 };
 
 let config: Config | undefined;

@@ -5,6 +5,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as global from "./global";
 import * as client from "./client";
+import { getConfig } from './config';
+import { createClient } from 'oicq';
 
 let timer: NodeJS.Timeout | undefined;
 
@@ -14,11 +16,11 @@ export function activate(context: vscode.ExtensionContext) {
 
     // create work dir
     global.setContext(context);
-    if (!fs.existsSync(context.globalStoragePath)) {
-        fs.mkdirSync(context.globalStoragePath);
+    if (!fs.existsSync(context.globalStorageUri.fsPath)) {
+        fs.mkdirSync(context.globalStorageUri.fsPath);
     }
-    if (!fs.existsSync(path.join(context.globalStoragePath, "tmp"))) {
-        fs.mkdirSync(path.join(context.globalStoragePath, "tmp"));
+    if (!fs.existsSync(path.join(context.globalStorageUri.fsPath, "tmp"))) {
+        fs.mkdirSync(path.join(context.globalStorageUri.fsPath, "tmp"));
     }
 
     if (!timer) {
