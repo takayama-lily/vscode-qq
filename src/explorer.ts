@@ -20,9 +20,9 @@ class ContactTreeItem extends vscode.TreeItem {
         super(id);
         this.id = id;
     };
-    updateLabel(name?: string) {
-        this.label = name + (this.new > 0 ? ` (+${this.new})` : "");
-        this.tooltip = name + ` (${parseContactId(this.id).uin})`;
+    updateLabel(emoji: string, name?: string, remark?: string) {
+        this.label = emoji + (remark || name) + (this.new > 0 ? ` (+${this.new})` : "");
+        this.tooltip = emoji + name + ` (${parseContactId(this.id).uin})`;
     }
 }
 
@@ -50,10 +50,12 @@ abstract class ContactListTreeDataProvider implements vscode.TreeDataProvider<st
             itemMap.set(id, item);
         }
         if (type === "u") {
-            const emoji = client.fl.get(uin)?.sex === "female" ? "🙎‍♀️" : "🙎‍♂️";
-            item.updateLabel(emoji + client.fl.get(uin)?.nickname);
+            const friend = client.fl.get(uin);
+            const emoji = friend?.sex === "female" ? "🙎‍♀️" : "🙎‍♂️";
+            item.updateLabel(emoji, friend?.nickname, friend?.remark);
         } else {
-            item.updateLabel("👨‍👦‍👦" + client.gl.get(uin)?.group_name);
+            const group = client.gl.get(uin);
+            item.updateLabel("👨‍👦‍👦", group?.group_name);
         }
         return item;
     }
