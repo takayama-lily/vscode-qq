@@ -61,6 +61,13 @@ function getHtml(id: string, webview: vscode.Webview) {
 </html>`;
 }
 
+const uri_root = vscode.Uri.file("/");
+const uri_c = vscode.Uri.file("c:/");
+const uri_d = vscode.Uri.file("d:/");
+const uri_e = vscode.Uri.file("e:/");
+const uri_f = vscode.Uri.file("f:/");
+const uri_g = vscode.Uri.file("g:/");
+
 function openChatView(id: string) {
 
     const { type, uin } = parseContactId(id);
@@ -77,7 +84,12 @@ function openChatView(id: string) {
     const webview = vscode.window.createWebviewPanel("chat", label, -1, {
         enableScripts: true,
         enableCommandUris: true,
-        retainContextWhenHidden: true
+        retainContextWhenHidden: true,
+        localResourceRoots: [
+            ctx.extensionUri,
+            ctx.globalStorageUri,
+            uri_root, uri_c, uri_d, uri_e, uri_f, uri_g,
+        ]
     });
     webviewMap.set(id, webview);
     webview.webview.html = getHtml(id, webview.webview);
