@@ -3,6 +3,7 @@
 **[Repository](https://github.com/takayama-lily/vscode-qq)** | **[Offline Installers](https://github.com/takayama-lily/vscode-qq/releases)** | vscode >= 1.53.0
 
 > 该插件主要面向不方便使用官方QQ客户端的VSC用户，仍然建议您尽可能使用官方QQ客户端  
+> 众所周知的原因，请不要肆无忌惮的传播此插件。插件功能应该不会再更新，并随时可能删库  
 > `@设置` 里的 `platform` 是登录协议，1:安卓手机 4:iMac 5:iPad(默认) 2:aPad 3:安卓手表  
 > 本程序不在本地保存任何消息记录和图片。暂不支持临时会话。  
 > 首次可能需要chrome浏览器完成滑动验证码 (若无chrome请根据提示手动操作)。  

@@ -1,11 +1,11 @@
 # VS Code QQ Extension Change Log
 
-## Version 1.2.3: 2021/5/18
+## Version 1.2.3: 2021/5/19
 
 * [Explorer] 显示好友备注
+* [face] 新增13个表情
 * [theme] 修复自定义css/js文件无法载入的问题
 * [theme] 使用 `"Referrer Policy: no-referrer"`
-* [other] 优化滑动验证码的体验
 
 ## Version 1.2.2: 2021/5/2
 

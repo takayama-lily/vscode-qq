@@ -299,10 +299,10 @@ function parseMessage(message) {
                 msg += `<a title="${v.data.qq}" href="javascript:void(0);" onclick="addAt('${v.data.qq}');">${filterXss(v.data.text)}</a>`;
                 break;
             case "face":
-                if (v.data.id > 310 || v.data.id === 275) {
-                    msg += "[未知表情]";
+                if (v.data.id > 323 || v.data.id === 275) {
+                    msg += v.data.text || "[未知表情]";
                 } else {
-                    msg += `<img ondblclick="addFace(${v.data.id})" src="${facePath + v.data.id}.png">`;
+                    msg += `<img class="face" ondblclick="addFace(${v.data.id})" src="${facePath + v.data.id}.png">`;
                 }
                 break;
             case "sface":
@@ -464,7 +464,7 @@ const idShowEmojiBox = document.querySelector('#show-emoji-box');
 
 // add face to document
 let tmpFaceStep = 0;
-for (let i = 0; i <= 310; ++i) {
+for (let i = 0; i <= 323; ++i) {
     if (i === 275 || (i > 247 && i < 260)) {
         continue;
     }

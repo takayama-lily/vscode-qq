@@ -173,6 +173,10 @@ body {
     width: auto;
     vertical-align: bottom;
 }
+.lite-chatbox .content img.face {
+    width: 28px;
+    height: 28px;
+}
 .lite-chatbox .content a {
     text-decoration: none;
 }
