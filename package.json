@@ -2,7 +2,7 @@
 	"name": "vscode-qq",
 	"displayName": "QQ",
 	"description": "lite qq for chat in working",
-	"version": "1.2.2",
+	"version": "1.2.3",
 	"engines": {
 		"vscode": "^1.53.0"
 	},
