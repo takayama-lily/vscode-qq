@@ -2,11 +2,12 @@ import * as child_process from "child_process";
 import * as EventEmitter from "events";
 import * as http from "http";
 import * as os from "os";
+import * as fs from "fs";
 import * as path from "path";
 import * as WebSocket from "ws";
 import * as getAnUnusedPort from "get-port";
-import { ctx } from "./global";
 
+const tmpdir = path.join(os.tmpdir(), "vscode-qq");
 const params = [
     "--disable-extensions",
     "--enable-automation",
@@ -27,6 +28,9 @@ export class Cdp extends EventEmitter {
 
     private async openChrome(url: string) {
         this.port = await getAnUnusedPort();
+        if (!fs.existsSync(tmpdir)) {
+            fs.mkdirSync(tmpdir);
+        }
         let cmd = "";
         if (os.platform().includes("win")) {
             cmd = "cmd /c start chrome.exe";
@@ -35,7 +39,7 @@ export class Cdp extends EventEmitter {
         }
         cmd += ` "${url}" `;
         cmd += params.join(" ")
-            + " --user-data-dir=" + path.join(ctx.globalStoragePath, "tmp")
+            + " --user-data-dir=" + tmpdir
             + " --remote-debugging-port=" + this.port;
         this.url = url;
         child_process.execSync(cmd);
@@ -89,11 +93,13 @@ export class Cdp extends EventEmitter {
                 } else if (obj.id === 2) {
                     const body = JSON.parse(obj.result.body);
                     this.ticket = body.ticket;
-                    ws.send(JSON.stringify({
-                        id: 3,
-                        method: "Browser.close"
-                    }));
-                    ws.close();
+                    if (this.ticket) {
+                        ws.send(JSON.stringify({
+                            id: 3,
+                            method: "Browser.close"
+                        }));
+                        ws.close();
+                    }
                 }
             } catch { }
         });
@@ -114,7 +120,7 @@ export class Cdp extends EventEmitter {
                 clearInterval(id);
                 this._getTicket();
             } else {
-                if (times >= 5) {
+                if (times >= 10) {
                     clearInterval(id);
                     this.emit("error", TIMEOUT_ERROR);
                 } else {

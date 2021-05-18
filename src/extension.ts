@@ -17,9 +17,6 @@ export function activate(context: vscode.ExtensionContext) {
     if (!fs.existsSync(context.globalStoragePath)) {
         fs.mkdirSync(context.globalStoragePath);
     }
-    if (!fs.existsSync(path.join(context.globalStoragePath, "tmp"))) {
-        fs.mkdirSync(path.join(context.globalStoragePath, "tmp"));
-    }
 
     if (!timer) {
         timer = setInterval(() => {
