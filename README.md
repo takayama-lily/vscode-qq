@@ -1,6 +1,7 @@
 # VS Code QQ Extension
 
 **[Repository](https://github.com/takayama-lily/vscode-qq)** | **[Offline Installers](https://github.com/takayama-lily/vscode-qq/releases)** | vscode >= 1.53.0
+[![discord](https://img.shields.io/static/v1?label=chat&message=discord&color=7289da&logo=discord)](https://discord.gg/gKnU7BARzv)
 
 > 该插件主要面向不方便使用官方QQ客户端的VSC用户，仍然建议您尽可能使用官方QQ客户端  
 > 众所周知的原因，请不要肆无忌惮的传播此插件。插件功能应该不会再更新，并随时可能删库  
