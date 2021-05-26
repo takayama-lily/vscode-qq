@@ -110,7 +110,7 @@
         const date = new Date(unixstamp ? unixstamp * 1000 : Date.now());
         return date.getFullYear()
             + "/"
-            + String(date.getMonth()).padStart(2, "0")
+            + String(date.getMonth() + 1).padStart(2, "0")
             + "/"
             + String(date.getDate()).padStart(2, "0")
             + " "
