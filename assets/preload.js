@@ -61,9 +61,9 @@
         return new Promise((resolve, reject) => {
             postMessage(obj);
             const id = setTimeout(() => {
-                reject(new TimeoutError);
+                reject(new vsc.TimeoutError);
                 handlers.delete(echo);
-            }, 5000);
+            }, 5500);
             handlers.set(echo, (data) => {
                 clearTimeout(id);
                 resolve(data);

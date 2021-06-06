@@ -321,7 +321,7 @@ button#send {
     width: 80px;
     height: 80px;
     border: 1px solid #c5d4c4;
-    border-radius: 100%;
+    border-radius: 10%;
     margin: 10px 55px;
 }
 .group-members  {

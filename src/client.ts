@@ -77,7 +77,7 @@ function createClient(uin: number) {
     });
     client.on("system.offline", (data) => {
         logining = false;
-        if (data.message.includes("未收到") || data.message.includes("register")) {
+        if (data.message.includes("服务器繁忙")) {
             data.message = "服务器繁忙，请过几秒后再次尝试。";
         }
         vscode.window.showErrorMessage(data.message);

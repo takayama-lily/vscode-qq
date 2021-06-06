@@ -1,5 +1,11 @@
 # VS Code QQ Extension Change Log
 
+## Version 1.2.4: 2021/6/6
+
+* 修复有时无法验证设备锁的问题
+* [theme] 修复月份显示少1的问题
+* [theme] 群头像改为方的
+
 ## Version 1.2.3: 2021/5/19
 
 * [Explorer] 显示好友备注
