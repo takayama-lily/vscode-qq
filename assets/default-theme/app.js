@@ -507,23 +507,21 @@ function parseMessage(message) {
                         msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[嵌套转发]</a><span style="display:none">${filterXss(v.data.data)}</span>`;
                     }
                 } else {
-                    var xmlContent = v.data.data;
+                    var xmlContent = filterXss(v.data.data);
                     //var xmlDoc=loadXML(testXML);
                     //var xmlMsgtitle=xmlDoc.getElementsByTagName("title")[1];
-                    eval('xmlMsg' + xmlContent.match(/(action=")(.+?)(")/gi)[0]);
-                    if (xmlMsgaction == "web") {
+                    eval('xmlMsg' + xmlContent.match(/(action=")(.+?)(")/gi)[0]); 
+                    if (xmlMsgaction == "web") { //判断是否为链接分享
                         var xmlMsgtitle = xmlContent.match(/(<title>)(.+?)(<\/title>)/gi)[0];
-                        xmlMsgtitle = xmlMsgtitle.replace(/(<title>)|(<\/title>)/gi, '');
+                        xmlMsgtitle = xmlMsgtitle.replace(/(<title>)|(<\/title>)/gi, '');//获取标题
                         var xmlMsgsummary = xmlContent.match(/(<summary>)(.+?)(<\/summary>)/gi)[0];
-                        xmlMsgsummary = xmlMsgsummary.replace(/(<summary>)|(<\/summary>)/gi, '');
-                        eval('xmlMsg' + xmlContent.match(/(cover=")(.+?)(")/gi)[0]);
-                        eval('xmlMsg' + xmlContent.match(/(url=")(.+?)(")/gi)[0]);
-                    }
-                    //msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[XML卡片消息]</a><span style="display:none">${filterXss(v.data.data)}</span>`;
-                    msg = `
+                        xmlMsgsummary = xmlMsgsummary.replace(/(<summary>)|(<\/summary>)/gi, '');//获取简介
+                        eval('xmlMsg' + xmlContent.match(/(cover=")(.+?)(")/gi)[0]);//获取封面
+                        eval('xmlMsg' + xmlContent.match(/(url=")(.+?)(")/gi)[0]);//获取目标地址
+                        msg = `
                         <div class="xmlMsgWrapper">
                             <div>
-                                <img src="${xmlMsgcover}" style="width: 64px; border-radius: 8px"/>
+                                <img src="${xmlMsgcover}" style="width: 56px; border-radius: 8px"/>
                             </div>
                             <div>
                                 <ul class="xmlMsgContent">
@@ -534,16 +532,25 @@ function parseMessage(message) {
                                 </ul>
                             </div>
                         </div>`
+                    } else {
+                    msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[XML卡片消息]</a><span style="display:none">${filterXss(v.data.data)}</span>`;
+                }
+                    
                 }
                 break;
             case "json":
                 /*
                 msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[JSON卡片消息]</a><span style="display:none">${filterXss(JSON.stringify(JSON.parse(v.data.data), null, 4))}</span>`;
                 */
-                var translatedJsonObj = eval('('+String(v.data.data)+')');
-                var jsonMsgTitle = Base64.decode(translatedJsonObj["meta"]["mannounce"]["title"]);
-                var jsonMsgContent = Base64.decode(translatedJsonObj["meta"]["mannounce"]["text"]); //提取内容
-                msg = `<span class="jsonMsgTitle">${jsonMsgTitle}</span><br/><span class="jsonMsgContent">${jsonMsgContent}</span><br/><a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[JSON卡片消息]</a><span style="display:none">${filterXss(JSON.stringify(JSON.parse(v.data.data), null, 4))}</span>`;
+                //"app": "com.tencent.mannounce"
+                var translatedJsonObj = eval('('+String(filterXss(v.data.data))+')'); //解析json消息
+                if (translatedJsonObj["app"] == "com.tencent.mannounce") { //判断是否为群公告
+                    var jsonMsgTitle = Base64.decode(translatedJsonObj["meta"]["mannounce"]["title"]); //提取标题
+                    var jsonMsgContent = Base64.decode(translatedJsonObj["meta"]["mannounce"]["text"]); //提取内容
+                    msg = `<span class="jsonMsgTitle">${jsonMsgTitle}</span><br/><span class="jsonMsgContent">${jsonMsgContent}</span><br/>`;
+                } else {
+                    msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[JSON卡片消息]</a><span style="display:none">${filterXss(JSON.stringify(JSON.parse(v.data.data), null, 4))}</span>`;
+                }
                 //msg +=`<span>${filterXss(JSON.stringify(JSON.parse(v.data.data), null, 4))}</span>`;
                 break;
                 
@@ -634,7 +641,7 @@ document.querySelector("body").insertAdjacentHTML("beforeend", `<div class="cont
     </div>
 </div>
 <div id="footer">
-    <textarea id="content" rows="10" placeholder="在此输入消息..."></textarea>
+    <textarea id="content" rows="4" placeholder="在此输入消息..."></textarea>
     <button id="send" onclick="sendMsg()">发送</button>Ctrl+Enter　
     <span id="show-stamp-box" class="insert-button">🧡</span>
     <div class="stamp-box box"></div>
