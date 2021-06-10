@@ -1,6 +1,6 @@
 /*! LiteWebChat_Frame v2.1.0 | MorFans Lab(c) 2017, BY:SuperPaxxs & Haswikr | https://lab.morfans.cn / Released under the LGPL License */
 * {
-    font-family: Microsoft Yahei UI;
+    font-family: Helvetica,"PingFang SC","Microsoft YaHei",sans-serif;
 }
 .lite-chatbox{
     padding:0;
@@ -8,7 +8,7 @@
     position:relative;
     overflow-y:auto;
     overflow-x:hidden;
-    font:18px Helvetica,"PingFang SC","Microsoft YaHei",sans-serif
+    font:18px
 }
 .lite-chatbox .cmsg{
     position:relative;
