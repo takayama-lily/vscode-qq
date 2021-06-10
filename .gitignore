@@ -1,7 +1,7 @@
 out
 dist
 node_modules
-.vscode
+.vscode/
 *.vsix
-.vscode/launch.json
+.vscode-test/
 .gitignore
