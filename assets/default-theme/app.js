@@ -507,7 +507,7 @@ function parseMessage(message) {
                         msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[嵌套转发]</a><span style="display:none">${filterXss(v.data.data)}</span>`;
                     }
                 } else {
-                    var xmlContent = filterXss(v.data.data);
+                    var xmlContent = v.data.data;
                     //var xmlDoc=loadXML(testXML);
                     //var xmlMsgtitle=xmlDoc.getElementsByTagName("title")[1];
                     eval('xmlMsg' + xmlContent.match(/(action=")(.+?)(")/gi)[0]); 
@@ -543,7 +543,7 @@ function parseMessage(message) {
                 msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[JSON卡片消息]</a><span style="display:none">${filterXss(JSON.stringify(JSON.parse(v.data.data), null, 4))}</span>`;
                 */
                 //"app": "com.tencent.mannounce"
-                var translatedJsonObj = eval('('+String(filterXss(v.data.data))+')'); //解析json消息
+                var translatedJsonObj = eval('('+String(v.data.data)+')'); //解析json消息
                 if (translatedJsonObj["app"] == "com.tencent.mannounce") { //判断是否为群公告
                     var jsonMsgTitle = Base64.decode(translatedJsonObj["meta"]["mannounce"]["title"]); //提取标题
                     var jsonMsgContent = Base64.decode(translatedJsonObj["meta"]["mannounce"]["text"]); //提取内容
