@@ -83,14 +83,68 @@ function getChatHistory(message_id = "", count = 20) {
 }
 
 let sending = false;
+const pastedImageBufferSize = 10_000_000;
+/** @type {{ placeholder: string, cqcode: string, url: string }[]} */
+const pastedImageMappings = [];
 function sendMsg() {
-    const message = document.querySelector("#content").value;
+    let message = `${document.querySelector("#content").value}`;
     if (sending || !message) {
         return;
     }
     sending = true;
     document.querySelector("#send").disabled = true;
-    webview.sendMsg(message).then((data) => {
+
+    // 把粘贴的图片占位符重新转换为 CQ 码
+    const splitted = []
+    let messageHtml = '';
+    while (true) {
+        let begin = Infinity;
+        /** @type {typeof pastedImageMappings[0]} */
+        let found;
+        for (const x of pastedImageMappings) {
+            const index = message.indexOf(x.placeholder);
+            if (index != -1 && index < begin) {
+                found = x;
+                begin = index;
+            }
+        }
+
+        if (begin === Infinity) {
+            messageHtml += filterXss(message);
+            splitted.push(message);
+            break;
+        }
+        const before = message.slice(0, begin);
+
+        splitted.push(before);
+        splitted.push(found.cqcode);
+        message = message.slice(begin + found.placeholder.length);
+
+        messageHtml += filterXss(before);
+        messageHtml += `<a href="${found.url}" target="_blank" onmouseenter="previewImage(this)">粘贴的图片</a>`;
+    }
+    // 真正的消息，已经把把图片占位符转换成了 CQ 码
+    const realMessage = splitted.join("");
+
+    // 计算目前的空间占用，清理比较老的图片
+    let currentSize = 0;
+    let clearIndex = pastedImageMappings.length - 1;
+    for (; clearIndex >= 0; --clearIndex) {
+        const size = pastedImageMappings[clearIndex].cqcode.length / 4 * 3;
+        currentSize += size;
+        if (currentSize >= pastedImageBufferSize) {
+            break;
+        }
+    }
+    if (clearIndex > 0) {
+        const removed = pastedImageMappings.splice(0, clearIndex);
+        for (const { url } of removed) {
+            URL.revokeObjectURL(url);
+        }
+        console.log(`Removed ${removed.length} items`);
+    }
+
+    webview.sendMsg(realMessage).then((data) => {
         if (data.retcode > 1) {
             let msg = data.error?.message;
             if (msg?.includes("禁言")) {
@@ -111,7 +165,7 @@ function sendMsg() {
             const html = `<a class="msgid" id="${data.data.message_id}"></a><div class="cright cmsg">
     <img class="headIcon radius" onmouseenter="previewImage(this)" src="${genAvaterUrl(me)}" />
     <span class="name" title="${nick}(${me}) ${datetime()}">${nick} ${timestamp()}</span>
-    <span class="content">${filterXss(message)}</span>
+    <span class="content">${messageHtml}</span>
 </div>`;
             document.querySelector("#lite-chatbox").insertAdjacentHTML("beforeend", html);
         }
@@ -405,6 +459,25 @@ function addStr2Textarea(str) {
     document.querySelector("#content").focus();
 }
 
+function setTextareaText(str) {
+    currentTextareaContent = str;
+    document.querySelector("#content").value = currentTextareaContent;
+    document.querySelector("#content").focus();
+}
+
+function insertStr2Textarea(str) {
+    const textArea = document.querySelector("#content");
+    if (textArea.selectionStart || textArea.selectionStart == '0') {
+        const begin = textArea.selectionStart;
+        const end = textArea.selectionEnd || textArea.selectionStart;
+        setTextareaText(textArea.value.substring(0, begin) + str + textArea.value.substring(end));
+        textArea.selectionStart = textArea.selectionEnd = begin + str.length;
+    }
+    else {
+        addStr2Textarea(str);
+    }
+}
+
 let currentTextareaContent = "";
 
 document.querySelector("body").insertAdjacentHTML("beforeend", `<div class="content-left"><div class="lite-chatbox">
@@ -438,7 +511,7 @@ document.querySelector("body").insertAdjacentHTML("beforeend", `<div class="cont
     <div class="face-box box"></div>
     <span id="show-emoji-box" class="insert-button">颜</span>
     <div class="emoji-box box"></div>
-    <span id="insert-pic" class="insert-button">🖼️</span>
+    <span id="insert-pic" class="insert-button" title="也可以直接粘贴图片">🖼️</span>
     ${c2c ? "" : '<span id="to-bottom" onclick="triggerRightBar()">显示/隐藏侧栏</span>'}
 </div>
 </div>
@@ -657,6 +730,39 @@ document.querySelector("#content").oninput = function () {
         currentTextareaContent = content;
     }
 };
+
+// 粘贴图片
+document.querySelector("#content").addEventListener("paste", async ev => {
+    ev.preventDefault();
+    /** @type {DataTransfer} */
+    const clipboardData = (ev.clipboardData || ev.originalEvent.clipboardData);
+    const pasted = await Promise.all(Array.from(clipboardData.items).map(item => {
+        if (item.kind !== "file") {
+            return new Promise(resolve => item.getAsString(s => resolve(s.replace("\r\n", "\n"))));
+        }
+        if (!item.type.startsWith("image/")) {
+            return Promise.resolve(`（暂不支持的文件类型：${item.type}）`);
+        }
+
+        return new Promise((resolve, reject) => {
+            const blob = item.getAsFile();
+            const url = URL.createObjectURL(blob);
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                const base64 = reader.result.split(",")[1];
+                const cqcode = `[CQ:image,file=base64://${base64}]`;
+                const placeholder = `[粘贴的图片 ${url}]`;
+                pastedImageMappings.push({ placeholder, cqcode, url });
+                resolve(placeholder);
+            }
+            reader.onerror = reject;
+            reader.readAsDataURL(blob)
+        })
+    }))
+    const text = pasted.join();
+    insertStr2Textarea(text);
+})
 
 function timestamp(unixstamp) {
     return webview.timestamp(unixstamp);
