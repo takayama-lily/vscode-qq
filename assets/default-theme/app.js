@@ -733,12 +733,15 @@ document.querySelector("#content").oninput = function () {
 
 // 粘贴图片
 document.querySelector("#content").addEventListener("paste", async ev => {
-    ev.preventDefault();
     /** @type {DataTransfer} */
     const clipboardData = (ev.clipboardData || ev.originalEvent.clipboardData);
     const pasted = await Promise.all(Array.from(clipboardData.items).map(item => {
         if (item.kind !== "file") {
-            return new Promise(resolve => item.getAsString(s => resolve(s.replace("\r\n", "\n"))));
+            // 处理富文本会比较麻烦，交给 textarea 自己去处理吧（
+            // 可是，这样其实有个问题，假如同时复制了交错的文字与图片
+            // 那么顺序将会被打乱 - 首先是 textarea 自己粘贴的文字，之后才是图片
+            // 该怎么办才好呀 qwq
+            return Promise.resolve('');
         }
         if (!item.type.startsWith("image/")) {
             return Promise.resolve(`（暂不支持的文件类型：${item.type}）`);
