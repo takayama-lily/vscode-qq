@@ -763,7 +763,7 @@ document.querySelector("#content").addEventListener("paste", async ev => {
             reader.readAsDataURL(blob)
         })
     }))
-    const text = pasted.join();
+    const text = pasted.join("");
     insertStr2Textarea(text);
 })
 
