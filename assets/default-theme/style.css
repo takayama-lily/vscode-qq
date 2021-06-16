@@ -1,11 +1,14 @@
 /*! LiteWebChat_Frame v2.1.0 | MorFans Lab(c) 2017, BY:SuperPaxxs & Haswikr | https://lab.morfans.cn / Released under the LGPL License */
+* {
+    font-family: Helvetica,"PingFang SC","Microsoft YaHei",sans-serif;
+}
 .lite-chatbox{
     padding:0;
     width:100%;
     position:relative;
     overflow-y:auto;
     overflow-x:hidden;
-    font:18px Helvetica,"PingFang SC","Microsoft YaHei",sans-serif
+    font:18px
 }
 .lite-chatbox .cmsg{
     position:relative;
@@ -26,7 +29,6 @@
     height:34px;
     top:9px;
     position:absolute;
-    border:1px solid #c5d4c4
 }
 .lite-chatbox .name{
     color:var(--vscode-input-foreground);
@@ -86,9 +88,9 @@
     border-radius:6px
 }
 .lite-chatbox img.radius{
-    -moz-border-radius:100%;
-    -webkit-border-radius:100%;
-    border-radius:100%
+    -moz-border-radius:20%;
+    -webkit-border-radius:20%;
+    border-radius:20%
 }
 .lite-chatbox .cright img.headIcon{
     right:0
@@ -109,8 +111,6 @@
     border-radius:20px 0 20px 20px;
     /* color:#aaa; */
     background:var(--vscode-sideBar-background);
-    -webkit-box-shadow:5px 5px 15px 0 rgba(102,102,102,0.15);
-    box-shadow:5px 5px 15px 0 rgba(102,102,102,0.15)
 }
 .lite-chatbox .cleft .content{
     margin:0 0 0 48px;
@@ -119,8 +119,6 @@
     /* color:#aaa; */
     border: 2px solid var(--vscode-quickInputTitle-background);
     background: var(--vscode-sideBar-background);
-    -webkit-box-shadow:5px 5px 15px 0 rgba(102,102,102,0.1);
-    box-shadow:5px 5px 15px 0 rgba(102,102,102,0.1)
 }
 .lite-chatbox .cright .content:after{
     right:-12px;
@@ -207,9 +205,21 @@ body {
     box-sizing: border-box;
     background-color: var(--vscode-editor-background);
     color: var(--vscode-editor-foreground);
+    font-size: 16px;
+    padding: 10px;
 }
 button#send {
-    margin: 10px;
+    margin-right: 10px;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    padding-left: 1.5em;
+    padding-right: 1.5em;
+    border-radius: 8px;
+    -webkit-border-radius: 8px;
+    background:var(--vscode-editor-background);
+    color: var(--vscode-editor-foreground);
+    font-weight: bold;
+    font-size: 16px;
 }
 #to-bottom {
     position: absolute;
@@ -362,3 +372,28 @@ button#send {
 .msg-forward p {
     color: var(--vscode-input-foreground);
 }
+
+.jsonMsgTitle{
+    font-weight: bold;
+    font-size: 20px;
+}
+
+/* .xmlMsgWrapper {
+    display: table;
+}
+
+.xmlMsgContent {
+    vertical-align: middle;
+    list-style: none;
+}
+
+.xmlMsgTitle {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.xmlMsgWrapper div{
+    display: table-cell;
+    vertical-align: middle;
+    text-align: left;
+} */

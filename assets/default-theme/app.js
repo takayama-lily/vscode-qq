@@ -337,11 +337,27 @@ function parseMessage(message) {
                         msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[嵌套转发]</a><span style="display:none">${filterXss(v.data.data)}</span>`;
                     }
                 } else {
-                    msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[XML卡片消息]</a><span style="display:none">${filterXss(v.data.data)}</span>`;
+                    const dom = new DOMParser().parseFromString(v.data.data, "text/xml");
+                    if (dom.querySelector("msg")?.getAttribute("action") === "web") { //判断是否为链接分享
+                        const title = dom.querySelector("msg").getAttribute("brief");
+                        const url = dom.querySelector("msg").getAttribute("url");
+                        msg = `<a href="${filterXss(url)}">${filterXss(title)}</a>`;
+                    } else {
+                        msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[XML卡片消息]</a><span style="display:none">${filterXss(v.data.data)}</span>`;
+                    }
                 }
                 break;
             case "json":
-                msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[JSON卡片消息]</a><span style="display:none">${filterXss(JSON.stringify(JSON.parse(v.data.data), null, 4))}</span>`;
+                try {
+                    const jsonObj = JSON.parse(v.data.data);
+                    if (jsonObj["app"] === "com.tencent.mannounce") { //判断是否为群公告
+                        const title = decodeURIComponent(escape(atob(jsonObj["meta"]["mannounce"]["title"])));
+                        const content = decodeURIComponent(escape(atob(jsonObj["meta"]["mannounce"]["text"])));
+                        msg = `<span class="jsonMsgTitle">${filterXss(title)}</span><br/><span class="jsonMsgContent">${filterXss(content)}</span><br/>`;
+                    } else {
+                        msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[JSON卡片消息]</a><span style="display:none">${filterXss(JSON.stringify(jsonObj, null, 4))}</span>`;
+                    }
+                } catch { }
                 break;
             case "file":
                 msg = `<a href="${v.data.url}" target="_blank">文件: ${filterXss(v.data.name)} (${v.data.size / 1e6}MB)</a>`;
@@ -430,7 +446,7 @@ document.querySelector("body").insertAdjacentHTML("beforeend", `<div class="cont
     </div>
 </div>
 <div id="footer">
-    <textarea id="content" rows="10" placeholder="在此输入消息..."></textarea>
+    <textarea id="content" rows="4" placeholder="在此输入消息..."></textarea>
     <button id="send" onclick="sendMsg()">发送</button>Ctrl+Enter　
     <span id="show-stamp-box" class="insert-button">🧡</span>
     <div class="stamp-box box"></div>
