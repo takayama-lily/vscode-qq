@@ -337,53 +337,28 @@ function parseMessage(message) {
                         msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[嵌套转发]</a><span style="display:none">${filterXss(v.data.data)}</span>`;
                     }
                 } else {
-                    var xmlContent = v.data.data;
-                    //var xmlDoc=loadXML(testXML);
-                    //var xmlMsgtitle=xmlDoc.getElementsByTagName("title")[1];
-                    eval('xmlMsg' + xmlContent.match(/(action=")(.+?)(")/gi)[0]); 
-                    if (xmlMsgaction == "web") { //判断是否为链接分享
-                        var xmlMsgtitle = xmlContent.match(/(<title>)(.+?)(<\/title>)/gi)[0];
-                        xmlMsgtitle = xmlMsgtitle.replace(/(<title>)|(<\/title>)/gi, '');//获取标题
-                        var xmlMsgsummary = xmlContent.match(/(<summary>)(.+?)(<\/summary>)/gi)[0];
-                        xmlMsgsummary = xmlMsgsummary.replace(/(<summary>)|(<\/summary>)/gi, '');//获取简介
-                        eval('xmlMsg' + xmlContent.match(/(cover=")(.+?)(")/gi)[0]);//获取封面
-                        eval('xmlMsg' + xmlContent.match(/(url=")(.+?)(")/gi)[0]);//获取目标地址
-                        msg = `
-                        <div class="xmlMsgWrapper">
-                            <div>
-                                <img src="${xmlMsgcover}" style="width: 56px; border-radius: 8px"/>
-                            </div>
-                            <div>
-                                <ul class="xmlMsgContent">
-                                    <li class="xmlMsgTitle">
-                                    <a href="${xmlMsgurl}">[链接]${xmlMsgtitle}</a>
-                                    </li>
-                                    <li class="xmlMsgSummary">${xmlMsgsummary}</li>
-                                </ul>
-                            </div>
-                        </div>`
+                    const dom = new DOMParser().parseFromString(v.data.data, "text/xml");
+                    if (dom.querySelector("msg")?.getAttribute("action") === "web") { //判断是否为链接分享
+                        const title = dom.querySelector("msg").getAttribute("brief");
+                        const url = dom.querySelector("msg").getAttribute("url");
+                        msg = `<a href="${filterXss(url)}">${filterXss(title)}</a>`;
                     } else {
-                    msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[XML卡片消息]</a><span style="display:none">${filterXss(v.data.data)}</span>`;
-                }
-                    
+                        msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[XML卡片消息]</a><span style="display:none">${filterXss(v.data.data)}</span>`;
+                    }
                 }
                 break;
             case "json":
-                /*
-                msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[JSON卡片消息]</a><span style="display:none">${filterXss(JSON.stringify(JSON.parse(v.data.data), null, 4))}</span>`;
-                */
-                //"app": "com.tencent.mannounce"
-                var translatedJsonObj = eval('('+String(v.data.data)+')'); //解析json消息
-                if (translatedJsonObj["app"] == "com.tencent.mannounce") { //判断是否为群公告
-                    var jsonMsgTitle = decodeURIComponent(escape(atob(translatedJsonObj["meta"]["mannounce"]["title"]))); //提取标题
-                    var jsonMsgContent = decodeURIComponent(escape(atob(translatedJsonObj["meta"]["mannounce"]["text"]))); //提取内容
-                    msg = `<span class="jsonMsgTitle">${jsonMsgTitle}</span><br/><span class="jsonMsgContent">${jsonMsgContent}</span><br/>`;
-                } else {
-                    msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[JSON卡片消息]</a><span style="display:none">${filterXss(JSON.stringify(JSON.parse(v.data.data), null, 4))}</span>`;
-                }
-                //msg +=`<span>${filterXss(JSON.stringify(JSON.parse(v.data.data), null, 4))}</span>`;
+                try {
+                    const jsonObj = JSON.parse(v.data.data);
+                    if (jsonObj["app"] === "com.tencent.mannounce") { //判断是否为群公告
+                        const title = decodeURIComponent(escape(atob(jsonObj["meta"]["mannounce"]["title"])));
+                        const content = decodeURIComponent(escape(atob(jsonObj["meta"]["mannounce"]["text"])));
+                        msg = `<span class="jsonMsgTitle">${filterXss(title)}</span><br/><span class="jsonMsgContent">${filterXss(content)}</span><br/>`;
+                    } else {
+                        msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[JSON卡片消息]</a><span style="display:none">${filterXss(JSON.stringify(jsonObj, null, 4))}</span>`;
+                    }
+                } catch { }
                 break;
-                
             case "file":
                 msg = `<a href="${v.data.url}" target="_blank">文件: ${filterXss(v.data.name)} (${v.data.size / 1e6}MB)</a>`;
                 break;

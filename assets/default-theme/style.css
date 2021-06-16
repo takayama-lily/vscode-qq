@@ -209,16 +209,17 @@ body {
     padding: 10px;
 }
 button#send {
-    margin: 10px;
+    margin-right: 10px;
     padding-top: 0.5em;
     padding-bottom: 0.5em;
-    padding-left: 2em;
-    padding-right: 2em;
+    padding-left: 1.5em;
+    padding-right: 1.5em;
     border-radius: 8px;
     -webkit-border-radius: 8px;
-    background:var(--vscode-sideBar-background);
-    color: var(--vscode-editorLink-activeForeground);
+    background:var(--vscode-editor-background);
+    color: var(--vscode-editor-foreground);
     font-weight: bold;
+    font-size: 16px;
 }
 #to-bottom {
     position: absolute;
@@ -377,12 +378,11 @@ button#send {
     font-size: 20px;
 }
 
-.xmlMsgWrapper {
+/* .xmlMsgWrapper {
     display: table;
 }
 
 .xmlMsgContent {
-    /**float: right;*/
     vertical-align: middle;
     list-style: none;
 }
@@ -396,4 +396,4 @@ button#send {
     display: table-cell;
     vertical-align: middle;
     text-align: left;
-} 
+} */
