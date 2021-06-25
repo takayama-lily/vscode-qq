@@ -341,7 +341,7 @@ function parseMessage(message) {
                     if (dom.querySelector("msg")?.getAttribute("action") === "web") { //判断是否为链接分享
                         const title = dom.querySelector("msg").getAttribute("brief");
                         const url = dom.querySelector("msg").getAttribute("url");
-                        msg = `<a href="${filterXss(url)}">${filterXss(title)}</a>`;
+                        msg = `<a href="${filterXss(url)}">${filterXss(title)}</a><br>` + filterXss(dom.querySelector("summary")?.innerHTML);
                     } else {
                         msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[XML卡片消息]</a><span style="display:none">${filterXss(v.data.data)}</span>`;
                     }
