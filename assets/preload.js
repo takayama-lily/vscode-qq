@@ -3,8 +3,6 @@
  */
 ;(() => {
 
-    const t = Date.now();
-
     /**
      * @type {import("./types").Webview}
      */
@@ -32,6 +30,7 @@
     vsc.target_uin = Number(env.attributes.target_id?.value);
     vsc.assets_path = env.attributes.path?.value + "/";
     vsc.faces_path = vsc.assets_path + "faces/";
+    vsc.t = Number(env.attributes.t?.value);
 
     /**
      * @param {import("oicq").CommonEventData} data 
@@ -95,10 +94,10 @@
 
     vsc.scrollHome = () => window.scroll(0, 0);
     vsc.scrollEnd = () => window.scroll(0, window.document.body.scrollHeight);
-    vsc.getUserAvaterUrlSmall = (uin) => `https://q1.qlogo.cn/g?b=qq&s=100&nk=${uin}&t=` + t;
-    vsc.getUserAvaterUrlLarge = (uin) => `https://q1.qlogo.cn/g?b=qq&s=640&nk=${uin}&t=` + t;
-    vsc.getGroupAvaterUrlSmall = (uin) => `https://p.qlogo.cn/gh/${uin}/${uin}/100?t=` + t;
-    vsc.getGroupAvaterUrlLarge = (uin) => `https://p.qlogo.cn/gh/${uin}/${uin}/640?t=` + t;
+    vsc.getUserAvaterUrlSmall = (uin) => `https://q1.qlogo.cn/g?b=qq&s=100&nk=${uin}&t=` + vsc.t;
+    vsc.getUserAvaterUrlLarge = (uin) => `https://q1.qlogo.cn/g?b=qq&s=640&nk=${uin}&t=` + vsc.t;
+    vsc.getGroupAvaterUrlSmall = (uin) => `https://p.qlogo.cn/gh/${uin}/${uin}/100?t=` + vsc.t;
+    vsc.getGroupAvaterUrlLarge = (uin) => `https://p.qlogo.cn/gh/${uin}/${uin}/640?t=` + vsc.t;
 
     vsc.timestamp = (unixstamp) => {
         const date = new Date(unixstamp ? unixstamp * 1000 : Date.now());

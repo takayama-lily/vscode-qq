@@ -20,6 +20,8 @@ const availableThemes = [
     "console"
 ];
 
+const T = Date.now();
+
 function getHtml(id: string, webview: vscode.Webview) {
     let preload = webview.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, "assets", "preload.js")).toString();
     let css: string, js: string;
@@ -54,7 +56,7 @@ function getHtml(id: string, webview: vscode.Webview) {
     <link rel="stylesheet" type="text/css" href="${css}" />
 </head>
 <body>
-    <env self_id="${self}" nickname="${client.nickname}" c2c="${type === "u" ? 1 : 0}" target_id="${uin}" temp="0" path="${path}">
+    <env self_id="${self}" nickname="${client.nickname}" c2c="${type === "u" ? 1 : 0}" target_id="${uin}" temp="0" path="${path}" t="${T}">
     <script src="${preload}"></script>
     <script src="${js}"></script>
 </body>
