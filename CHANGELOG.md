@@ -1,5 +1,12 @@
 # VS Code QQ Extension Change Log
 
+## Version 1.3.0: 2021/7/22
+
+* [default-theme] 修复头像缓存无法及时更新的问题
+* [default-theme] 支持直接粘贴图片
+* [default-theme] 支持接收链接分享
+* [default-theme] 优化了UI
+
 ## Version 1.2.4: 2021/6/6
 
 * 修复有时无法验证设备锁的问题

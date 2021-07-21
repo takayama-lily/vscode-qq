@@ -1,19 +1,16 @@
 # VS Code QQ Extension
 
-**[Repository](https://github.com/takayama-lily/vscode-qq)** | **[Offline Installers](https://github.com/takayama-lily/vscode-qq/releases)** | vscode >= 1.53.0
-[![discord](https://img.shields.io/static/v1?label=chat&message=discord&color=7289da&logo=discord)](https://discord.gg/gKnU7BARzv)
+[![discord](https://img.shields.io/static/v1?label=chat&message=discord&color=7289da&logo=discord)](https://discord.gg/gKnU7BARzv) | **[Repository](https://github.com/takayama-lily/vscode-qq)** | **[Offline Installers](https://github.com/takayama-lily/vscode-qq/releases)** | vscode >= 1.53.0
 
-> 该插件主要面向不方便使用官方QQ客户端的VSC用户  
 > `@设置` 里的 `platform` 是登录协议，1:手机 3:手表(功能不完整) 4:PC 5:pad(默认)  
 > 本程序不在本地保存任何消息记录和图片。暂不支持临时会话。  
-> 首次可能需要chrome浏览器完成滑动验证码 (若无chrome请根据提示手动操作)。  
-> 仍然建议您尽可能使用官方QQ客户端。  
+> 首次登录可能需要有chrome浏览器完成滑动验证码 (若无chrome请根据提示手动操作)。  
 
 ## 切换UI主题
 
 * 当前支持两种主题 `default`(默认) 、`console`(控制台风格)  
-* 可在`@设置`中加入 `"theme": "console"` 来切换  
-* 欢迎为本项目贡献UI，详细翻阅 [修改/自定义UI主题](https://github.com/takayama-lily/vscode-qq/wiki/%E8%87%AA%E5%AE%9A%E4%B9%89%E8%81%8A%E5%A4%A9UI%E7%95%8C%E9%9D%A2)
+* 可在`@设置`中修改 `"theme": "console"` 来切换  
+* 支持 [修改/自定义UI主题](https://github.com/takayama-lily/vscode-qq/wiki/%E8%87%AA%E5%AE%9A%E4%B9%89%E8%81%8A%E5%A4%A9UI%E7%95%8C%E9%9D%A2)
 
 ## 可用命令
 
