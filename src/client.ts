@@ -52,6 +52,17 @@ function createClient(uin: number) {
         vscode.window.showErrorMessage(data.message);
 
     });
+    client.on("system.login.qrcode", function (data) {
+        const webview = vscode.window.createWebviewPanel("device", "手机QQ扫码登录 (完成后请关闭)", -1, {
+            enableScripts: true,
+            enableCommandUris: true
+        });
+        webview.webview.html = `若提示二维码已过期重试一次<br><img src="data:image/jpeg;base64,${data.image.toString("base64")}">`;
+        webview.reveal();
+        webview.onDidDispose(() => {
+            client.login();
+        });
+    });
     client.on("system.login.slider", function (data) {
         const cdp = new Cdp;
         cdp.on("ticket", (ticket: string) => {
@@ -89,7 +100,7 @@ function createClient(uin: number) {
         }
         setConfig({
             account: this.uin,
-            password: this.password_md5.toString("hex")
+            password: this.password_md5 ? this.password_md5.toString("hex") : "qrcode"
         });
         vscode.window.showInformationMessage(`${client.nickname}(${client.uin}) 已上线`);
         initLists();
@@ -125,16 +136,18 @@ function inputAccount() {
  */
 function inputPassword() {
     const password = String(getConfig().password);
-    if (password) {
+    if (password === "qrcode") {
+        return client.login();
+    } else if (password) {
         return client.login(password);
     }
     vscode.window.showInputBox({
-        placeHolder: "输入密码...",
+        placeHolder: "输入密码... (扫码登录请留空)",
         prompt: `输入账号 ${client.uin} 的密码`,
         password: true
     }).then((pass) => {
         if (!pass) {
-            return;
+            return client.login();
         }
         const password = crypto.createHash("md5").update(pass).digest();
         logining = true;
@@ -243,7 +256,7 @@ export function invoke() {
             } else if (value) {
                 const i = arr.indexOf(value);
                 selectedStatus = Number(Object.keys(statusMap)[i]);
-                if (client && client.password_md5) {
+                if (client) {
                     if (!client.isOnline()) {
                         client.login();
                     } else {

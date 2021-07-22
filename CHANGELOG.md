@@ -1,7 +1,8 @@
 # VS Code QQ Extension Change Log
 
-## Version 1.3.0: 2021/7/22
+## Version 1.3.1: 2021/7/22
 
+* [Explorer] 支持手机QQ扫码直接登录
 * [default-theme] 修复头像缓存无法及时更新的问题
 * [default-theme] 支持直接粘贴图片
 * [default-theme] 支持接收链接分享
