@@ -1,5 +1,10 @@
 # VS Code QQ Extension Change Log
 
+## Version 1.3.2: 2021/7/23
+
+* 修复每次登录都要扫码的问题
+* 放大二维码
+
 ## Version 1.3.1: 2021/7/22
 
 * [Explorer] 支持手机QQ扫码直接登录
