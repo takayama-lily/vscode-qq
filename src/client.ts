@@ -57,7 +57,7 @@ function createClient(uin: number) {
             enableScripts: true,
             enableCommandUris: true
         });
-        webview.webview.html = `若提示二维码已过期重试一次<br><img width="400px" height="400px" src="data:image/jpeg;base64,${data.image.toString("base64")}">`;
+        webview.webview.html = `若提示二维码已过期重试一次<br><img width="400px" height="400px" src="data:image/png;base64,${data.image.toString("base64")}">`;
         webview.reveal();
         webview.onDidDispose(() => {
             client.login();
