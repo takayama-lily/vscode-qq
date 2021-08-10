@@ -200,7 +200,7 @@ function genSystemMessage(data) {
     } else if (data.notice_type === "group") {
         switch (data.sub_type) {
             case "recall":
-                msg = `${genLabel(data.operator_id)} 撤回了 ${data.user_id === data.operator_id ? "自己" : genLabel(data.user_id)} 的<a href="#${data.message_id}">一条消息</>`;
+                msg = `${genLabel(data.operator_id)} 撤回了 ${data.user_id === data.operator_id ? "自己" : genLabel(data.user_id)} 的<a href="#${data.message_id}" onclick="document.querySelector('#${filterMsgIdSelector(data.message_id).replace(/\\/g, "\\\\")}')?.nextElementSibling.animate([{'background':'var(--vscode-sideBar-background)'}],{duration: 3000})">一条消息</>`;
                 appendRecalledText(data.message_id);
                 break;
             case "increase":
