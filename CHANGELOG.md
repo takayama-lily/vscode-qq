@@ -1,5 +1,9 @@
 # VS Code QQ Extension Change Log
 
+## Version 1.3.3: 2021/8/10
+
+* [default-theme] 定位到`[回复]`和`[撤回]`的消息时显示动画效果
+
 ## Version 1.3.2: 2021/7/23
 
 * 修复每次登录都要扫码的问题
