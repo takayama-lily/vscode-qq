@@ -383,7 +383,8 @@ function parseMessage(message) {
                 msg = `<a href="${v.data.url}" target="_blank">视频消息</a>`;
                 break;
             case "xml":
-                if (v.data.type === 35) {
+                const dom = new DOMParser().parseFromString(v.data.data, "text/xml");
+                if (dom.querySelector("msg")?.getAttribute("serviceID") === "35") {
                     try {
                         const resid = /resid="[^"]+"/.exec(v.data.data)[0].replace("resid=\"", "").replace("\"", "");
                         msg = `<a href="javascript:void(0)" onclick="triggerForwardMsg(this)" id="${resid}">[合并转发]</a><span class="msg-forward"></span>`;
@@ -391,7 +392,6 @@ function parseMessage(message) {
                         msg = `<a href="javascript:void(0)" onclick="javascript:var s=this.nextElementSibling.style;if(s.display=='block')s.display='none';else s.display='block'">[嵌套转发]</a><span style="display:none">${filterXss(v.data.data)}</span>`;
                     }
                 } else {
-                    const dom = new DOMParser().parseFromString(v.data.data, "text/xml");
                     if (dom.querySelector("msg")?.getAttribute("action") === "web") { //判断是否为链接分享
                         const title = dom.querySelector("msg").getAttribute("brief");
                         const url = dom.querySelector("msg").getAttribute("url");
