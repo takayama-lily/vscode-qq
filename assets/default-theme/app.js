@@ -347,7 +347,7 @@ function parseMessage(message) {
     for (let v of message) {
         switch (v.type) {
             case "text":
-                msg += filterXss(v.data.text);
+                msg += filterXss(v.data.text).replace(/(https?:\/\/[^\s]+)/g, '<a href="$1">$1</a>');
                 break;
             case "at":
                 msg += `<a title="${v.data.qq}" href="javascript:void(0);" onclick="addAt('${v.data.qq}');">${filterXss(v.data.text)}</a>`;
