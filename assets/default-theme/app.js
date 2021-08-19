@@ -353,8 +353,8 @@ function parseMessage(message) {
                 msg += `<a title="${v.data.qq}" href="javascript:void(0);" onclick="addAt('${v.data.qq}');">${filterXss(v.data.text)}</a>`;
                 break;
             case "face":
-                if (v.data.id > 323 || v.data.id === 275) {
-                    msg += v.data.text || "[未知表情]";
+                if (v.data.id > 324) {
+                    msg += v.data.text || "[表情]";
                 } else {
                     msg += `<img class="face" ondblclick="addFace(${v.data.id})" src="${facePath + v.data.id}.png">`;
                 }
@@ -553,7 +553,7 @@ const idShowEmojiBox = document.querySelector('#show-emoji-box');
 
 // add face to document
 let tmpFaceStep = 0;
-for (let i = 0; i <= 323; ++i) {
+for (let i = 0; i <= 324; ++i) {
     if (i === 275 || (i > 247 && i < 260)) {
         continue;
     }
