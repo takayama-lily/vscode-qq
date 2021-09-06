@@ -458,7 +458,7 @@ export function refreshContacts(id: string, flag: boolean) {
  *          之前无新消息时：全部刷新(新消息+1)
  *          之前有新消息时：单个刷新(新消息+1)
  * 
- *  打开视图时/视图聚焦时(需要通过webview上报window.focus事件)：
+ *  打开视图时/视图聚焦时：
  *      之前无新消息时：不刷新
  *      之前有新消息时：单个刷新(新消息置0)
  * 
