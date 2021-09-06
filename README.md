@@ -22,7 +22,9 @@
 
 ## 其他
 
-* [清除登录信息](https://github.com/takayama-lily/vscode-qq/wiki/%E6%B8%85%E9%99%A4%E7%99%BB%E5%BD%95%E4%BF%A1%E6%81%AF)
+* 如何清除登录信息
+  1. 登录状态下点击 `@切换账号`
+  2. 关闭或重启vscode即可完全清除
 * [外网被限制无法登录的解决方法](https://github.com/takayama-lily/vscode-qq/wiki/%E6%88%91%E7%9A%84%E6%9C%BA%E5%99%A8%E6%B2%A1%E6%9C%89%E5%A4%96%E7%BD%91%E6%80%8E%E4%B9%88%E5%8A%9E)
 
 ----
@@ -37,9 +39,10 @@
 ## 自行编译此扩展
 
 ```bash
+# Node.js版本需高于12.16
 # clone此项目
-npm i
-npm i typescript -g
-npm i vsce -g
-vsce package
+> npm i
+> npm i typescript -g
+> npm i vsce -g
+> vsce package
 ```
