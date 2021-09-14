@@ -465,7 +465,7 @@ function addFace(id) {
  * @param {string} file 
  */
  function addImage(file) {
-    const cqcode = `[CQ:image,file=${file}]`;
+    const cqcode = `[CQ:image,file=${file},type=face]`;
     addStr2Textarea(cqcode);
 }
 
@@ -740,7 +740,7 @@ document.querySelector("#content").oninput = function () {
         addStr2Textarea(cqcode);
     } else if (diff.endsWith("&vscodeDragFlag=1")) {
         const file = new URL(diff).searchParams.get("file");
-        const cqcode = `[CQ:image,file=${file}]`;
+        const cqcode = `[CQ:image,file=${file},type=face]`;
         addStr2Textarea(cqcode);
     } else {
         currentTextareaContent = content;
