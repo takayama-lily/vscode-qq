@@ -133,7 +133,7 @@ function openChatView(id: string) {
     });
 }
 
-function postC2CEvent(data: oicq.FriendNoticeEventData | oicq.PrivateMessageEventData) {
+function postC2CEvent(data: oicq.FriendNoticeEventData | oicq.PrivateMessageEventData | oicq.SyncMessageEventData) {
     const id = genContactId("u", data.user_id);
     webviewMap.get(id)?.webview.postMessage(data);
 }
@@ -166,4 +166,5 @@ export function bind() {
     client.on("notice.group", postGroupEvent);
     client.on("notice.friend.recall", postC2CEvent);
     client.on("notice.friend.poke", postC2CEvent);
+    client.on("sync.message", postC2CEvent);
 }

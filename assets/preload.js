@@ -37,7 +37,7 @@
      */
     function onHostMessage(data) {
         if (!data.echo) {
-            if (data.post_type === "message") {
+            if (data.post_type === "message" || (data.post_type === "sync" && data.sync_type === "message")) {
                 vsc.dispatchEvent(new window.CustomEvent("message", { detail: data }));
             } else if (data.post_type === "notice") {
                 vsc.dispatchEvent(new window.CustomEvent("notice", { detail: data }));

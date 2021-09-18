@@ -289,6 +289,7 @@ function genUserMessage(data) {
         return "";
     }
     let title = "";
+    data.user_id = data.sender.user_id;
 
     if (data.anonymous) {
         data.sender.card = data.anonymous.name;
