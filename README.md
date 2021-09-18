@@ -2,9 +2,8 @@
 
 [![discord](https://img.shields.io/static/v1?label=chat&message=discord&color=7289da&logo=discord)](https://discord.gg/gKnU7BARzv) | **[Repository](https://github.com/takayama-lily/vscode-qq)** | **[Offline Installers](https://github.com/takayama-lily/vscode-qq/releases)** | vscode >= 1.53.0 | 摸鱼工具
 
-> `@设置` 里的 `platform` 是登录协议，1:手机 3:手表(功能不完整) 4:PC 5:pad(默认)  
 > 本程序不在本地保存任何消息记录和图片。暂不支持临时会话。  
-> 若遇到"上网环境异常"请使用扫码登录(密码留空Enter)。  
+> `@设置` 里的 `platform` 是登录协议，1:手机 3:手表(功能不完整) 4:PC 5:pad(默认)  
 
 ## 切换UI主题
 

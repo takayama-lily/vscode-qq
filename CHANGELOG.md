@@ -1,5 +1,13 @@
 # VS Code QQ Extension Change Log
 
+## Version 1.4.0: 2021/9/18
+
+* [default-theme] 支持查看嵌套转发内的消息
+* [default-theme] 支持url染色和点击
+* [default-theme] 表情以小图形式发送
+* [default-theme] 自动同步其他客户端发送的私聊
+* 更新依赖库，修复已知bug
+
 ## Version 1.3.3: 2021/8/10
 
 * [default-theme] 定位到`[回复]`和`[撤回]`的消息时显示动画效果
