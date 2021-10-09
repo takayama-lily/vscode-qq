@@ -21,6 +21,7 @@ const statusMap: { [k: number]: string } = {
     97: "@个人资料",
     98: "@切换账号",
     99: "@设置",
+    100: "@feedback"
 };
 
 /**
@@ -249,6 +250,10 @@ export function invoke() {
                 if (client) {
                     showProfile();
                 }
+                return;
+            }
+            if (value === "@feedback") {
+                vscode.env.openExternal(vscode.Uri.parse("https://github.com/takayama-lily/vscode-qq/issues"));
                 return;
             }
             if (value?.includes("离线")) {

@@ -1,5 +1,11 @@
 # VS Code QQ Extension Change Log
 
+## Version 1.4.1: 2021/10/9
+
+* [default-theme] 修复表情排列问题
+* [default-theme] 修复无法显示好友文件消息
+* [Explorer] 添加 `@feecback` 选项
+
 ## Version 1.4.0: 2021/9/18
 
 * [default-theme] 支持查看嵌套转发内的消息
