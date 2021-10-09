@@ -559,7 +559,7 @@ for (let i = 0; i <= 324; ++i) {
         continue;
     }
     ++tmpFaceStep;
-    let html = `<img onclick="addFace(${i})" style="margin:5px;cursor:pointer" width="28" height="28" src="${facePath+i+".png"}">` + (tmpFaceStep % 12 === 0 ? "<br>" : "");
+    let html = `<img onclick="addFace(${i})" style="margin:5px;cursor:pointer" width="28" height="28" src="${facePath+i+".png"}">`;
     document.querySelector('.face-box').insertAdjacentHTML("beforeend", html);
 }
 document.querySelector("body").addEventListener("click", (e) => {
@@ -666,7 +666,7 @@ function addEmoji2Box(from, to) {
     for (let i = from; i <= to; ++i) {
         ++tmpEmojiStep;
         let str = String.fromCodePoint(i);
-        let html = `<span onclick="addStr2Textarea('${str}')" style="cursor:pointer">` + str + (tmpEmojiStep % 18 === 0 ? "</span><br>" : "</span>");
+        let html = `<span onclick="addStr2Textarea('${str}')" style="cursor:pointer">` + str + "</span>";
         document.querySelector('.emoji-box').insertAdjacentHTML("beforeend", html);
     }
 }

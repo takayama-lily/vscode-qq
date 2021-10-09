@@ -236,6 +236,7 @@ button#send {
 }
 .box {
     height: 240px;
+    width: 480px;
     overflow-y: auto;
     background-color: var(--vscode-editor-background);
     max-height: 240px;
@@ -250,9 +251,9 @@ button#send {
 .stamp-box img {
     margin:5px;
     cursor:pointer;
-    max-width:48px;
-    max-height:48px;
-    min-width:48px;
+    max-width:68px;
+    max-height:68px;
+    min-width:68px;
     vertical-align: middle;
 }
 .insert-button {
