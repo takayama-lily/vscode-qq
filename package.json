@@ -2,7 +2,7 @@
 	"name": "vscode-qq",
 	"displayName": "QQ",
 	"description": "lite qq for chat in working",
-	"version": "1.4.1",
+	"version": "1.4.2",
 	"engines": {
 		"vscode": "^1.53.0"
 	},
@@ -173,8 +173,8 @@
 	},
 	"dependencies": {
 		"get-port": "^5.1.1",
-		"oicq": "^1.20.2",
-		"ws": "^7.5.5"
+		"oicq": "^1.21.3",
+		"ws": "^7.5.6"
 	},
 	"publisher": "takayama",
 	"license": "MPL-2.0",
