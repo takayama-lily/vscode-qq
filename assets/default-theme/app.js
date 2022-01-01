@@ -9,6 +9,25 @@ let c2c = webview.c2c;
 let uin = webview.target_uin;
 let nick = webview.nickname;
 let facePath = webview.faces_path;
+let send_key = webview.send_key;
+
+let send_key_match = function(event){
+    return event.ctrlKey && event.keyCode === 13;
+};
+let send_key_string = "Ctrl+Enter";
+
+switch (send_key){
+    case 1:
+        send_key_match = function(event){
+            return event.keyCode === 13;
+        };// 不知道为啥没效果
+        send_key_string = "Enter";// 这个也无效
+        break;
+    case 2:
+        // 我没有Mac这个地方我不知道怎么写Mac上的组合快捷键
+        break;
+    default:
+}
 
 /**
  * 群员列表
@@ -521,7 +540,7 @@ document.querySelector("body").insertAdjacentHTML("beforeend", `<div class="cont
 </div>
 <div id="footer">
     <textarea id="content" rows="4" placeholder="在此输入消息..."></textarea>
-    <button id="send" onclick="sendMsg()">发送</button>Ctrl+Enter　
+    <button id="send" onclick="sendMsg()">发送</button>${send_key_string}　
     <span id="show-stamp-box" class="insert-button">🧡</span>
     <div class="stamp-box box"></div>
     <span id="show-face-box" class="insert-button">😀</span>
@@ -719,7 +738,7 @@ function previewImage(obj, width, height) {
 
 // Ctrl+Enter
 window.onkeydown = function (event) {
-    if (event.ctrlKey && event.keyCode === 13) {
+    if (send_key_match(event)) {
         sendMsg();
     }
 };

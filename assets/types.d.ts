@@ -14,6 +14,7 @@ export interface Webview extends EventTarget {
     readonly faces_path: string; //表情文件夹路径("/"结尾)
     readonly t: number; //vsc启动时间戳，用于解决头像缓存问题
     readonly TimeoutError: typeof Error;
+    readonly send_key: number; //发送消息的快捷键
 
     // 监听新消息事件
     on(type: "message", listener: (data: CustomEvent<MessageEventData>) => void): void;

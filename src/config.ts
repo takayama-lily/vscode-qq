@@ -11,6 +11,7 @@ interface Config extends oicq.ConfBot {
     theme?: string,
     theme_css?: string,
     theme_js?: string,
+    send_key?:number,
 }
 
 const optimized: Config = {
@@ -21,6 +22,7 @@ const optimized: Config = {
     theme: "default",
     theme_css: "",
     theme_js: "",
+    send_key: 0,
 };
 
 let config: Config | undefined;
