@@ -419,7 +419,7 @@ function parseMessage(message) {
                 break;
             case "reply":
                 if (message[1]?.type === "at" && message[3]?.type === "at" && message[1]?.data.qq === message[3]?.data.qq) {
-                    message.splice(1, 2);
+                    message.splice(1, 1);
                 }
                 msg += `<a href="#${v.data.id}" onclick="document.querySelector('#${filterMsgIdSelector(v.data.id).replace(/\\/g, "\\\\")}')?.nextElementSibling.animate([{'background':'var(--vscode-sideBar-background)'}],{duration: 3000})">[回复]</a>`;
                 break;
