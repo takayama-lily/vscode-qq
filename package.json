@@ -14,6 +14,21 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
+		"configuration": {
+			"title": "VSCode QQ",
+			"properties": {
+				"vscode-qq.showImage": {
+					"type": "string",
+					"default": "false",
+					"enum": ["true", "false"],
+					"enumDescriptions": [
+						"在聊天气泡中显示图片",
+						"不在聊天气泡中显示图片（可以鼠标悬停预览图片）"
+					],
+					"description": "修改聊天页面的图片显示方案"
+				}
+			}
+		},
 		"commands": [
 			{
 				"command": "oicq.contact.pin",

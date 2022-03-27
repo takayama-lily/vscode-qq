@@ -31,6 +31,7 @@
     vsc.assets_path = env.attributes.path?.value + "/";
     vsc.faces_path = vsc.assets_path + "faces/";
     vsc.t = Number(env.attributes.t?.value);
+    vsc.showImage = (env.attributes.showImage?.value === "true");
 
     /**
      * @param {import("oicq").CommonEventData} data 

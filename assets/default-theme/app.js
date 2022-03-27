@@ -9,6 +9,7 @@ let c2c = webview.c2c;
 let uin = webview.target_uin;
 let nick = webview.nickname;
 let facePath = webview.faces_path;
+let showImage = webview.showImage;
 
 /**
  * 群员列表
@@ -95,7 +96,7 @@ function sendMsg() {
     document.querySelector("#send").disabled = true;
 
     // 把粘贴的图片占位符重新转换为 CQ 码
-    const splitted = []
+    const splitted = [];
     let messageHtml = '';
     while (true) {
         let begin = Infinity;
@@ -121,7 +122,13 @@ function sendMsg() {
         message = message.slice(begin + found.placeholder.length);
 
         messageHtml += filterXss(before);
-        messageHtml += `<a href="${found.url}" target="_blank" onmouseenter="previewImage(this)">粘贴的图片</a>`;
+
+        if (showImage) {
+            let width = "200", height = "auto";
+            messageHtml += `<img src="${found.url}" alt="粘贴的图片" ondblclick="showFullImage(this)" width="${width}" height="${height}" rawwidth="auto" rawheight="auto">`;
+        } else {
+            messageHtml += `<a href="${found.url}" target="_blank" onmouseenter="previewImage(this)">粘贴的图片</a>`;
+        }
     }
     // 真正的消息，已经把把图片占位符转换成了 CQ 码
     const realMessage = splitted.join("");
@@ -374,8 +381,14 @@ function parseMessage(message) {
                     v.data.url = v.data.url.replace(/\/[0-9]+\//, "/0/").replace(/[0-9]+-/g, "0-");
                 }
                 let split = v.data.file.split("-");
-                let width = parseInt(split[1]), height = parseInt(split[2]);
-                msg += `<a href="${v.data.url}&file=${v.data.file}&vscodeDragFlag=1" target="_blank" onmouseenter="previewImage(this,${width},${height})">${v.type === "image" ? "图片" : "闪照"}</a>`;
+                let rawWidth = parseInt(split[1]), rawHeight = parseInt(split[2]);
+                if (showImage) {
+                    let retSize = showImageSize(rawWidth, rawHeight);
+                    let width = retSize[0], height = retSize[1];
+                    msg += `<img src="${v.data.url}&file=${v.data.file}&vscodeDragFlag=1" alt="${v.type === "image" ? "图片" : "闪照"}" ondblclick="showFullImage(this)" width="${width}" height="${height}" rawwidth="auto" rawheight="auto">`;
+                } else {
+                    msg += `<a href="${v.data.url}&file=${v.data.file}&vscodeDragFlag=1" target="_blank" onmouseenter="previewImage(this,${rawWidth},${rawHeight})">${v.type === "image" ? "图片" : "闪照"}</a>`;
+                }
                 break;
             case "record":
                 msg = `<a href="${v.data.url}" target="_blank">语音消息</a>`;
@@ -775,14 +788,14 @@ document.querySelector("#content").addEventListener("paste", async ev => {
                 const placeholder = `[粘贴的图片 ${url}]`;
                 pastedImageMappings.push({ placeholder, cqcode, url });
                 resolve(placeholder);
-            }
+            };
             reader.onerror = reject;
-            reader.readAsDataURL(blob)
-        })
-    }))
+            reader.readAsDataURL(blob);
+        });
+    }));
     const text = pasted.join("");
     insertStr2Textarea(text);
-})
+});
 
 function timestamp(unixstamp) {
     return webview.timestamp(unixstamp);
@@ -835,6 +848,29 @@ function triggerForwardMsg(obj) {
             elememt.innerHTML = html;
         });
     }
+}
+
+// 计算文本气泡中显示的预览图的尺寸
+function showImageSize(rawWidth, rawHeight) {
+    let maxWidth = 200, maxHeight = 200;
+    if (rawWidth > maxWidth || rawHeight > maxHeight) {
+        if (rawWidth >= rawHeight) {
+            width = maxWidth;
+            height = "auto";
+        } else {
+            width = "auto";
+            height = maxHeight;
+        }
+    } else {
+        width = rawWidth, height = rawHeight;
+    }
+    return [width, height];
+}
+
+// 用于双击缩放文本气泡中的图片
+function showFullImage(el) {
+    [el.attributes.rawwidth.value, el.attributes.width.value] = [el.attributes.width.value, el.attributes.rawwidth.value];
+    [el.attributes.rawheight.value, el.attributes.height.value] = [el.attributes.height.value, el.attributes.rawheight.value];
 }
 
 //init

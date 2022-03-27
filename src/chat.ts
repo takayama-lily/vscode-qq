@@ -47,6 +47,8 @@ function getHtml(id: string, webview: vscode.Webview) {
     }
     const { self, type, uin } = parseContactId(id);
     const path = webview.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, "assets")).toString();
+    const vscodeQQConfig = vscode.workspace.getConfiguration("vscode-qq");
+    const showImage = vscodeQQConfig.get<string>("showImage");
     return `<!DOCTYPE html>
 <html>
 <head>
@@ -56,7 +58,7 @@ function getHtml(id: string, webview: vscode.Webview) {
     <link rel="stylesheet" type="text/css" href="${css}" />
 </head>
 <body>
-    <env self_id="${self}" nickname="${client.nickname}" c2c="${type === "u" ? 1 : 0}" target_id="${uin}" temp="0" path="${path}" t="${T}">
+    <env self_id="${self}" nickname="${client.nickname}" c2c="${type === "u" ? 1 : 0}" target_id="${uin}" temp="0" path="${path}" t="${T}" showImage="${showImage}">
     <script src="${preload}"></script>
     <script src="${js}"></script>
 </body>
