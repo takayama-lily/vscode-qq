@@ -13,6 +13,7 @@ export interface Webview extends EventTarget {
     readonly assets_path: string; //assets文件夹路径("/"结尾)
     readonly faces_path: string; //表情文件夹路径("/"结尾)
     readonly t: number; //vsc启动时间戳，用于解决头像缓存问题
+    readonly showImage: boolean; //是否在气泡中直接显示图片
     readonly TimeoutError: typeof Error;
 
     // 监听新消息事件
