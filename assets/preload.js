@@ -1,7 +1,7 @@
 /**
  * 该文件在页面生成时自动加载
  */
-;(() => {
+; (() => {
 
     /**
      * @type {import("./types").Webview}
@@ -80,7 +80,7 @@
         "sendGroupPoke", "setGroupCard", "setGroupAdmin", "setGroupSpecialTitle",
         "setGroupKick", "setGroupBan", "setGroupWholeBan", "setGroupAnonymousBan",
         "getForwardMsg", "getGroupInfo", "getGroupMemberList", "getGroupMemberInfo",
-        "getStrangerInfo", "getGroupNotice", "getRoamingStamp", "getMsg"
+        "getStrangerInfo", "getRoamingStamp", "getMsg"
     ];
 
     for (let name of available_apis) {

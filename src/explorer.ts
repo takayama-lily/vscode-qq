@@ -148,7 +148,7 @@ vscode.commands.registerCommand("oicq.contact.profile", async (id: string) => {
     const { uin, type } = parseContactId(id);
     const arr: string[] = [];
     if (type === "u") {
-        const data = (await client.getStrangerInfo(uin, true)).data;
+        const data = (await client.getStrangerInfo(uin));
         if (data) {
             arr.push("账号：" + data.user_id);
             arr.push("昵称：" + data.nickname);
@@ -157,14 +157,14 @@ vscode.commands.registerCommand("oicq.contact.profile", async (id: string) => {
             arr.push("地区：" + data.area);
         }
     } else {
-        const data = (await client.getGroupInfo(uin, true)).data;
+        const data = (await client.getGroupInfo(uin, true));
         if (data) {
             arr.push("群号：" + data.group_id);
             arr.push("群名：" + data.group_name);
             arr.push(`人数：${data.member_count}/${data.max_member_count}`);
             arr.push("等级：" + data.grade);
             arr.push("活跃人数：" + data.active_member_count);
-            arr.push("创建时间：" + new Date(data.create_time * 1000));
+            // arr.push("创建时间：" + new Date(data.create_time * 1000));
         }
     }
     vscode.window.showQuickPick(arr);
@@ -228,7 +228,7 @@ vscode.commands.registerCommand("oicq.group.invite", (id: string) => {
                 uid = Number(uin);
             }
             client.inviteFriend(gid, uid).then((data) => {
-                if (data.retcode === 0) {
+                if (data) {
                     vscode.window.showInformationMessage("邀请发送成功。");
                 } else {
                     vscode.window.showErrorMessage("邀请失败，请确认你是否有邀请的权限，或对方已经入群。");
