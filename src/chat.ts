@@ -113,7 +113,7 @@ function openChatView(id: string) {
                 } else {
                     buf = Buffer.alloc(17);
                 }
-                buf.writeUInt32BE(uin, 0); 
+                buf.writeUInt32BE(uin, 0);
                 data.params[0] = buf.toString("base64");
             }
             const fn = client[data.command];
@@ -133,12 +133,12 @@ function openChatView(id: string) {
     });
 }
 
-function postC2CEvent(data: oicq.FriendNoticeEventData | oicq.PrivateMessageEventData | oicq.SyncMessageEventData) {
+function postC2CEvent(data: oicq.FriendNoticeEvent | oicq.PrivateMessageEvent) {
     const id = genContactId("u", data.user_id);
     webviewMap.get(id)?.webview.postMessage(data);
 }
 
-function postGroupEvent(data: oicq.GroupNoticeEventData | oicq.GroupMessageEventData) {
+function postGroupEvent(data: oicq.GroupNoticeEvent | oicq.GroupMessageEvent) {
     const id = genContactId("g", data.group_id);
     webviewMap.get(id)?.webview.postMessage(data);
 }
@@ -166,5 +166,4 @@ export function bind() {
     client.on("notice.group", postGroupEvent);
     client.on("notice.friend.recall", postC2CEvent);
     client.on("notice.friend.poke", postC2CEvent);
-    client.on("sync.message", postC2CEvent);
 }

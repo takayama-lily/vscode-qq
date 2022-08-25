@@ -4,7 +4,7 @@ import * as oicq from 'oicq';
 import * as vscode from 'vscode';
 import { ctx, client, NOOP } from "./global";
 
-interface Config extends oicq.ConfBot {
+interface Config extends oicq.Config {
     account?: number,
     password?: string,
     show_me_add_group_request?: boolean,
@@ -48,11 +48,11 @@ export function setConfig(obj: Config) {
 }
 
 export function genClientConfig() {
-    const clientConfig: oicq.ConfBot = {
+    const clientConfig: oicq.Config = {
         log_level: "off",
-        kickoff: false,
+        // kickoff: false,
         ignore_self: false,
-        brief: true,
+        // brief: true,
         reconn_interval: 0,
         data_dir: ctx.globalStoragePath,
     };
